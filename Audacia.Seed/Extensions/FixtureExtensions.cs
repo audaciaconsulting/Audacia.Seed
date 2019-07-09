@@ -19,11 +19,7 @@ namespace Audacia.Seed.Extensions
 		/// <summary>Registers a collection pf <see cref="DbSeed"/> instances with an AutoFixture <see cref="Fixture"/> instance.</summary>
 		public static void RegisterSeeds(this Fixture fixture, Assembly assembly)
 		{
-			var seeds = assembly.GetExportedTypes()
-				.Where(t => typeof(DbSeed).IsAssignableFrom(t))
-				.Select(Activator.CreateInstance)
-				.Select(seed => (DbSeed)seed);
-
+			var seeds = DbSeed.FromAssembly(assembly);
 			fixture.RegisterSeeds(seeds);
 		}
 		
@@ -34,7 +30,7 @@ namespace Audacia.Seed.Extensions
 			{
 				var flags = new
 				{
-					instance = BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy,
+					instance = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy,
 					@static = BindingFlags.NonPublic | BindingFlags.Static
 				};
 

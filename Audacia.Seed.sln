@@ -8,6 +8,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audacia.Seed.EntityFramewor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audacia.Seed.Tests", "Audacia.Seed.Tests\Audacia.Seed.Tests.csproj", "{4F25AB2B-2B0C-47C7-B5D2-834E83BB8F29}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F177C05A-C2CB-4E89-AB30-AFF7CC0CBCA2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audacia.Seed.EntityFramework6.Tests", "Audacia.Seed.EntityFramework6.Tests\Audacia.Seed.EntityFramework6.Tests.csproj", "{B3FFAB9A-FB35-418A-A46D-48450658AE15}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audacia.Seed.EntityFrameworkCore.Tests", "Audacia.Seed.EntityFrameworkCore.Tests\Audacia.Seed.EntityFrameworkCore.Tests.csproj", "{2AE5ACA3-1417-4844-8757-F69471549FE6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +36,18 @@ Global
 		{4F25AB2B-2B0C-47C7-B5D2-834E83BB8F29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F25AB2B-2B0C-47C7-B5D2-834E83BB8F29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F25AB2B-2B0C-47C7-B5D2-834E83BB8F29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3FFAB9A-FB35-418A-A46D-48450658AE15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3FFAB9A-FB35-418A-A46D-48450658AE15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3FFAB9A-FB35-418A-A46D-48450658AE15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3FFAB9A-FB35-418A-A46D-48450658AE15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AE5ACA3-1417-4844-8757-F69471549FE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AE5ACA3-1417-4844-8757-F69471549FE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AE5ACA3-1417-4844-8757-F69471549FE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AE5ACA3-1417-4844-8757-F69471549FE6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4F25AB2B-2B0C-47C7-B5D2-834E83BB8F29} = {F177C05A-C2CB-4E89-AB30-AFF7CC0CBCA2}
+		{B3FFAB9A-FB35-418A-A46D-48450658AE15} = {F177C05A-C2CB-4E89-AB30-AFF7CC0CBCA2}
+		{2AE5ACA3-1417-4844-8757-F69471549FE6} = {F177C05A-C2CB-4E89-AB30-AFF7CC0CBCA2}
 	EndGlobalSection
 EndGlobal

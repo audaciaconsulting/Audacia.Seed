@@ -1,7 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
 using Audacia.Seed.Extensions;
+using Audacia.Seed.Tests.Entities;
 using AutoFixture;
 using Xunit;
 
@@ -15,6 +13,9 @@ namespace Audacia.Seed.Tests
 			var fixture = new Fixture();
 			var assembly = GetType().Assembly;
 			fixture.RegisterSeeds(assembly);
+
+			var person = fixture.Create<Person>();
+			Assert.Equal("Dave", person.Name); // everyone is dave
 		}
 	}
 }

@@ -5,7 +5,7 @@ namespace Audacia.Seed.Tests.DbSeeds
 {
 	public class HolidaySeed : DbSeed<Holiday>,  IDependsOn<Person>
 	{
-		public override Holiday Single()
+		protected override Holiday Single()
 		{
 			var start = Previous == null
 				? Random.DateTime()
