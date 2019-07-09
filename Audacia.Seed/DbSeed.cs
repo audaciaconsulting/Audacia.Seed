@@ -30,10 +30,9 @@ namespace Audacia.Seed
 				.ToList();
 		}
 
-		// TODO: Remove this at some point.
-		/// <summary>The number of entities to be seeded- temporary.</summary>
-		public const int DefaultCount = 50;
-
+		/// <summary>The number of entities to be seeded. This can be overridden in a subclass or set in the config file.</summary>
+		public virtual int Count { get; internal set; }
+		
 		/// <summary><see cref="System.Random"/> instance for generating random property values.</summary>
 		protected System.Random Random { get; } = new System.Random();
 
@@ -42,9 +41,16 @@ namespace Audacia.Seed
 
 		/// <summary>This returns a single instance of the entity to be seeded.</summary>
 		public abstract object SingleObject();
+		
+		/// <summary>This returns all instances of the entity's defaults.</summary>
+		public abstract IEnumerable<object> DefaultObjects();
 
-		/// <summary>This method returns multiple instances of the entity to be seeded.</summary>
-		public IEnumerable<object> MultipleObjects(int count) => Enumerable.Range(0, count).Select(_ => SingleObject()).Where(x => x != null);
+		/// <summary>This method returns multiple instances of the entity to be seeded, the number of which is specified by the <see cref="Count"/> property.</summary>
+		public IEnumerable<object> AllObjects() => Enumerable
+			.Range(0, Count)
+			.Select(_ => SingleObject())
+			.Where(x => x != null)
+			.Concat(DefaultObjects());
 
 		internal SeedContext SeedContext { get; private set; } = new SeedContext();
 		
@@ -53,16 +59,18 @@ namespace Audacia.Seed
 		public static IEnumerable<DbSeed> FromAssembly(Assembly assembly)
 		{
 			var context = new SeedContext();
-			var types = assembly.GetExportedTypes()
+			var seeds = assembly.GetExportedTypes()
 				.Where(t => typeof(DbSeed).IsAssignableFrom(t))
 				.Select(Activator.CreateInstance)
 				.Select(seed => (DbSeed) seed)
 				.ToList();
 
-			foreach (var type in types)
-				type.SeedContext = context;
+			SeedConfiguration.Configure(seeds);
 			
-			return TopologicalSort(types);
+			foreach (var type in seeds) 
+				type.SeedContext = context;
+
+			return TopologicalSort(seeds);
 		}
 
 		/// <summary>Sorts an enumerable of <see cref="DbSeed"/> topologically, so dependencies are seeded before their dependants.</summary>
@@ -132,11 +140,10 @@ namespace Audacia.Seed
 		}
 
 		/// <summary>This method should return entities instances which should be seeded by default.</summary>
-		public IEnumerable<object> DefaultObjects()
+		public override IEnumerable<object> DefaultObjects()
 		{
 			var results = Defaults().ToList();
-			Previous = results.First();
-
+			
 			foreach (var result in results)
 				SeedContext.Add(EntityType, result);
 

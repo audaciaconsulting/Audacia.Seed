@@ -5,6 +5,8 @@ namespace Audacia.Seed.TestFixtures.DbSeeds
 {
 	public class HolidaySeed : DbSeed<Holiday>,  IDependsOn<Person>
 	{
+		public override int Count => 10;
+		
 		protected override Holiday Single()
 		{
 			var start = Previous == null

@@ -63,7 +63,7 @@ public class TestDbInitializer : DropCreateDatabaseAlways<TestDbContext>
     protected override void Seed(TestDbContext context)
     {
         var assembly = Assembly.GetAssembly(typeof(JobSeed));
-        context.ConfigureSeed(assembly);
+        context.ConfigureSeeds(assembly);
         base.Seed(context);
     }
 }
@@ -73,23 +73,13 @@ Some initializers do not support the seed method however, but the call to `Confi
 
 ## Audacia.Seed.EntityFrameworkCore
 
-This library facilitates the registering of seed fixtures with Entity Framework Core, which is written to configure its seed data via the `ModelBuilder`:
+This library facilitates the registering of seed fixtures with Entity Framework Core. Ef Core includes functionality to configure its seed data via the `ModelBuilder`, however, its not appropriate for randomly-generated seed data. The correct way to ensure seed data is added is to include the following in your application startup:
 
 ```c#
-public class TestDbContext : DbContext
-{
-    public TestDbContext() { }
+var dbContext = new TestDbContext();
+dbContext.Database.EnsureCreated();
 
-    public DbSet<Person> People { get; set; }
-
-    public DbSet<Holiday> Holidays { get; set; }
-
-    public DbSet<Job> Jobs { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.ConfigureSeeds(Assembly.GetAssembly(typeof(JobSeed)));
-        base.OnModelCreating(modelBuilder);
-    }
-}
+var assembly = Assembly.GetAssembly(typeof(JobSeed));
+dbContext.ConfigureSeeds(assembly);
+dbContext.SaveChanges();
 ```

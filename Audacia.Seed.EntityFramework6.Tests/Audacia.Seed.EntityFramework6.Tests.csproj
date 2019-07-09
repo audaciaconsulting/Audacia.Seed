@@ -49,14 +49,37 @@
 		  <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
 		  <Private>True</Private>
 		</Reference>
+		<Reference Include="mscorlib" />
 		<Reference Include="NMemory, Version=3.0.0.0, Culture=neutral, PublicKeyToken=afc61983f100d280">
 		  <HintPath>..\packages\NMemory.3.1.0\lib\net45\NMemory.dll</HintPath>
 		  <Private>True</Private>
 		</Reference>
 		<Reference Include="System" />
 		<Reference Include="System.ComponentModel.DataAnnotations" />
+		<Reference Include="System.Configuration" />
+		<Reference Include="System.Configuration.ConfigurationManager, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+		  <HintPath>..\packages\System.Configuration.ConfigurationManager.4.5.0\lib\net461\System.Configuration.ConfigurationManager.dll</HintPath>
+		  <Private>True</Private>
+		</Reference>
 		<Reference Include="System.Core" />
 		<Reference Include="System.Data" />
+		<Reference Include="System.Data.OracleClient" />
+		<Reference Include="System.Drawing" />
+		<Reference Include="System.Net" />
+		<Reference Include="System.Security.AccessControl, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+		  <HintPath>..\packages\System.Security.AccessControl.4.5.0\lib\net461\System.Security.AccessControl.dll</HintPath>
+		  <Private>True</Private>
+		</Reference>
+		<Reference Include="System.Security.Permissions, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+		  <HintPath>..\packages\System.Security.Permissions.4.5.0\lib\net461\System.Security.Permissions.dll</HintPath>
+		  <Private>True</Private>
+		</Reference>
+		<Reference Include="System.Security.Principal.Windows, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+		  <HintPath>..\packages\System.Security.Principal.Windows.4.5.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
+		  <Private>True</Private>
+		</Reference>
+		<Reference Include="System.ServiceProcess" />
+		<Reference Include="System.Transactions" />
 		<Reference Include="System.Xml" />
 		<Reference Include="xunit.abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c">
 			<HintPath>..\packages\xunit.abstractions.2.0.0\lib\net35\xunit.abstractions.dll</HintPath>

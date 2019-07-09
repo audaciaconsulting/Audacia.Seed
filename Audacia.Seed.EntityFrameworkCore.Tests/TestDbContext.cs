@@ -1,5 +1,6 @@
 using System.Data.Common;
 using System.Reflection;
+using Audacia.Random.Extensions;
 using Audacia.Seed.EntityFrameworkCore.Extensions;
 using Audacia.Seed.TestFixtures.DbSeeds;
 using Audacia.Seed.TestFixtures.Entities;
@@ -23,11 +24,5 @@ namespace Audacia.Seed.EntityFrameworkCore.Tests
 		private static readonly DbContextOptions<TestDbContext> Options = new DbContextOptionsBuilder<TestDbContext>()
 			.UseSqlite(Connection)
 			.Options;
-
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
-		{
-			modelBuilder.ConfigureSeeds(Assembly.GetAssembly(typeof(JobSeed)));
-			base.OnModelCreating(modelBuilder);
-		}
 	}
 }

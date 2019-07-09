@@ -1,15 +1,27 @@
+using System.Reflection;
+using Audacia.Seed.EntityFrameworkCore.Extensions;
+using Audacia.Seed.TestFixtures.DbSeeds;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace Audacia.Seed.EntityFrameworkCore.Tests
 {
 	public class UnitTest
 	{
-		protected TestDbContext DbContext { get; } = new TestDbContext();
-
 		[Fact]
 		public void Test()
 		{
-			
+			var dbContext = new TestDbContext();
+			dbContext.Database.OpenConnection();
+			dbContext.Database.EnsureCreated();
+
+			var assembly = Assembly.GetAssembly(typeof(JobSeed));
+			dbContext.ConfigureSeeds(assembly);
+			dbContext.SaveChanges();
+
+			Assert.NotEmpty(dbContext.Holidays);
+			Assert.NotEmpty(dbContext.Jobs);
+			Assert.NotEmpty(dbContext.People);
 		}
 	}
 }

@@ -11,7 +11,7 @@ namespace Audacia.Seed.EntityFramework6.Tests
 			var dbContext = new TestDbContext();
 
 			Assert.NotEmpty(dbContext.Holidays);
-			Assert.Empty(dbContext.Jobs);
+			Assert.NotEmpty(dbContext.Jobs);
 			Assert.NotEmpty(dbContext.People);
 		}
 	}

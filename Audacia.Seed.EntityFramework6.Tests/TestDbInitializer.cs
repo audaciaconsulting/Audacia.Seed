@@ -10,7 +10,7 @@ namespace Audacia.Seed.EntityFramework6.Tests
 		protected override void Seed(TestDbContext context)
 		{
 			var assembly = Assembly.GetAssembly(typeof(JobSeed));
-			context.ConfigureSeed(assembly);
+			context.ConfigureSeeds(assembly);
 			base.Seed(context);
 		}
 	}

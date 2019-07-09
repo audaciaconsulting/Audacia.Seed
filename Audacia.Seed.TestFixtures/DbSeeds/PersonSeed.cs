@@ -5,6 +5,8 @@ namespace Audacia.Seed.TestFixtures.DbSeeds
 {
 	public class PersonSeed : DbSeed<Person>, IDependsOn<Job>
 	{
+		public override int Count => 10;
+		
 		protected override Person Single()
 		{
 			var jobCount = Random.Next(1, 4);
