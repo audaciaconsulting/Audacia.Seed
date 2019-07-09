@@ -15,7 +15,6 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Audacia.Seed.AutoFixture\Audacia.Seed.AutoFixture.csproj" />
 	  <ProjectReference Include="..\Audacia.Seed.TestFixtures\Audacia.Seed.TestFixtures.csproj" />
-	  <ProjectReference Include="..\Audacia.Seed.Tests\Audacia.Seed.Tests.csproj" />
 	</ItemGroup>
 
 </Project>
