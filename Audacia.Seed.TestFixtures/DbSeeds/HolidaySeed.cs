@@ -12,12 +12,13 @@ namespace Audacia.Seed.TestFixtures.DbSeeds
 				: Random.DateTimeFrom(Previous.End);
 
 			var end = Random.DateTimeFrom(start);
+			var person = Existing<Person>().Random(); 
 			
 			return new Holiday
 			{
 				Start = start,
 				End = end,
-				Person = Existing<Person>().Random(),
+				Person = person,
 				Notes = Random.Sentence()
 			};
 		}
