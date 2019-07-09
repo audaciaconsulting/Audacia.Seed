@@ -12,7 +12,11 @@ namespace Audacia.Seed.AutoFixture.Tests
 		[Fact]
 		public void Test()
 		{
-			holidayHolidayHHolidayliokugijlohokkjhHhhHol
+			var fixture = new Fixture();
+			var assembly = Assembly.GetAssembly(typeof(JobSeed));
+			fixture.RegisterSeeds(assembly);
+
+			var person = fixture.Create<Person>();
 			Assert.Equal("Dave", person.Name); // everyone is dave
 		}
 	}
