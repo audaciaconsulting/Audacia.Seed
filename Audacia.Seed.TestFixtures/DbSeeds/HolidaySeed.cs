@@ -1,7 +1,7 @@
 using Audacia.Random.Extensions;
-using Audacia.Seed.Tests.Entities;
+using Audacia.Seed.TestFixtures.Entities;
 
-namespace Audacia.Seed.Tests.DbSeeds
+namespace Audacia.Seed.TestFixtures.DbSeeds
 {
 	public class HolidaySeed : DbSeed<Holiday>,  IDependsOn<Person>
 	{

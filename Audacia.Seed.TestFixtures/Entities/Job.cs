@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Audacia.Seed.Tests.Entities
+namespace Audacia.Seed.TestFixtures.Entities
 {
 	public class Job
 	{

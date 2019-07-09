@@ -24,7 +24,7 @@ namespace Audacia.Seed
 		public abstract object SingleObject();
 
 		/// <summary>This method returns multiple instances of the entity to be seeded.</summary>
-		public IEnumerable<object> MultipleObjects(int count) => Enumerable.Range(0, count).Select(_ => SingleObject());
+		public IEnumerable<object> MultipleObjects(int count) => Enumerable.Range(0, count).Select(_ => SingleObject()).Where(x => x != null);
 
 		/// <summary>Returns an instance of each of the exported <see cref="DbSeed"/> types from the specified assembly.</summary>
 		/// <param name="assembly"></param>

@@ -1,12 +1,12 @@
 using System.Data.Common;
 using System.Data.Entity;
-using Audacia.Seed.Tests.Entities;
+using Audacia.Seed.TestFixtures.Entities;
 
 namespace Audacia.Seed.EntityFramework6.Tests
 {
 	public class TestDbContext : DbContext
 	{
-		public TestDbContext() : base(Connection, false)
+		public TestDbContext() : base(GetConnection(), true)
 		{
 			Database.SetInitializer(new TestDbInitializer());
 		}
@@ -17,6 +17,6 @@ namespace Audacia.Seed.EntityFramework6.Tests
 
 		public DbSet<Job> Jobs { get; set; }
 
-		private static DbConnection Connection => Effort.DbConnectionFactory.CreateTransient();
+		private static DbConnection GetConnection() => Effort.DbConnectionFactory.CreateTransient();
 	}
 }

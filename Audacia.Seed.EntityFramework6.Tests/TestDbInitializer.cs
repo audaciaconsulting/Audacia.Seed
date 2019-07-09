@@ -1,7 +1,7 @@
 using System.Data.Entity;
 using System.Reflection;
 using Audacia.Seed.EntityFramework6.Extensions;
-using Audacia.Seed.Tests.DbSeeds;
+using Audacia.Seed.TestFixtures.DbSeeds;
 
 namespace Audacia.Seed.EntityFramework6.Tests
 {

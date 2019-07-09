@@ -1,30 +1,102 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
 	<PropertyGroup>
-		<TargetFramework>netcoreapp2.2</TargetFramework>
-
-		<IsPackable>false</IsPackable>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+		<ProjectGuid>{246DBD55-CE39-4C66-B055-F5A3E18C9C47}</ProjectGuid>
+		<ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+		<OutputType>Library</OutputType>
+		<AppDesignerFolder>Properties</AppDesignerFolder>
+		<RootNamespace>Audacia.Seed.EntityFramework6.Tests</RootNamespace>
+		<AssemblyName>Audacia.Seed.EntityFramework6.Tests</AssemblyName>
+		<TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+		<FileAlignment>512</FileAlignment>
 	</PropertyGroup>
-
-	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-	  <NoWarn>1701;1702;NU1701</NoWarn>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<PlatformTarget>AnyCPU</PlatformTarget>
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>full</DebugType>
+		<Optimize>false</Optimize>
+		<OutputPath>bin\Debug\</OutputPath>
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<ErrorReport>prompt</ErrorReport>
+		<WarningLevel>4</WarningLevel>
 	</PropertyGroup>
-
-	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-	  <NoWarn>1701;1702;NU1701</NoWarn>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<PlatformTarget>AnyCPU</PlatformTarget>
+		<DebugType>pdbonly</DebugType>
+		<Optimize>true</Optimize>
+		<OutputPath>bin\Release\</OutputPath>
+		<DefineConstants>TRACE</DefineConstants>
+		<ErrorReport>prompt</ErrorReport>
+		<WarningLevel>4</WarningLevel>
 	</PropertyGroup>
-
 	<ItemGroup>
-		<PackageReference Include="Effort.EF6" Version="2.1.1" />
-		<PackageReference Include="EntityFramework" Version="6.2.0" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
-		<PackageReference Include="xunit" Version="2.4.0" />
-		<PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+		<Reference Include="Audacia.Random, Version=3.0.19084.33650, Culture=neutral, PublicKeyToken=null">
+		  <HintPath>..\packages\Audacia.Random.3.0.19084.33650\lib\netstandard2.0\Audacia.Random.dll</HintPath>
+		  <Private>True</Private>
+		</Reference>
+		<Reference Include="Effort, Version=2.1.1.0, Culture=neutral, PublicKeyToken=6a46696d54971e6d">
+		  <HintPath>..\packages\Effort.EF6.2.1.1\lib\net45\Effort.dll</HintPath>
+		  <Private>True</Private>
+		</Reference>
+		<Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+		  <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
+		  <Private>True</Private>
+		</Reference>
+		<Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+		  <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+		  <Private>True</Private>
+		</Reference>
+		<Reference Include="NMemory, Version=3.0.0.0, Culture=neutral, PublicKeyToken=afc61983f100d280">
+		  <HintPath>..\packages\NMemory.3.1.0\lib\net45\NMemory.dll</HintPath>
+		  <Private>True</Private>
+		</Reference>
+		<Reference Include="System" />
+		<Reference Include="System.ComponentModel.DataAnnotations" />
+		<Reference Include="System.Core" />
+		<Reference Include="System.Data" />
+		<Reference Include="System.Xml" />
+		<Reference Include="xunit.abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c">
+			<HintPath>..\packages\xunit.abstractions.2.0.0\lib\net35\xunit.abstractions.dll</HintPath>
+		</Reference>
+		<Reference Include="xunit.assert, Version=2.1.0.3179, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c">
+			<HintPath>..\packages\xunit.assert.2.1.0\lib\dotnet\xunit.assert.dll</HintPath>
+		</Reference>
+		<Reference Include="xunit.core, Version=2.1.0.3179, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c">
+			<HintPath>..\packages\xunit.extensibility.core.2.1.0\lib\dotnet\xunit.core.dll</HintPath>
+		</Reference>
+		<Reference Include="xunit.execution.desktop, Version=2.1.0.3179, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c">
+			<HintPath>..\packages\xunit.extensibility.execution.2.1.0\lib\net45\xunit.execution.desktop.dll</HintPath>
+		</Reference>
 	</ItemGroup>
-
 	<ItemGroup>
-	  <ProjectReference Include="..\Audacia.Seed.EntityFramework6\Audacia.Seed.EntityFramework6.csproj" />
-	  <ProjectReference Include="..\Audacia.Seed.Tests\Audacia.Seed.Tests.csproj" />
+		<Compile Include="TestDbContext.cs" />
+		<Compile Include="TestDbInitializer.cs" />
+		<Compile Include="Properties\AssemblyInfo.cs" />
+		<Compile Include="UnitTest.cs" />
 	</ItemGroup>
-
+	<ItemGroup>
+	  <None Include="App.config" />
+	  <None Include="packages.config" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Audacia.Seed.EntityFramework6\Audacia.Seed.EntityFramework6.csproj">
+	    <Project>{e9c687e3-adc2-4ff2-be8c-277e2ee0108d}</Project>
+	    <Name>Audacia.Seed.EntityFramework6</Name>
+	  </ProjectReference>
+	  <ProjectReference Include="..\Audacia.Seed.TestFixtures\Audacia.Seed.TestFixtures.csproj">
+	    <Project>{9ebf0134-84cf-458e-8686-2c8725cfac9d}</Project>
+	    <Name>Audacia.Seed.TestFixtures</Name>
+	  </ProjectReference>
+	</ItemGroup>
+	<Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+	<!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+			 Other similar extension points exist, see Microsoft.Common.targets.
+	<Target Name="BeforeBuild">
+	</Target>
+	<Target Name="AfterBuild">
+	</Target>
+	-->
 </Project>

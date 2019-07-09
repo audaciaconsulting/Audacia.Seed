@@ -1,6 +1,6 @@
 using System;
 
-namespace Audacia.Seed.Tests.Entities
+namespace Audacia.Seed.TestFixtures.Entities
 {
 	public class Holiday : IDependsOn<Person>
 	{

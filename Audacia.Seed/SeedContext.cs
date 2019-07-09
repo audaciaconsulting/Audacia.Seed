@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Audacia.Seed {
+namespace Audacia.Seed
+{
 	internal class SeedContext
 	{
 		private readonly IDictionary<Type, HashSet<object>> _dictionary = new Dictionary<Type, HashSet<object>>();
@@ -15,12 +16,14 @@ namespace Audacia.Seed {
 
 		public IEnumerable Entries(Type type)
 		{
-			return _dictionary[type] ?? (_dictionary[type] = new HashSet<object>());
+			return _dictionary.TryGetValue(type, out var value)
+				? value
+				: _dictionary[type] = new HashSet<object>();
 		}
 
 		public void Add<T>(object entity)
 		{
-			this.Add(typeof(T), entity);
+			Add(typeof(T), entity);
 		}
 
 		public void Add(Type type, object entity)
