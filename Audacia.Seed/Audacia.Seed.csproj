@@ -14,7 +14,12 @@
 
 	<ItemGroup>
 	  <PackageReference Include="Audacia.Random" Version="3.0.19084.33650" />
-	  <PackageReference Include="AutoFixture" Version="4.10.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="..\README.md">
+	    <Link>README.md</Link>
+	  </Content>
 	</ItemGroup>
 
 </Project>

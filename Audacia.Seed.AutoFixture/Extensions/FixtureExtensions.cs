@@ -13,7 +13,7 @@ namespace Audacia.Seed.Extensions
 		/// <summary>Registers a <see cref="DbSeed"/> with an AutoFixture <see cref="Fixture"/> instance.</summary>
 		public static void RegisterSeed<T>(this Fixture fixture, DbSeed<T> seed) where T : class
 		{
-			fixture.Register(seed.Single);
+			fixture.Register(() => (T)seed.SingleObject());
 		}
 		
 		/// <summary>Registers a collection pf <see cref="DbSeed"/> instances with an AutoFixture <see cref="Fixture"/> instance.</summary>
@@ -58,11 +58,6 @@ namespace Audacia.Seed.Extensions
 		private static void Register<T>(IFixture fixture, Delegate @delegate)
 		{
 			fixture.Register((Func<T>)@delegate);
-		}
-
-		private static T Single<T>(DbSeed<T> seed) where T : class
-		{
-			return seed.Single();
 		}
 	}
 }

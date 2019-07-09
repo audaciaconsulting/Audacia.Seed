@@ -14,6 +14,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audacia.Seed.EntityFramewor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audacia.Seed.EntityFrameworkCore.Tests", "Audacia.Seed.EntityFrameworkCore.Tests\Audacia.Seed.EntityFrameworkCore.Tests.csproj", "{2AE5ACA3-1417-4844-8757-F69471549FE6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audacia.Seed.AutoFixture", "Audacia.Seed.AutoFixture\Audacia.Seed.AutoFixture.csproj", "{8F845AF5-290A-46F1-87F6-D321F02490E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audacia.Seed.AutoFixture.Tests", "Audacia.Seed.AutoFixture.Tests\Audacia.Seed.AutoFixture.Tests.csproj", "{349123BA-A67F-416F-8A91-E2DFB36B32F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,10 +48,19 @@ Global
 		{2AE5ACA3-1417-4844-8757-F69471549FE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AE5ACA3-1417-4844-8757-F69471549FE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AE5ACA3-1417-4844-8757-F69471549FE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F845AF5-290A-46F1-87F6-D321F02490E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F845AF5-290A-46F1-87F6-D321F02490E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F845AF5-290A-46F1-87F6-D321F02490E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F845AF5-290A-46F1-87F6-D321F02490E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{349123BA-A67F-416F-8A91-E2DFB36B32F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{349123BA-A67F-416F-8A91-E2DFB36B32F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{349123BA-A67F-416F-8A91-E2DFB36B32F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{349123BA-A67F-416F-8A91-E2DFB36B32F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4F25AB2B-2B0C-47C7-B5D2-834E83BB8F29} = {F177C05A-C2CB-4E89-AB30-AFF7CC0CBCA2}
 		{B3FFAB9A-FB35-418A-A46D-48450658AE15} = {F177C05A-C2CB-4E89-AB30-AFF7CC0CBCA2}
 		{2AE5ACA3-1417-4844-8757-F69471549FE6} = {F177C05A-C2CB-4E89-AB30-AFF7CC0CBCA2}
+		{349123BA-A67F-416F-8A91-E2DFB36B32F4} = {F177C05A-C2CB-4E89-AB30-AFF7CC0CBCA2}
 	EndGlobalSection
 EndGlobal
