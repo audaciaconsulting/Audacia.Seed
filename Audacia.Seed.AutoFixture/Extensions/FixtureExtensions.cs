@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using AutoFixture;
 
-namespace Audacia.Seed.Extensions
+namespace Audacia.Seed.AutoFixture.Extensions
 {
 	/// <summary>Extension methods for AutoFixture's <see cref="Fixture"/> type.</summary>
 	public static class FixtureExtensions
