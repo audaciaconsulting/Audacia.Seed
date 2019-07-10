@@ -33,6 +33,22 @@ Notice the usage of the `Previous` property to ensure that the holiday being gen
 
 Similarly, the `IIncludes<T>` interface can be used to specify that a seed fixture includes some dependant type.
 
+###Configuration
+
+There are two ways to configure seeding behaviour. All `DbSeed` classes have an overridable `Count` property which can be used to set the number of entities a given seed fixture should produce.
+
+Additionally, the more recommended approach would be to use the application settings in web.config or equivalent. Settings can be specified either with or without the namespace:
+
+```xml
+<configuration>
+    <appSettings>
+        <add key="seed:Holiday" value="10" />
+        <add key="seed:Job" value="10" />
+        <add key="seed:Person" value="100" />
+    </appSettings>
+</configuration>
+```
+
 ## Audacia.Seed.AutoFixture
 
 This library allows for seed fixtures to be used with the popular AutoFixture library.
