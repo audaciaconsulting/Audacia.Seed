@@ -2,6 +2,10 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
+		<Title>Audacia.Seed.EntityFrameworkCore</Title>
+		<Authors>Adam Drewery</Authors>
+		<Description>Entity Framework Core integration for Audacia.Seed</Description>
+		<Copyright>Copyright © Audacia 2019</Copyright>
 	</PropertyGroup>
 
 	<ItemGroup>

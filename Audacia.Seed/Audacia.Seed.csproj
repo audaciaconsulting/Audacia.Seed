@@ -2,6 +2,10 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
+		<Title>Audacia.Seed</Title>
+		<Authors>Adam Drewery</Authors>
+		<Description>Base types for the Audacia seed libraries.</Description>
+		<Copyright>Copyright © Audacia 2019</Copyright>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

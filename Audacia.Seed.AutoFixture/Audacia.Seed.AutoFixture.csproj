@@ -2,6 +2,10 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
+		<Title>Audacia.Seed.AutoFixture</Title>
+		<Authors>Adam Drewery</Authors>
+		<Description>Integration libraries for using Audacia.Seed with the popular AutoFixture library.</Description>
+		<Copyright>Copyright © Audacia 2019</Copyright>
 	</PropertyGroup>
 
 	<ItemGroup>
