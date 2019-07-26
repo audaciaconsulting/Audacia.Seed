@@ -9,7 +9,4 @@ steps:
       Audacia.Seed/Audacia.Seed.csproj
       Audacia.Seed.AutoFixture/Audacia.Seed.AutoFixture.csproj
       Audacia.Seed.EntityFrameworkCore/Audacia.Seed.EntityFrameworkCore.csproj
-      
-- template: build-package.netfx.yaml@templates
-  parameters:
-    projects: Audacia.Seed/Audacia.EntityFramework6.csproj
+      Audacia.Seed/Audacia.EntityFramework6.csproj
