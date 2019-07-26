@@ -6,6 +6,9 @@ jobs:
 
 - job:
   displayName: Audacia.Seed
+  trigger:
+    paths:
+      include: Audacia.Seed/*
   steps:
   - template: build-package.netcore.yaml@templates
     parameters:
@@ -13,6 +16,9 @@ jobs:
 
 - job:
   displayName: Audacia.Seed.AutoFixture
+  trigger:
+    paths:
+      include: Audacia.Seed.AutoFixture/*
   steps:
   - template: build-package.netcore.yaml@templates
     parameters:
@@ -20,6 +26,9 @@ jobs:
 
 - job:
   displayName: Audacia.Seed.EntityFrameworkCore
+  trigger:
+    paths:
+      include: Audacia.Seed.EntityFrameworkCore/*
   steps:
   - template: build-package.netcore.yaml@templates
     parameters:
@@ -27,6 +36,9 @@ jobs:
         
 - job:
   displayName: Audacia.Seed.EntityFramework6
+  trigger:
+    paths:
+      include: Audacia.Seed/EntityFramework6
   steps:      
   - template: build-package.netfx.yaml@templates
     parameters:
