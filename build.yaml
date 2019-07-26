@@ -4,3 +4,8 @@ resources: { repositories: [ { repository: templates, type: git, name: Audacia/A
 
 steps:
 - template: build-package.netcore.yaml@templates
+  parameters:
+    projects: |
+      Audacia.Seed/Audacia.Seed.csproj
+      Audacia.Seed.AutoFixture/Audacia.Seed.AutoFixture.csproj
+      Audacia.Seed.EntityFrameworkCore/Audacia.Seed.EntityFrameworkCore.csproj
