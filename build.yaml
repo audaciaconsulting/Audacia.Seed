@@ -2,17 +2,24 @@ name: $(Build.BuildId).$(Year:yy)$(DayOfYear)
 trigger: [master]
 resources: { repositories: [ { repository: templates, type: git, name: Audacia/Audacia.Build.Templates } ] }
 
-steps:
-- template: build-package.netcore.yaml@templates
-  parameters:
-    framework: netcore
-    projects: |
-      Audacia.Seed/Audacia.Seed.csproj
-      Audacia.Seed.AutoFixture/Audacia.Seed.AutoFixture.csproj
-      Audacia.Seed.EntityFrameworkCore/Audacia.Seed.EntityFrameworkCore.csproj
-      
-- template: build-package.netcore.yaml@templates
-  parameters:
-    framework: netfx
-    projects: Audacia.Seed.EntityFramework6/Audacia.Seed.EntityFramework6.csproj
+jobs:
+
+- job: netcore
+  displayName: .NET Core
+  steps:
+  - template: build-package.netcore.yaml@templates
+    parameters:
+      framework: netcore
+      projects: |
+        Audacia.Seed/Audacia.Seed.csproj
+        Audacia.Seed.AutoFixture/Audacia.Seed.AutoFixture.csproj
+        Audacia.Seed.EntityFrameworkCore/Audacia.Seed.EntityFrameworkCore.csproj
+
+- job: netfx
+  displayName: .NET Framework
+  steps:      
+  - template: build-package.netfx.yaml@templates
+    parameters:
+      framework: netfx
+      projects: Audacia.Seed.EntityFramework6/Audacia.Seed.EntityFramework6.csproj
       
