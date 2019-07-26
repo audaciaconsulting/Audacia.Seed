@@ -6,7 +6,6 @@
 		<Authors>Adam Drewery</Authors>
 		<Description>Entity Framework Core integration for Audacia.Seed</Description>
 		<Copyright>Copyright © Audacia 2019</Copyright>
-		<PackageVersion>0.1.0</PackageVersion>
 		<PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
 	</PropertyGroup>
 
