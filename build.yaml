@@ -4,17 +4,28 @@ resources: { repositories: [ { repository: templates, type: git, name: Audacia/A
 
 jobs:
 
-- job: netcore
-  displayName: .NET Core
+- job:
+  displayName: Audacia.Seed
   steps:
   - template: build-package.netcore.yaml@templates
     parameters:
-      projects: | 
-        Audacia.Seed/Audacia.Seed.csproj
-        Audacia.Seed.AutoFixture/Audacia.Seed.AutoFixture.csproj
-        Audacia.Seed.EntityFrameworkCore/Audacia.Seed.EntityFrameworkCore.csproj
+      projects: Audacia.Seed/Audacia.Seed.csproj
 
-- job: netfx
+- job:
+  displayName: Audacia.Seed.AutoFixture
+  steps:
+  - template: build-package.netcore.yaml@templates
+    parameters:
+      projects: Audacia.Seed.AutoFixture/Audacia.Seed.AutoFixture.csproj
+
+- job:
+  displayName: Audacia.Seed.EntityFrameworkCore
+  steps:
+  - template: build-package.netcore.yaml@templates
+    parameters:
+      projects: Audacia.Seed.EntityFrameworkCore/Audacia.Seed.EntityFrameworkCore.csproj
+        
+- job:
   displayName: .NET Framework
   steps:      
   - template: build-package.netfx.yaml@templates
