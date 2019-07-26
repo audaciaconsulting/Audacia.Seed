@@ -26,7 +26,7 @@ jobs:
       projects: Audacia.Seed.EntityFrameworkCore/Audacia.Seed.EntityFrameworkCore.csproj
         
 - job:
-  displayName: .NET Framework
+  displayName: Audacia.Seed.EntityFramework6
   steps:      
   - template: build-package.netfx.yaml@templates
     parameters:
