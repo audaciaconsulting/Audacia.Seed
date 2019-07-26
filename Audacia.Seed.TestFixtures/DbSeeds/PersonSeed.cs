@@ -10,7 +10,7 @@ namespace Audacia.Seed.TestFixtures.DbSeeds
 		protected override Person Single()
 		{
 			var jobCount = Random.Next(1, 4);
-			var jobs = Existing<Job>().TakeRandom(jobCount); // todo: TakeRandom(int min, int max)
+			var jobs = Existing<Job>().TakeRandom(jobCount);
 			var person = new Person { Name = "Dave" };
 
 			foreach (var job in jobs)

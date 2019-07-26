@@ -6,6 +6,8 @@
 		<Authors>Adam Drewery</Authors>
 		<Description>Base types for the Audacia seed libraries.</Description>
 		<Copyright>Copyright © Audacia 2019</Copyright>
+		<PackageVersion>0.1.0</PackageVersion>
+		<PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
