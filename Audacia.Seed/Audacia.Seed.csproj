@@ -19,7 +19,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Audacia.Random" Version="3.0.19084.33650" />
+	  <PackageReference Include="Audacia.Random" Version="3.0.42445.19206" />
 	  <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
 	</ItemGroup>
 

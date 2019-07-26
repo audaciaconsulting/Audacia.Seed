@@ -9,7 +9,6 @@ jobs:
   steps:
   - template: build-package.netcore.yaml@templates
     parameters:
-      framework: netcore
       projects: |
         Audacia.Seed/Audacia.Seed.csproj
         Audacia.Seed.AutoFixture/Audacia.Seed.AutoFixture.csproj
@@ -20,6 +19,5 @@ jobs:
   steps:      
   - template: build-package.netfx.yaml@templates
     parameters:
-      framework: netfx
       projects: Audacia.Seed.EntityFramework6/Audacia.Seed.EntityFramework6.csproj
       
