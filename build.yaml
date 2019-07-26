@@ -9,4 +9,4 @@ steps:
       Audacia.Seed/Audacia.Seed.csproj
       Audacia.Seed.AutoFixture/Audacia.Seed.AutoFixture.csproj
       Audacia.Seed.EntityFrameworkCore/Audacia.Seed.EntityFrameworkCore.csproj
-      Audacia.Seed/Audacia.EntityFramework6.csproj
+      Audacia.Seed.EntityFramework6/Audacia.Seed.EntityFramework6.csproj
