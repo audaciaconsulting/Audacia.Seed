@@ -1,4 +1,3 @@
-using System;
 using Xunit;
 
 namespace Audacia.Seed.EntityFramework6.Tests

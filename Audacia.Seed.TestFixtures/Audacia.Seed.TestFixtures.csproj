@@ -9,4 +9,8 @@
 	  <ProjectReference Include="..\Audacia.Seed\Audacia.Seed.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <PackageReference Include="Audacia.Random" Version="3.0.42445.19206" />
+	</ItemGroup>
+
 </Project>
