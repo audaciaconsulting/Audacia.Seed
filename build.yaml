@@ -7,22 +7,22 @@ stages:
   displayName: Build
   jobs:
   
-  - template: jobs/build/netcore/package.yaml
+  - template: jobs/build/netcore/package.yaml@templates
     parameters:
       displayName: Audacia.Seed
       projects: Audacia.Seed/Audacia.Seed.csproj
   
-  - template: jobs/build/netcore/package.yaml
+  - template: jobs/build/netcore/package.yaml@templates
     parameters:
       displayName: Audacia.Seed.AutoFixture
       projects: Audacia.Seed.AutoFixture/Audacia.Seed.AutoFixture.csproj
   
-  - template: jobs/build/netcore/package.yaml
+  - template: jobs/build/netcore/package.yaml@templates
     parameters:
       displayName: Audacia.Seed.EntityFrameworkCore
       projects: Audacia.Seed.EntityFrameworkCore/Audacia.Seed.EntityFrameworkCore.csproj
   
-  - template: jobs/build/netcore/package.yaml
+  - template: jobs/build/netcore/package.yaml@templates
     parameters:
       displayName: Audacia.Seed
       projects: Audacia.Seed/Audacia.Seed.csproj
@@ -37,4 +37,4 @@ stages:
 - stage:
   displayName: Release
   jobs:
-    - template: jobs/release/netcore/internal-package.yaml
+    - template: jobs/release/netcore/internal-package.yaml@templates
