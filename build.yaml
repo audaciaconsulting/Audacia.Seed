@@ -22,11 +22,6 @@ stages:
       displayName: Audacia.Seed.EntityFrameworkCore
       projects: Audacia.Seed.EntityFrameworkCore/Audacia.Seed.EntityFrameworkCore.csproj
   
-  - template: jobs/build/netcore/package.yaml@templates
-    parameters:
-      displayName: Audacia.Seed
-      projects: Audacia.Seed/Audacia.Seed.csproj
-  
   - job:
     displayName: Audacia.Seed.EntityFramework6
     steps:      
@@ -37,4 +32,4 @@ stages:
 - stage:
   displayName: Release
   jobs:
-    - template: jobs/release/netcore/internal-package.yaml@templates
+  - template: jobs/release/netcore/internal-package.yaml@templates
