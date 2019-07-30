@@ -2,31 +2,40 @@ name: $(Build.BuildId).$(Year:yy)$(DayOfYear)
 trigger: [master]
 resources: { repositories: [ { repository: templates, type: git, name: Audacia/Audacia.Build.Templates } ] }
 
-jobs:
-
-- template: jobs/build/netcore/package.yaml
-  parameters:
-    displayName: Audacia.Seed
-    projects: Audacia.Seed/Audacia.Seed.csproj
-
-- template: jobs/build/netcore/package.yaml
-  parameters:
-    displayName: Audacia.Seed.AutoFixture
-    projects: Audacia.Seed.AutoFixture/Audacia.Seed.AutoFixture.csproj
-
-- template: jobs/build/netcore/package.yaml
-  parameters:
-    displayName: Audacia.Seed.EntityFrameworkCore
-    projects: Audacia.Seed.EntityFrameworkCore/Audacia.Seed.EntityFrameworkCore.csproj
-
-- template: jobs/build/netcore/package.yaml
-  parameters:
-    displayName: Audacia.Seed
-    projects: Audacia.Seed/Audacia.Seed.csproj
-
-- job:
-  displayName: Audacia.Seed.EntityFramework6
-  steps:      
-  - template: build-package.netfx.yaml@templates
+steps:
+- step:
+  displayName: Build
+  jobs:
+  
+  - template: jobs/build/netcore/package.yaml
     parameters:
-      projects: Audacia.Seed.EntityFramework6/Audacia.Seed.EntityFramework6.csproj
+      displayName: Audacia.Seed
+      projects: Audacia.Seed/Audacia.Seed.csproj
+  
+  - template: jobs/build/netcore/package.yaml
+    parameters:
+      displayName: Audacia.Seed.AutoFixture
+      projects: Audacia.Seed.AutoFixture/Audacia.Seed.AutoFixture.csproj
+  
+  - template: jobs/build/netcore/package.yaml
+    parameters:
+      displayName: Audacia.Seed.EntityFrameworkCore
+      projects: Audacia.Seed.EntityFrameworkCore/Audacia.Seed.EntityFrameworkCore.csproj
+  
+  - template: jobs/build/netcore/package.yaml
+    parameters:
+      displayName: Audacia.Seed
+      projects: Audacia.Seed/Audacia.Seed.csproj
+  
+  - job:
+    displayName: Audacia.Seed.EntityFramework6
+    steps:      
+    - template: build-package.netfx.yaml@templates
+      parameters:
+        projects: Audacia.Seed.EntityFramework6/Audacia.Seed.EntityFramework6.csproj
+
+- step:
+  displayName: Release
+  jobs:
+    - 
+    - template: jobs/release/netcore/internal-package.yaml
