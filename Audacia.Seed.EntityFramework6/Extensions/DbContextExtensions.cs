@@ -1,5 +1,4 @@
 using System.Data.Entity;
-using System.Linq;
 using System.Reflection;
 
 namespace Audacia.Seed.EntityFramework6.Extensions

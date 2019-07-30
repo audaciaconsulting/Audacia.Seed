@@ -6,6 +6,7 @@
 		<Authors>Adam Drewery</Authors>
 		<Description>Base types for the Audacia seed libraries.</Description>
 		<Copyright>Copyright © Audacia 2019</Copyright>
+		<PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -17,7 +18,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Audacia.Random" Version="3.0.19084.33650" />
 	  <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
 	</ItemGroup>
 
