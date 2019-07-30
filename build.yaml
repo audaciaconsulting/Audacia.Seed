@@ -2,8 +2,8 @@ name: $(Build.BuildId).$(Year:yy)$(DayOfYear)
 trigger: [master]
 resources: { repositories: [ { repository: templates, type: git, name: Audacia/Audacia.Build.Templates } ] }
 
-steps:
-- step:
+stages:
+- stage:
   displayName: Build
   jobs:
   
@@ -34,8 +34,7 @@ steps:
       parameters:
         projects: Audacia.Seed.EntityFramework6/Audacia.Seed.EntityFramework6.csproj
 
-- step:
+- stage:
   displayName: Release
   jobs:
-    - 
     - template: jobs/release/netcore/internal-package.yaml
