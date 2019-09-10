@@ -58,6 +58,8 @@ namespace Audacia.Seed
 		/// <param name="assembly"></param>
 		public static IEnumerable<DbSeed> FromAssembly(Assembly assembly)
 		{
+			if (assembly == null) throw new ArgumentNullException(nameof(assembly));
+			
 			var context = new SeedContext();
 			var seeds = assembly.GetExportedTypes()
 				.Where(t => typeof(DbSeed).IsAssignableFrom(t))
@@ -116,6 +118,8 @@ namespace Audacia.Seed
 		protected virtual IEnumerable<T> Defaults() => Enumerable.Empty<T>();
 
 		/// <summary>This method should return a single instance of the entity to be seeded.</summary>
+		[SuppressMessage("StyleCop", "CA1716")]
+		[SuppressMessage("StyleCop", "CA1720")]
 		protected internal virtual T Single() => default(T);
 
 		/// <summary>This property can be used by derived types to check what data has already been seeded.</summary>

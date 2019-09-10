@@ -11,17 +11,19 @@ namespace Audacia.Seed.EntityFrameworkCore.Tests
 		[Fact]
 		public void Test()
 		{
-			var dbContext = new TestDbContext();
-			dbContext.Database.OpenConnection();
-			dbContext.Database.EnsureCreated();
+			using (var dbContext = new TestDbContext())
+			{
+				dbContext.Database.OpenConnection();
+				dbContext.Database.EnsureCreated();
 
-			var assembly = Assembly.GetAssembly(typeof(JobSeed));
-			dbContext.ConfigureSeeds(assembly);
-			dbContext.SaveChanges();
+				var assembly = Assembly.GetAssembly(typeof(JobSeed));
+				dbContext.ConfigureSeeds(assembly);
+				dbContext.SaveChanges();
 
-			Assert.NotEmpty(dbContext.Holidays);
-			Assert.NotEmpty(dbContext.Jobs);
-			Assert.NotEmpty(dbContext.People);
+				Assert.NotEmpty(dbContext.Holidays);
+				Assert.NotEmpty(dbContext.Jobs);
+				Assert.NotEmpty(dbContext.People);
+			}
 		}
 	}
 }

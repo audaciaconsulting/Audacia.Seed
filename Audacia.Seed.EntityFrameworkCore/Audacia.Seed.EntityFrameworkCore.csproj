@@ -4,12 +4,20 @@
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<Title>Audacia.Seed.EntityFrameworkCore</Title>
 		<Authors>Adam Drewery</Authors>
+		<Version>0.1.0</Version>
 		<Description>Entity Framework Core integration for Audacia.Seed</Description>
 		<Copyright>Copyright © Audacia 2019</Copyright>
 		<PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
 	</PropertyGroup>
 
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+	  <DebugSymbols>true</DebugSymbols>
+	  <DebugType>full</DebugType>
+	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	</PropertyGroup>
+
 	<ItemGroup>
+	  <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.4" />
 	</ItemGroup>
 

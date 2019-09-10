@@ -25,6 +25,9 @@ namespace Audacia.Seed.AutoFixture.Extensions
 		/// <summary>Registers the <see cref="DbSeed"/> types in the specified assembly with an AutoFixture <see cref="Fixture"/> instance.</summary>
 		public static void RegisterSeeds(this Fixture fixture, IEnumerable<DbSeed> seeds)
 		{
+			if (fixture == null) throw new ArgumentNullException(nameof(fixture));
+			if (seeds == null) throw new ArgumentNullException(nameof(seeds));
+			
 			foreach (var seed in seeds)
 			{
 				var flags = new
