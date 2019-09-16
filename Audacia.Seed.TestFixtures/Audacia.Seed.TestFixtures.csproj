@@ -11,6 +11,7 @@
 
 	<ItemGroup>
 	  <PackageReference Include="Audacia.Random" Version="3.0.42445.19206" />
+	  <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4" />
 	</ItemGroup>
 
 </Project>

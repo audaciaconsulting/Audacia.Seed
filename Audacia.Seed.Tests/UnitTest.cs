@@ -1,10 +1,14 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using Xunit;
 
 namespace Audacia.Seed.Tests
 {
-	public class DbSeedTests
+	[SuppressMessage("StyleCop", "CA1707")]
+	[SuppressMessage("StyleCop", "CA1034")]
+	[SuppressMessage("StyleCop", "CA1812")]
+	public static class DbSeedTests
 	{
 		public class TopologicalSort
 		{
