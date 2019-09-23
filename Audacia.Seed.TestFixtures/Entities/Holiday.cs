@@ -13,7 +13,7 @@ namespace Audacia.Seed.TestFixtures.Entities
 		public Person Person { get; set; }
 
 		public int PersonId { get; set; }
-		
+
 		public string Notes { get; set; }
 	}
 }

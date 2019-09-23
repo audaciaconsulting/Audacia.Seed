@@ -2,11 +2,23 @@
 
 	<PropertyGroup>
 		<TargetFramework>netcoreapp2.0</TargetFramework>
+    <CodeAnalysisRuleSet>..\CodeAnalysis.Tests.ruleset</CodeAnalysisRuleSet>
+    <IsPackable>false</IsPackable>
+	</PropertyGroup>
 
-		<IsPackable>false</IsPackable>
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+	  <DocumentationFile>bin\Release\Audacia.Seed.EntityFrameworkCore.Tests.xml</DocumentationFile>
+	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	  <NoWarn>1701;1702;SA0001</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+	  <DebugSymbols>false</DebugSymbols>
+	  <NoWarn>1701;1702;SA0001</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Audacia.CodeAnalysis" Version="0.0.47086.19266" />
 		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.4" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.4" />

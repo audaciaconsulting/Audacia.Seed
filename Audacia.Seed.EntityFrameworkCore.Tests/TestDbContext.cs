@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using Audacia.Seed.TestFixtures.Entities;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -15,10 +16,11 @@ namespace Audacia.Seed.EntityFrameworkCore.Tests
 
 		public DbSet<Job> Jobs { get; set; }
 
-		private static DbConnection Connection => new SqliteConnection("DataSource=:memory:");
+		private static DbConnection GetConnection() => new SqliteConnection("DataSource=:memory:");
 
+		[SuppressMessage("ReSharper", "IDISP004", Justification = "This is just how EF works, sorry.")]
 		private static readonly DbContextOptions<TestDbContext> Options = new DbContextOptionsBuilder<TestDbContext>()
-			.UseSqlite(Connection)
+			.UseSqlite(GetConnection())
 			.Options;
 	}
 }

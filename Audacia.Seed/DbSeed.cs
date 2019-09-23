@@ -10,6 +10,9 @@ namespace Audacia.Seed
 	/// <summary>The base class for a database seed fixture.</summary>
 	public abstract class DbSeed
 	{
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DbSeed"/> class.
+        /// </summary>
 		[SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Good luck subclassing this bad boy when its constructor is private.")]
 		internal DbSeed()
 		{
@@ -19,29 +22,29 @@ namespace Audacia.Seed
 				.Where(i => i.GetGenericTypeDefinition() == typeof(IDependsOn<>))
 				.Select(i => i.GenericTypeArguments.Single())
 				.ToList();
-			
+
 			IncludedTypes = GetType()
 				.GetInterfaces()
 				.Where(i => i.IsGenericType)
 				.Where(i => i.GetGenericTypeDefinition() == typeof(IIncludes<>))
 				.Select(i => i.GenericTypeArguments.Single())
-				.Concat(new[]{ EntityType })
+				.Concat(new[] { EntityType })
 				.Distinct()
 				.ToList();
 		}
 
 		/// <summary>The number of entities to be seeded. This can be overridden in a subclass or set in the config file.</summary>
 		public virtual int Count { get; internal set; }
-		
+
 		/// <summary><see cref="System.Random"/> instance for generating random property values.</summary>
-		protected System.Random Random { get; } = new System.Random();
+		protected Random Random { get; } = new Random();
 
 		/// <summary>The type of entity this seed class generates.</summary>
 		public abstract Type EntityType { get; }
 
 		/// <summary>This returns a single instance of the entity to be seeded.</summary>
 		public abstract object SingleObject();
-		
+
 		/// <summary>This returns all instances of the entity's defaults.</summary>
 		public abstract IEnumerable<object> DefaultObjects();
 
@@ -53,23 +56,22 @@ namespace Audacia.Seed
 			.Concat(DefaultObjects());
 
 		internal SeedContext SeedContext { get; private set; } = new SeedContext();
-		
+
 		/// <summary>Returns an instance of each of the exported <see cref="DbSeed"/> types from the specified assembly.</summary>
-		/// <param name="assembly"></param>
 		public static IEnumerable<DbSeed> FromAssembly(Assembly assembly)
 		{
 			if (assembly == null) throw new ArgumentNullException(nameof(assembly));
-			
+
 			var context = new SeedContext();
 			var seeds = assembly.GetExportedTypes()
 				.Where(t => typeof(DbSeed).IsAssignableFrom(t))
 				.Select(Activator.CreateInstance)
-				.Select(seed => (DbSeed) seed)
+				.Select(seed => (DbSeed)seed)
 				.ToList();
 
 			SeedConfiguration.Configure(seeds);
-			
-			foreach (var type in seeds) 
+
+			foreach (var type in seeds)
 				type.SeedContext = context;
 
 			return TopologicalSort(seeds);
@@ -92,21 +94,20 @@ namespace Audacia.Seed
 						yield return seed;
 					}
 				}
-				
+
 				if (!removed.Any())
 				{
 					var cyclicDependencies = string.Join(", ", list.Select(x => x.EntityType.Name));
 					throw new InvalidDataException("Cyclic dependencies detected in the following seed fixtures: " + cyclicDependencies);
 				}
-				
-				foreach(var x in removed)
+
+				foreach (var x in removed)
 					list.Remove(x);
 			}
-
 		}
 
 		internal ICollection<Type> Dependencies { get; }
-		
+
 		internal ICollection<Type> IncludedTypes { get; }
 	}
 
@@ -118,13 +119,11 @@ namespace Audacia.Seed
 		protected virtual IEnumerable<T> Defaults() => Enumerable.Empty<T>();
 
 		/// <summary>This method should return a single instance of the entity to be seeded.</summary>
-		[SuppressMessage("StyleCop", "CA1716")]
-		[SuppressMessage("StyleCop", "CA1720")]
-		protected internal virtual T Single() => default(T);
+		public virtual T GetSingle() => default;
 
 		/// <summary>This property can be used by derived types to check what data has already been seeded.</summary>
 		/// <typeparam name="TEntity">The type of entities to return.</typeparam>
-		protected IEnumerable<TEntity> Existing<TEntity>() where TEntity : class => 
+		protected IEnumerable<TEntity> Existing<TEntity>() where TEntity : class =>
 			SeedContext.Entries<TEntity>();
 
 		/// <summary>This property references the previous entity of this type to be seeded, or null if the current is the first.</summary>
@@ -136,9 +135,9 @@ namespace Audacia.Seed
 		/// <summary>This method should return a single instance of the entity to be seeded.</summary>
 		public override object SingleObject()
 		{
-			var result = Single();
+			var result = GetSingle();
 			Previous = result;
-			
+
 			SeedContext.Add(EntityType, result);
 			return result;
 		}
@@ -147,7 +146,7 @@ namespace Audacia.Seed
 		public override IEnumerable<object> DefaultObjects()
 		{
 			var results = Defaults().ToList();
-			
+
 			foreach (var result in results)
 				SeedContext.Add(EntityType, result);
 

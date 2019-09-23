@@ -7,11 +7,11 @@ namespace Audacia.Seed.EntityFramework6.Tests
 		[Fact]
 		public void Test()
 		{
-			using(var dbContext = new TestDbContext())
+			using (var db = new TestDbContext())
 			{
-				Assert.NotEmpty(dbContext.Holidays);
-				Assert.NotEmpty(dbContext.Jobs);
-				Assert.NotEmpty(dbContext.People);
+				Assert.NotEmpty(db.Holidays);
+				Assert.NotEmpty(db.Jobs);
+				Assert.NotEmpty(db.People);
 			}
 		}
 	}

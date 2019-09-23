@@ -29,10 +29,12 @@ namespace Audacia.Seed
 		public void Add(Type type, object entity)
 		{
 			if (_dictionary.TryGetValue(type, out var value))
-				value.Add(entity);
-			else
+            {
+                value.Add(entity);
+            }
+            else
 			{
-				var hashset = new HashSet<object> {entity};
+				var hashset = new HashSet<object> { entity };
 				_dictionary[type] = hashset;
 			}
 		}

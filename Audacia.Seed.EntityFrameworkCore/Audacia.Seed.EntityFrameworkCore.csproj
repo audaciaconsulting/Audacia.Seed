@@ -8,15 +8,22 @@
 		<Description>Entity Framework Core integration for Audacia.Seed</Description>
 		<Copyright>Copyright © Audacia 2019</Copyright>
 		<PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
+    <CodeAnalysisRuleSet>..\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
 	  <DebugSymbols>true</DebugSymbols>
 	  <DebugType>full</DebugType>
 	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	  <DocumentationFile>bin\Release\Audacia.Seed.EntityFrameworkCore.xml</DocumentationFile>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+	  <DocumentationFile>bin\Debug\Audacia.Seed.EntityFrameworkCore.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.47086.19266" />
 	  <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.4" />
 	</ItemGroup>

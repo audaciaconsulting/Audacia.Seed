@@ -10,7 +10,7 @@ namespace Audacia.Seed.TestFixtures.Entities
 		public string Name { get; set; }
 
 		public DateTime Birthday { get; set; }
-		
+
 		public ICollection<Job> Jobs { get; } = new HashSet<Job>();
 	}
 }

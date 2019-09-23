@@ -2,7 +2,18 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
+    <CodeAnalysisRuleSet>..\CodeAnalysis.Tests.ruleset</CodeAnalysisRuleSet>
 		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	  <NoWarn>1701;1702;SA0001</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+	  <DebugSymbols>false</DebugSymbols>
+	  <NoWarn>1701;1702;SA0001</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -10,6 +21,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.47086.19266" />
 	  <PackageReference Include="Audacia.Random" Version="3.0.42445.19206" />
 	  <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4" />
 	</ItemGroup>

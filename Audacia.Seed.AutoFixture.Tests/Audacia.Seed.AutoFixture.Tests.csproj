@@ -2,11 +2,23 @@
 
 	<PropertyGroup>
 		<TargetFramework>netcoreapp2.2</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <CodeAnalysisRuleSet>..\CodeAnalysis.Tests.ruleset</CodeAnalysisRuleSet>
+	</PropertyGroup>
 
-		<IsPackable>false</IsPackable>
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	  <DebugSymbols>false</DebugSymbols>
+	  <NoWarn>1701;1702;SA0001</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+	  <DebugSymbols>false</DebugSymbols>
+	  <NoWarn>1701;1702;SA0001</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Audacia.CodeAnalysis" Version="0.0.47086.19266" />
 		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
 		<PackageReference Include="xunit" Version="2.4.0" />

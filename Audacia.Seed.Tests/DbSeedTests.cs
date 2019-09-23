@@ -1,13 +1,13 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using Audacia.Seed.Tests.TestClasses;
 using Xunit;
 
 namespace Audacia.Seed.Tests
 {
-	[SuppressMessage("StyleCop", "CA1707")]
-	[SuppressMessage("StyleCop", "CA1034")]
-	[SuppressMessage("StyleCop", "CA1812")]
+	[SuppressMessage("CA1812", "ClassNeverInstantiated.Local", Justification = "I've got some test classes here that get instantiated dynamically.'")]
+	[SuppressMessage("ReSharper", "ClassNeverInstantiated.Local", Justification = "I've got some test classes here that get instantiated dynamically.'")]
 	public static class DbSeedTests
 	{
 		public class TopologicalSort
@@ -23,12 +23,12 @@ namespace Audacia.Seed.Tests
 				};
 
 				var sorted = DbSeed.TopologicalSort(seeds).ToList();
-				
+
 				Assert.IsType<TestSeed1>(sorted[0]);
 				Assert.IsType<TestSeed2>(sorted[1]);
 				Assert.IsType<TestSeed3>(sorted[2]);
 			}
-			
+
 			[Fact]
 			public void Throws_an_exception_when_cyclic_references_are_detected()
 			{
@@ -42,23 +42,6 @@ namespace Audacia.Seed.Tests
 
 				Assert.Throws<InvalidDataException>(() => DbSeed.TopologicalSort(seeds).ToList());
 			}
-			
-			private class TestSeed1 : DbSeed<Test1> { }
-
-			private class TestSeed2  : DbSeed<Test2>, IDependsOn<Test1> { }
-			
-			private class TestSeed3  : DbSeed<Test3>, IDependsOn<Test2> { }
-
-			private class BadSeed : DbSeed<Test4>, IDependsOn<Test4> { }
-			
-			private class Test1 { }
-			
-			private class Test2 { }
-			
-			private class Test3 { }
-			
-			private class Test4 { }
 		}
-	
 	}
 }
