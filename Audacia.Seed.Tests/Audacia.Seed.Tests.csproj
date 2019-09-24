@@ -8,13 +8,11 @@
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
 	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	  <DebugSymbols>false</DebugSymbols>
-	  <NoWarn>1701;1702;SA0001</NoWarn>
+	  <NoWarn>1701;1702;SA0001;CS1591</NoWarn>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-	  <DebugSymbols>false</DebugSymbols>
-	  <NoWarn>1701;1702;SA0001</NoWarn>
+	  <NoWarn>1701;1702;SA0001;CS1591</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

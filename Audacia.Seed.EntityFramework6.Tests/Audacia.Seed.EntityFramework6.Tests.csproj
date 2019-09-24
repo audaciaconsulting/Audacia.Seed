@@ -7,15 +7,12 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DebugSymbols>false</DebugSymbols>
-    <DebugType>full</DebugType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>1701;1702;SA0001</NoWarn>
+    <NoWarn>1701;1702;SA0001;CS1591</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DebugSymbols>false</DebugSymbols>
-    <NoWarn>1701;1702;SA0001</NoWarn>
+    <NoWarn>1701;1702;SA0001;CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
