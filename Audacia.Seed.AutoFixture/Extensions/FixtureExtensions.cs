@@ -36,8 +36,8 @@ namespace Audacia.Seed.AutoFixture.Extensions
 			{
 				var flags = new
 				{
-					instance = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy,
-					@static = BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.FlattenHierarchy
+					instance = BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy,
+					@static = BindingFlags.NonPublic | BindingFlags.Static
 				};
 
 				var types = new
@@ -53,8 +53,8 @@ namespace Audacia.Seed.AutoFixture.Extensions
 						?.MakeGenericMethod(seed.EntityType)
 				};
 
-				Debug.Assert(methods.seed != null);
-				Debug.Assert(methods.register != null);
+				Debug.Assert(methods.seed != null, "methods.seed != null");
+				Debug.Assert(methods.register != null, "methods.register != null");
 
 				var @delegate = Delegate.CreateDelegate(types.func, seed, methods.seed);
 				methods.register.Invoke(null, new object[] { fixture, @delegate });
