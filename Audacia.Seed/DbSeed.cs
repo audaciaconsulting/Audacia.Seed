@@ -119,7 +119,7 @@ namespace Audacia.Seed
 		protected virtual IEnumerable<T> Defaults() => Enumerable.Empty<T>();
 
 		/// <summary>This method should return a single instance of the entity to be seeded.</summary>
-		public virtual T GetSingle() => default;
+		public virtual T GetSingle() => default(T);
 
 		/// <summary>This property can be used by derived types to check what data has already been seeded.</summary>
 		/// <typeparam name="TEntity">The type of entities to return.</typeparam>
