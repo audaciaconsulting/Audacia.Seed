@@ -1,14 +1,14 @@
 name: $(Build.BuildId).$(Year:yy)$(DayOfYear)
 trigger: [master]
-resources: { repositories: [ { repository: templates, type: git, name: Audacia/Audacia.Build.Templates } ] }
+resources: { repositories: [ { repository: templates, type: git, name: Audacia/Audacia.Build } ] }
 
 stages:
 - stage: Build
   displayName: Build
   jobs:
-  - template: jobs/build/netcore/package.yaml@templates
+  - template: pipelines/build/nuget-package.job.yaml@templates
   
 - stage:
   displayName: Release
   jobs:
-  - template: jobs/release/netcore/internal-package.yaml@templates
+  - template: pipelines/release/internal-nuget-package.job.yaml@templates
