@@ -7,9 +7,9 @@ namespace Audacia.Seed.TestFixtures.DbSeeds
 	{
 		protected override IEnumerable<Job> Defaults()
 		{
-			yield return new Job {Name = "Cleaner"};
-			yield return new Job {Name = "Software Engineer"};
-			yield return new Job {Name = "Director"};
+			yield return new Job { Name = "Cleaner" };
+			yield return new Job { Name = "Software Engineer" };
+			yield return new Job { Name = "Director" };
 		}
 	}
 }

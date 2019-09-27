@@ -7,6 +7,7 @@
 		<Description>Base types for the Audacia seed libraries.</Description>
 		<Copyright>Copyright © Audacia 2019</Copyright>
 		<PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
+    <CodeAnalysisRuleSet>..\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -21,6 +22,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.47086.19266" />
 	  <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4" />
 	  <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
 	</ItemGroup>
