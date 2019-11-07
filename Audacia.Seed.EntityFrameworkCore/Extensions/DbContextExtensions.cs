@@ -19,8 +19,7 @@ namespace Audacia.Seed.EntityFrameworkCore.Extensions
 
 			foreach (var seed in seeds)
 			{
-				var data = seed.AllObjects();
-				dbContext.AddRange(data);
+				dbContext.ConfigureSeed(seed);
 			}
 		}
 
