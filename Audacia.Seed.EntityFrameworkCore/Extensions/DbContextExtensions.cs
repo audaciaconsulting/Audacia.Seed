@@ -23,5 +23,14 @@ namespace Audacia.Seed.EntityFrameworkCore.Extensions
 				dbContext.AddRange(data);
 			}
 		}
+
+		/// <summary>Configures the <see cref="DbContext"/> to ensure data is seeded at application startup.</summary>
+		[SuppressMessage("ReSharper", "SA1305", Justification = "That's not hungarian notation you dummy'")]
+		public static void ConfigureSeed(this DbContext dbContext, DbSeed seed)
+		{
+			if (seed == null) throw new ArgumentNullException(nameof(seed));
+			var data = seed.AllObjects();
+			dbContext.AddRange(data);
+		}
 	}
 }

@@ -19,7 +19,7 @@ namespace Audacia.Seed.EntityFrameworkCore.Tests
 		private static DbConnection GetConnection() => new SqliteConnection("DataSource=:memory:");
 
 		[SuppressMessage("ReSharper", "IDISP004", Justification = "This is just how EF works, sorry.")]
-		private static readonly DbContextOptions<TestDbContext> Options = new DbContextOptionsBuilder<TestDbContext>()
+		private static DbContextOptions<TestDbContext> Options => new DbContextOptionsBuilder<TestDbContext>()
 			.UseSqlite(GetConnection())
 			.Options;
 	}
