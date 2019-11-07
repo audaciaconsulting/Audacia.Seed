@@ -27,7 +27,9 @@ namespace Audacia.Seed.EntityFrameworkCore.Extensions
 		[SuppressMessage("ReSharper", "SA1305", Justification = "That's not hungarian notation you dummy'")]
 		public static void ConfigureSeed(this DbContext dbContext, DbSeed seed)
 		{
+			if (dbContext == null) throw new ArgumentNullException(nameof(dbContext));
 			if (seed == null) throw new ArgumentNullException(nameof(seed));
+
 			var data = seed.AllObjects();
 			dbContext.AddRange(data);
 		}
