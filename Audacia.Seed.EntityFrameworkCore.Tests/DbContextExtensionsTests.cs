@@ -7,11 +7,11 @@ using Xunit;
 
 namespace Audacia.Seed.EntityFrameworkCore.Tests
 {
-	public class UnitTest
+	public class DbContextExtensionsTests
 	{
 		[Fact]
 		[SuppressMessage("ReSharper", "SA1305", Justification = "That's not hungarian notation you dummy'")]
-		public void Test()
+		public void ConfigureSeeds()
 		{
 			using (var dbContext = new TestDbContext())
 			{
@@ -25,6 +25,29 @@ namespace Audacia.Seed.EntityFrameworkCore.Tests
 				Assert.NotEmpty(dbContext.Holidays);
 				Assert.NotEmpty(dbContext.Jobs);
 				Assert.NotEmpty(dbContext.People);
+
+				dbContext.Database.EnsureDeleted();
+			}
+		}
+
+		[Fact]
+		[SuppressMessage("ReSharper", "SA1305", Justification = "That's not hungarian notation you dummy'")]
+		public void ConfigureSeed()
+		{
+			using (var dbContext = new TestDbContext())
+			{
+				dbContext.Database.OpenConnection();
+				dbContext.Database.EnsureCreated();
+
+				var seed = new JobSeed();
+				dbContext.ConfigureSeed(seed);
+				dbContext.SaveChanges();
+
+				Assert.Empty(dbContext.Holidays);
+				Assert.NotEmpty(dbContext.Jobs);
+				Assert.Empty(dbContext.People);
+
+				dbContext.Database.EnsureDeleted();
 			}
 		}
 	}
