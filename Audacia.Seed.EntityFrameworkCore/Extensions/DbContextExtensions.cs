@@ -12,12 +12,19 @@ namespace Audacia.Seed.EntityFrameworkCore.Extensions
 		[SuppressMessage("ReSharper", "SA1305", Justification = "That's not hungarian notation you dummy'")]
 		public static void ConfigureSeeds(this DbContext dbContext, Assembly assembly)
 		{
-			if (dbContext == null) throw new ArgumentNullException(nameof(dbContext));
-			if (assembly == null) throw new ArgumentNullException(nameof(assembly));
+            if (dbContext == null)
+            {
+                throw new ArgumentNullException(nameof(dbContext));
+            }
 
-			var seeds = DbSeed.FromAssembly(assembly);
+            if (assembly == null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
 
-			foreach (var seed in seeds)
+            var seeds = DbSeed.FromAssembly(assembly);
+
+            foreach (var seed in seeds)
 			{
 				dbContext.ConfigureSeed(seed);
 			}
@@ -27,11 +34,18 @@ namespace Audacia.Seed.EntityFrameworkCore.Extensions
 		[SuppressMessage("ReSharper", "SA1305", Justification = "That's not hungarian notation you dummy'")]
 		public static void ConfigureSeed(this DbContext dbContext, DbSeed seed)
 		{
-			if (dbContext == null) throw new ArgumentNullException(nameof(dbContext));
-			if (seed == null) throw new ArgumentNullException(nameof(seed));
+            if (dbContext == null)
+            {
+                throw new ArgumentNullException(nameof(dbContext));
+            }
 
-			var data = seed.AllObjects();
-			dbContext.AddRange(data);
+            if (seed == null)
+            {
+                throw new ArgumentNullException(nameof(seed));
+            }
+
+            var data = seed.AllObjects();
+            dbContext.AddRange(data);
 		}
 	}
 }

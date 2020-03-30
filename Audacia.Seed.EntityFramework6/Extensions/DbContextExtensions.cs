@@ -12,11 +12,14 @@ namespace Audacia.Seed.EntityFramework6.Extensions
 		[SuppressMessage("ReSharper", "SA1305", Justification = "That's not hungarian notation you dummy'")]
 		public static void ConfigureSeeds(this DbContext dbContext, Assembly assembly)
 		{
-			if (dbContext == null) throw new ArgumentNullException(nameof(dbContext));
+            if (dbContext == null)
+            {
+                throw new ArgumentNullException(nameof(dbContext));
+            }
 
-			var seeds = DbSeed.FromAssembly(assembly);
+            var seeds = DbSeed.FromAssembly(assembly);
 
-			foreach (var seed in seeds)
+            foreach (var seed in seeds)
 			{
 				var entities = seed.AllObjects();
 				dbContext.Set(seed.EntityType).AddRange(entities);
