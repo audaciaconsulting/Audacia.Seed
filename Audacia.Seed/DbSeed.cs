@@ -60,21 +60,26 @@ namespace Audacia.Seed
 		/// <summary>Returns an instance of each of the exported <see cref="DbSeed"/> types from the specified assembly.</summary>
 		public static IEnumerable<DbSeed> FromAssembly(Assembly assembly)
 		{
-			if (assembly == null) throw new ArgumentNullException(nameof(assembly));
+            if (assembly == null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
 
-			var context = new SeedContext();
-			var seeds = assembly.GetExportedTypes()
+            var context = new SeedContext();
+            var seeds = assembly.GetExportedTypes()
 				.Where(t => typeof(DbSeed).IsAssignableFrom(t))
 				.Select(Activator.CreateInstance)
 				.Select(seed => (DbSeed)seed)
 				.ToList();
 
-			SeedConfiguration.Configure(seeds);
+            SeedConfiguration.Configure(seeds);
 
-			foreach (var type in seeds)
-				type.SeedContext = context;
+            foreach (var type in seeds)
+            {
+                type.SeedContext = context;
+            }
 
-			return TopologicalSort(seeds);
+            return TopologicalSort(seeds);
 		}
 
 		/// <summary>Sorts an enumerable of <see cref="DbSeed"/> topologically, so dependencies are seeded before their dependants.</summary>
@@ -102,7 +107,9 @@ namespace Audacia.Seed
 				}
 
 				foreach (var x in removed)
-					list.Remove(x);
+                {
+                    list.Remove(x);
+                }
 			}
 		}
 
@@ -148,7 +155,9 @@ namespace Audacia.Seed
 			var results = Defaults().ToList();
 
 			foreach (var result in results)
-				SeedContext.Add(EntityType, result);
+            {
+                SeedContext.Add(EntityType, result);
+            }
 
 			return results;
 		}

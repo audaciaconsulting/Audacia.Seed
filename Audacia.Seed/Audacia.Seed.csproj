@@ -8,6 +8,7 @@
 		<Copyright>Copyright © Audacia 2019</Copyright>
 		<PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
     <CodeAnalysisRuleSet>..\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -18,8 +19,7 @@
 	  <DocumentationFile>bin\Release\Audacia.Seed.xml</DocumentationFile>
 	  <DebugSymbols>true</DebugSymbols>
 	  <DebugType>full</DebugType>
-	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	</PropertyGroup>
+  </PropertyGroup>
 
 	<ItemGroup>
 	  <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.65010.20090">
