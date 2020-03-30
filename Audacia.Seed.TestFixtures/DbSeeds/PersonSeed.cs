@@ -14,7 +14,9 @@ namespace Audacia.Seed.TestFixtures.DbSeeds
 			var person = new Person { Name = "Dave" };
 
 			foreach (var job in jobs)
-				person.Jobs.Add(job);
+            {
+                person.Jobs.Add(job);
+            }
 
 			return person;
 		}

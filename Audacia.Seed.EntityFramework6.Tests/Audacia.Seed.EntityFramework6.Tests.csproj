@@ -4,10 +4,10 @@
     <TargetFramework>net47</TargetFramework>
     <Title>Audacia.Seed.EntityFramework6.Tests</Title>
     <CodeAnalysisRuleSet>..\CodeAnalysis.Tests.ruleset</CodeAnalysisRuleSet>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>1701;1702;SA0001;CS1591</NoWarn>
   </PropertyGroup>
 

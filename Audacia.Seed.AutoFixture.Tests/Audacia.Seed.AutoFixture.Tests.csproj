@@ -4,11 +4,11 @@
 		<TargetFramework>netcoreapp2.2</TargetFramework>
     <IsPackable>false</IsPackable>
     <CodeAnalysisRuleSet>..\CodeAnalysis.Tests.ruleset</CodeAnalysisRuleSet>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	  <NoWarn>1701;1702;SA0001;CS1591</NoWarn>
+    <NoWarn>1701;1702;SA0001;CS1591</NoWarn>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
