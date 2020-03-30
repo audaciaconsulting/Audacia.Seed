@@ -22,9 +22,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.47086.19266" />
+	  <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.65010.20090">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
 	  <PackageReference Include="AutoFixture" Version="4.11.0" />
-	  <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4" />
 	</ItemGroup>
 
 	<ItemGroup>

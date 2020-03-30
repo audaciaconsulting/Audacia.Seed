@@ -16,8 +16,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Audacia.CodeAnalysis" Version="0.0.47086.19266" />
-		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4" />
+		<PackageReference Include="Audacia.CodeAnalysis" Version="0.0.65010.20090">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
 		<PackageReference Include="xunit" Version="2.4.0" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
