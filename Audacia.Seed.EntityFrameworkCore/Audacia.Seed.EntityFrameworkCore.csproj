@@ -23,7 +23,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.65010.20090">
+	  <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.65187.20091">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
