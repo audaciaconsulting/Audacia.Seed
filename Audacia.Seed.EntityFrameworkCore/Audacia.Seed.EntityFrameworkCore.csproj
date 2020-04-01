@@ -9,13 +9,13 @@
 		<Copyright>Copyright © Audacia 2019</Copyright>
 		<PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
     <CodeAnalysisRuleSet>..\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
 	  <DebugSymbols>true</DebugSymbols>
 	  <DebugType>full</DebugType>
-	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	  <DocumentationFile>bin\Release\Audacia.Seed.EntityFrameworkCore.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\Audacia.Seed.EntityFrameworkCore.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -23,8 +23,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.47086.19266" />
-	  <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4" />
+	  <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.65187.20091">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
 	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.4" />
 	</ItemGroup>
 

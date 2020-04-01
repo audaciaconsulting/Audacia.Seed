@@ -29,10 +29,17 @@ namespace Audacia.Seed.AutoFixture.Extensions
 		[SuppressMessage("ReSharper", "REFL008", Justification = "The analyzer can't understand my binding flags are in a local variable.'")]
 		public static void RegisterSeeds(this Fixture fixture, IEnumerable<DbSeed> seeds)
 		{
-			if (fixture == null) throw new ArgumentNullException(nameof(fixture));
-			if (seeds == null) throw new ArgumentNullException(nameof(seeds));
+            if (fixture == null)
+            {
+                throw new ArgumentNullException(nameof(fixture));
+            }
 
-			foreach (var seed in seeds)
+            if (seeds == null)
+            {
+                throw new ArgumentNullException(nameof(seeds));
+            }
+
+            foreach (var seed in seeds)
 			{
 				var flags = new
 				{

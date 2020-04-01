@@ -28,10 +28,14 @@ namespace Audacia.Seed
 		/// <summary>Applies the seed settings in the application config file to the specified <see cref="DbSeed"/> instances, overwriting any hard-coded values.</summary>
 		public static void Configure(IEnumerable<DbSeed> seeds)
 		{
-			if (seeds == null) throw new ArgumentNullException(nameof(seeds));
-			var random = new Random();
+            if (seeds == null)
+            {
+                throw new ArgumentNullException(nameof(seeds));
+            }
 
-			foreach (var seed in seeds)
+            var random = new Random();
+
+            foreach (var seed in seeds)
 			{
 				var settings = ForType(seed.EntityType);
 				seed.Count = random.Next(settings.Minimum, settings.Maximum + 1);
@@ -42,34 +46,44 @@ namespace Audacia.Seed
 		/// <exception cref="ConfigurationErrorsException">One or more values for seed configurations could not be parsed as an integer or a range.</exception>
 		public static SeedConfiguration ForType(Type type)
 		{
-			if (type == null) throw new ArgumentNullException(nameof(type));
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
 
-			var key1 = Prefix + type.Name;
-			var key2 = Prefix + type.FullName;
+            var key1 = Prefix + type.Name;
+            var key2 = Prefix + type.FullName;
 
-			var value = ConfigurationManager.AppSettings[key1]
-				?? ConfigurationManager.AppSettings[key2];
+            var value = ConfigurationManager.AppSettings[key1]
+                        ?? ConfigurationManager.AppSettings[key2];
 
-			if (value == null)
-				return new SeedConfiguration(0);
+            if (value == null)
+            {
+                return new SeedConfiguration(0);
+            }
 
 			// Is it just a number
-			if (value.All(char.IsDigit))
-				return new SeedConfiguration(int.Parse(value, NumberFormatInfo.InvariantInfo));
+            if (value.All(char.IsDigit))
+            {
+                return new SeedConfiguration(int.Parse(value, NumberFormatInfo.InvariantInfo));
+            }
 
 			// If its not a range then we can't handle this.
-			var invalid = value.Count(x => x == '-') != 1
+            var invalid = value.Count(x => x == '-') != 1
 			              || value.Any(x => !char.IsDigit(x) || x != '-')
-			              || value.First() == '-'
+			              || value[0] == '-'
 			              || value.Last() == '-';
 
-			if (invalid) throw new ConfigurationErrorsException($"Can't parse configuration value \"{value}\"");
+            if (invalid)
+            {
+                throw new ConfigurationErrorsException($"Can't parse configuration value \"{value}\"");
+            }
 
-			var parts = value.Split('-');
-			var min = int.Parse(parts[0], NumberFormatInfo.InvariantInfo);
-			var max = int.Parse(parts[1], NumberFormatInfo.InvariantInfo);
+            var parts = value.Split('-');
+            var min = int.Parse(parts[0], NumberFormatInfo.InvariantInfo);
+            var max = int.Parse(parts[1], NumberFormatInfo.InvariantInfo);
 
-			return new SeedConfiguration(min, max);
+            return new SeedConfiguration(min, max);
 		}
 	}
 }

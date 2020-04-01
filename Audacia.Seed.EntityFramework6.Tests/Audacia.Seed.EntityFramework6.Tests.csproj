@@ -4,10 +4,10 @@
     <TargetFramework>net47</TargetFramework>
     <Title>Audacia.Seed.EntityFramework6.Tests</Title>
     <CodeAnalysisRuleSet>..\CodeAnalysis.Tests.ruleset</CodeAnalysisRuleSet>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>1701;1702;SA0001;CS1591</NoWarn>
   </PropertyGroup>
 
@@ -16,9 +16,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.47086.19266" />
+    <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.65187.20091">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Effort.EF6" Version="2.2.2" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4" />
     <PackageReference Include="EntityFramework" Version="6.2.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />

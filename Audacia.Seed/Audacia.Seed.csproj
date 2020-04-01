@@ -8,6 +8,7 @@
 		<Copyright>Copyright © Audacia 2019</Copyright>
 		<PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
     <CodeAnalysisRuleSet>..\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -18,12 +19,13 @@
 	  <DocumentationFile>bin\Release\Audacia.Seed.xml</DocumentationFile>
 	  <DebugSymbols>true</DebugSymbols>
 	  <DebugType>full</DebugType>
-	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	</PropertyGroup>
+  </PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.47086.19266" />
-	  <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4" />
+	  <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.65187.20091">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
 	  <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
 	</ItemGroup>
 
