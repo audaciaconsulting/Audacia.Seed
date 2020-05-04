@@ -25,7 +25,7 @@
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="Audacia.Random" Version="3.0.42445.19206" />
+	  <PackageReference Include="Audacia.Random" Version="3.0.63746.20079" />
 	</ItemGroup>
 
 </Project>
