@@ -2,6 +2,13 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
+        <Title>Audacia.Seed.AspNetCoreIdentity</Title>
+        <Authors>Techops</Authors>
+        <Description>ASP.Net Core Identity integration for Audacia.Seed</Description>
+        <Copyright>Copyright © Audacia 2020</Copyright>
+        <PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
+        <CodeAnalysisRuleSet>..\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <ItemGroup>
