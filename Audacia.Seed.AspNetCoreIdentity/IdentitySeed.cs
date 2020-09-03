@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Audacia.Seed.AspNetCoreIdentity.Exceptions;
 using Microsoft.AspNetCore.Identity;
@@ -29,6 +30,13 @@ namespace Audacia.Seed.AspNetCoreIdentity
         /// <summary>The type of entity this seed class generates.</summary>
         public override Type EntityType => typeof(IdentitySeedModel<TApplicationUser, TKey>);
 
+        public IEnumerable<IdentitySeedModel<TApplicationUser, TKey>> GetAll() => Enumerable
+            .Range(0, Count)
+            .Select(_ => GetSingle())
+            .Where(x => x != null)
+            .Concat(Defaults())
+            .ToArray();
+
         /// <summary>This method should return a single instance of the entity to be seeded.</summary>
         public override object SingleObject() => GetSingle();
 
@@ -39,27 +47,36 @@ namespace Audacia.Seed.AspNetCoreIdentity
         /// Seeds new application users into the database, existing users will be skipped.
         /// </summary>
         /// <param name="userManager">Asp.NetCore UserManager</param>
+        /// <param name="token">Cancellation token</param>
         /// <returns>An awaitable task.</returns>
         /// <exception cref="ArgumentNullException">Occurs when <see cref="UserManager{TUser}"/> or <see cref="IdentitySeed{TApplicationUser,TKey}"/> is null.</exception>
         /// <exception cref="IdentityException">Occurs when the <see cref="UserManager{TUser}"/> was unable to create a user.</exception>
-        public async Task ConfigureAsync(UserManager<TApplicationUser> userManager)
+        public async Task ConfigureAsync(UserManager<TApplicationUser> userManager, CancellationToken token)
         {
             if (userManager == null)
             {
                 throw new ArgumentNullException(nameof(userManager));
             }
 
+            token.ThrowIfCancellationRequested();
+
             // Generate all application users to seed.
-            var identitySeeds = (IEnumerable<IdentitySeedModel<TApplicationUser, TKey>>)AllObjects();
+            var identitySeeds = GetAll().ToArray();
             foreach (var identitySeed in identitySeeds)
             {
+                token.ThrowIfCancellationRequested();
+
                 // Check if user exists
                 var userIdentifier = identitySeed.ApplicationUser.Email;
                 var existingUser = await userManager.FindByEmailAsync(userIdentifier);
                 if (existingUser == null)
                 {
-                    // Create a new user with password
-                    var identityResult = await userManager.CreateAsync(identitySeed.ApplicationUser, identitySeed.Password);
+                    // Create a new user with password (if provided)
+                    var createUserTask = string.IsNullOrWhiteSpace(identitySeed.Password)
+                        ? userManager.CreateAsync(identitySeed.ApplicationUser)
+                        : userManager.CreateAsync(identitySeed.ApplicationUser, identitySeed.Password);
+
+                    var identityResult = await createUserTask;
                     if (!identityResult.Succeeded)
                     {
                         throw new IdentityException(identityResult.Errors, $"Unable to create user. {userIdentifier}");

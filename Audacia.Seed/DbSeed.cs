@@ -68,7 +68,9 @@ namespace Audacia.Seed
             var context = new SeedContext();
             var seeds = assembly.GetExportedTypes()
 				.Where(t => typeof(DbSeed).IsAssignableFrom(t))
-				.Where(t => !typeof(IIdentitySeed<>).IsAssignableFrom(t))
+				.Where(t => t.GetInterfaces()
+					.Where(i => i.IsGenericType)
+					.All(i => i.GetGenericTypeDefinition() != typeof(IIdentitySeed<>)))
 				.Select(Activator.CreateInstance)
 				.Select(seed => (DbSeed)seed)
 				.ToList();

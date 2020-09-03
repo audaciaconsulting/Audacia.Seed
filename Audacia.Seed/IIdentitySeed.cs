@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Audacia.Seed
 {
     /// <summary>
@@ -8,5 +10,9 @@ namespace Audacia.Seed
     public interface IIdentitySeed<out TIdentity> : IDbSeed<TIdentity>
         where TIdentity : class
     {
+        /// <summary>
+        /// Returns a types list of all identities to seed.
+        /// </summary>
+        IEnumerable<TIdentity> GetAll();
     }
 }
