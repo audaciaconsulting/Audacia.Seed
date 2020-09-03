@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Audacia.Seed.AspNetCoreIdentity.Exceptions;
 using Microsoft.AspNetCore.Identity;
 
 namespace Audacia.Seed.AspNetCoreIdentity
 {
     /// <summary>
-    /// The base implementation of an IdentitySeed
+    /// The base implementation of an IdentitySeed.
     /// </summary>
     /// <typeparam name="TApplicationUser">The <see cref="IdentityUser"/> class for your application.</typeparam>
     /// <typeparam name="TKey">The primary key of your <see cref="IdentityUser"/> class.</typeparam>
-    public abstract class IdentitySeed<TApplicationUser, TKey> : DbSeed, IDbSeed<IdentitySeedModel<TApplicationUser, TKey>>
+    public abstract class IdentitySeed<TApplicationUser, TKey> : DbSeed,
+        IIdentitySeed<IdentitySeedModel<TApplicationUser, TKey>>
         where TApplicationUser : IdentityUser<TKey>
         where TKey : IEquatable<TKey>
-    // TODO JP: create an interface that can be placed in Audacia.Seed and not add further dependencies
     {
         /// <summary>This method should return entities instances which should be seeded by default.</summary>
         public virtual IEnumerable<IdentitySeedModel<TApplicationUser, TKey>> Defaults()
@@ -32,5 +34,38 @@ namespace Audacia.Seed.AspNetCoreIdentity
 
         /// <summary>This method should return entities instances which should be seeded by default.</summary>
         public override IEnumerable<object> DefaultObjects() => Defaults().ToList();
+
+        /// <summary>
+        /// Seeds new application users into the database, existing users will be skipped.
+        /// </summary>
+        /// <param name="userManager">Asp.NetCore UserManager</param>
+        /// <returns>An awaitable task.</returns>
+        /// <exception cref="ArgumentNullException">Occurs when <see cref="UserManager{TUser}"/> or <see cref="IdentitySeed{TApplicationUser,TKey}"/> is null.</exception>
+        /// <exception cref="IdentityException">Occurs when the <see cref="UserManager{TUser}"/> was unable to create a user.</exception>
+        public async Task ConfigureAsync(UserManager<TApplicationUser> userManager)
+        {
+            if (userManager == null)
+            {
+                throw new ArgumentNullException(nameof(userManager));
+            }
+
+            // Generate all application users to seed.
+            var identitySeeds = (IEnumerable<IdentitySeedModel<TApplicationUser, TKey>>)AllObjects();
+            foreach (var identitySeed in identitySeeds)
+            {
+                // Check if user exists
+                var userIdentifier = identitySeed.ApplicationUser.Email;
+                var existingUser = await userManager.FindByEmailAsync(userIdentifier);
+                if (existingUser == null)
+                {
+                    // Create a new user with password
+                    var identityResult = await userManager.CreateAsync(identitySeed.ApplicationUser, identitySeed.Password);
+                    if (!identityResult.Succeeded)
+                    {
+                        throw new IdentityException(identityResult.Errors, $"Unable to create user. {userIdentifier}");
+                    }
+                }
+            }
+        }
     }
 }

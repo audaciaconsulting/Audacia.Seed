@@ -66,10 +66,9 @@ namespace Audacia.Seed
             }
 
             var context = new SeedContext();
-
-            // TODO JP: exclude IdentitySeeds form the list of exported types
             var seeds = assembly.GetExportedTypes()
 				.Where(t => typeof(DbSeed).IsAssignableFrom(t))
+				.Where(t => !typeof(IIdentitySeed<>).IsAssignableFrom(t))
 				.Select(Activator.CreateInstance)
 				.Select(seed => (DbSeed)seed)
 				.ToList();
