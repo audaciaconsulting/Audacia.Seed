@@ -8,13 +8,13 @@ using System.Reflection;
 namespace Audacia.Seed
 {
 	/// <summary>The base class for a database seed fixture.</summary>
-	public abstract class DbSeed
+	public abstract class DbSeed : IDbSeed
 	{
         /// <summary>
         /// Initializes a new instance of the <see cref="DbSeed"/> class.
         /// </summary>
 		[SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Good luck subclassing this bad boy when its constructor is private.")]
-		internal DbSeed()
+		protected DbSeed()
 		{
 			Dependencies = GetType()
 				.GetInterfaces()
@@ -68,6 +68,9 @@ namespace Audacia.Seed
             var context = new SeedContext();
             var seeds = assembly.GetExportedTypes()
 				.Where(t => typeof(DbSeed).IsAssignableFrom(t))
+				.Where(t => t.GetInterfaces()
+					.Where(i => i.IsGenericType)
+					.All(i => i.GetGenericTypeDefinition() != typeof(IIdentitySeed<>)))
 				.Select(Activator.CreateInstance)
 				.Select(seed => (DbSeed)seed)
 				.ToList();
@@ -120,10 +123,10 @@ namespace Audacia.Seed
 
 	/// <summary>The base class for a database seed fixture.</summary>
 	/// <typeparam name="T">The type of entity this seed class generates.</typeparam>
-	public abstract class DbSeed<T> : DbSeed where T : class
+	public abstract class DbSeed<T> : DbSeed, IDbSeed<T> where T : class
 	{
 		/// <summary>This method should return entities instances which should be seeded by default.</summary>
-		protected virtual IEnumerable<T> Defaults() => Enumerable.Empty<T>();
+		public virtual IEnumerable<T> Defaults() => Enumerable.Empty<T>();
 
 		/// <summary>This method should return a single instance of the entity to be seeded.</summary>
 		public virtual T GetSingle() => default;
