@@ -6,7 +6,7 @@
         <Authors>Techops</Authors>
         <Description>ASP.Net Core Identity integration for Audacia.Seed</Description>
         <Copyright>Copyright © Audacia 2020</Copyright>
-        <PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
+        <PackageIcon>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIcon>
         <CodeAnalysisRuleSet>..\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
