@@ -92,7 +92,7 @@ namespace Audacia.Seed.AspNetCoreIdentity
                     if (!addToRolesResult.Succeeded)
                     {
                         throw new IdentityException(addToRolesResult.Errors,
-                            $"Unable to add user ({userIdentifier}) to role {identitySeed.Role}.");
+                            $"Unable to add user ({userIdentifier}) to role {string.Join(",", identitySeed.Roles)}.");
                     }
                 }
             }
