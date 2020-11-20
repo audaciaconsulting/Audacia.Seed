@@ -10,5 +10,7 @@ namespace Audacia.Seed.AspNetCoreIdentity
         public TApplicationUser ApplicationUser { get; set; }
 
         public string Password { get; set; }
+
+        public string Role { get; set; }
     }
 }

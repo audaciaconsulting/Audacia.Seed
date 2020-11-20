@@ -82,6 +82,11 @@ namespace Audacia.Seed.AspNetCoreIdentity
                         throw new IdentityException(identityResult.Errors, $"Unable to create user. {userIdentifier}");
                     }
                 }
+
+                if (string.IsNullOrWhiteSpace(identitySeed.Role))
+                {
+                    await userManager.AddToRoleAsync(existingUser ?? identitySeed.ApplicationUser, identitySeed.Role);
+                }
             }
         }
     }
