@@ -83,10 +83,10 @@ namespace Audacia.Seed.AspNetCoreIdentity
                     }
                 }
 
-                if (string.IsNullOrWhiteSpace(identitySeed.Role))
+                foreach (var role in identitySeed.Roles)
                 {
                     var addToRoleResult = await userManager.AddToRoleAsync(existingUser ?? identitySeed.ApplicationUser,
-                        identitySeed.Role);
+                        role);
 
                     if (!addToRoleResult.Succeeded)
                     {
