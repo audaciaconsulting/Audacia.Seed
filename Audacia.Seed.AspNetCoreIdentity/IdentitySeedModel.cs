@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 
 namespace Audacia.Seed.AspNetCoreIdentity
@@ -10,5 +11,7 @@ namespace Audacia.Seed.AspNetCoreIdentity
         public TApplicationUser ApplicationUser { get; set; }
 
         public string Password { get; set; }
+
+        public ICollection<string> Roles { get; set; } = new List<string>();
     }
 }
