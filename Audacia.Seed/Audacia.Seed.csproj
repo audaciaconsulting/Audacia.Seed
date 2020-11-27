@@ -1,44 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
-		<Title>Audacia.Seed</Title>
-		<Authors>Audacia</Authors>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Title>Audacia.Seed</Title>
+    <Authors>Audacia</Authors>
     <Version>1.0.0</Version>
-		<Description>Base types for the Audacia seed libraries.</Description>
-		<Copyright>Copyright © Audacia 2019</Copyright>
-		<PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
+    <Description>Base types for the Audacia seed libraries.</Description>
+    <Copyright>Copyright © Audacia 2019</Copyright>
+    <PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
     <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
     <CodeAnalysisRuleSet>..\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	</PropertyGroup>
+  </PropertyGroup>
 
-	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-	  <DocumentationFile>bin\Debug\Audacia.Seed.xml</DocumentationFile>
-	</PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DocumentationFile>bin\Debug\Audacia.Seed.xml</DocumentationFile>
+  </PropertyGroup>
 
-	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-	  <DocumentationFile>bin\Release\Audacia.Seed.xml</DocumentationFile>
-	  <DebugSymbols>true</DebugSymbols>
-	  <DebugType>full</DebugType>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DocumentationFile>bin\Release\Audacia.Seed.xml</DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
-      <None Include="..\audacia-logo-circle-blue.png" Pack="true" PackagePath="\" />
+    <None Include="..\audacia-logo-circle-blue.png" Pack="true" PackagePath="\" />
   </ItemGroup>
-  
-	<ItemGroup>
-	  <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.65187.20091">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-	  <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
-	</ItemGroup>
 
-	<ItemGroup>
-	  <Content Include="..\README.md">
-	    <Link>README.md</Link>
-	  </Content>
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.65187.20091">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\README.md">
+      <Link>README.md</Link>
+    </Content>
+  </ItemGroup>
 
 </Project>
