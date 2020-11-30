@@ -83,16 +83,23 @@ namespace Audacia.Seed.AspNetCoreIdentity
                     }
                 }
 
-                if (identitySeed.Roles.Any())
+                foreach (var role in identitySeed.Roles)
                 {
-                    var addToRolesResult = await userManager.AddToRolesAsync(
-                        existingUser ?? identitySeed.ApplicationUser,
-                        identitySeed.Roles);
+                    var isInRole = await userManager.IsInRoleAsync(
+                        existingUser ?? identitySeed.ApplicationUser, 
+                        role);
 
-                    if (!addToRolesResult.Succeeded)
+                    if (!isInRole)
                     {
-                        throw new IdentityException(addToRolesResult.Errors,
-                            $"Unable to add user ({userIdentifier}) to role {string.Join(",", identitySeed.Roles)}.");
+                        var addToRoleResult = await userManager.AddToRoleAsync(
+                            existingUser ?? identitySeed.ApplicationUser,
+                            role);
+
+                        if (!addToRoleResult.Succeeded)
+                        {
+                            throw new IdentityException(addToRoleResult.Errors,
+                                $"Unable to add user ({userIdentifier}) to role {role}.");
+                        }
                     }
                 }
             }
