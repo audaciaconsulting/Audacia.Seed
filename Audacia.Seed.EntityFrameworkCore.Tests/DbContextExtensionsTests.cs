@@ -5,21 +5,12 @@ using Audacia.Seed.TestFixtures.DbSeeds;
 using Audacia.Seed.TestFixtures.Entities;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Audacia.Seed.EntityFrameworkCore.Tests
 {
     public class DbContextExtensionsTests
     {
-        private readonly ITestOutputHelper _testOutputHelper;
-
-        public DbContextExtensionsTests(ITestOutputHelper testOutputHelper)
-        {
-            _testOutputHelper = testOutputHelper;
-        }
-
         [Fact]
-        [SuppressMessage("", "SA1137", Justification = "Does have indentation")]
         [SuppressMessage("ReSharper", "SA1305", Justification = "That's not hungarian notation you dummy'")]
         public void ConfigureSeeds()
         {
@@ -42,7 +33,6 @@ namespace Audacia.Seed.EntityFrameworkCore.Tests
         }
 
         [Fact]
-        [SuppressMessage("", "SA1137", Justification = "Does have indentation")]
         [SuppressMessage("ReSharper", "SA1305", Justification = "That's not hungarian notation you dummy'")]
         public void ConfigureSeed()
         {
@@ -65,7 +55,6 @@ namespace Audacia.Seed.EntityFrameworkCore.Tests
         }
 
         [Fact]
-        [SuppressMessage("", "SA1137", Justification = "Does have indentation")]
         [SuppressMessage("ReSharper", "SA1305", Justification = "That's not hungarian notation you dummy'")]
         public void TestAddsSeedsToDbContext()
         {
@@ -89,7 +78,6 @@ namespace Audacia.Seed.EntityFrameworkCore.Tests
         }
 
         [Fact]
-        [SuppressMessage("", "SA1137", Justification = "Does have indentation")]
         [SuppressMessage("ReSharper", "SA1305", Justification = "That's not hungarian notation you dummy'")]
         public void TestAccessingPreExistingDataInDbContext()
         {
