@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Audacia.Seed.TestFixtures.DbSeeds
 {
-    public class PersonSeed : DbSeed<Person>, IDependsOn<Job>, ISeedFromDatabase
+    public class PersonSeed : DbSeed<Person>, IDependsOn<Job>, IDependsOn<Location>, ISeedFromDatabase
     {
         public override int Count => 10;
 
