@@ -17,6 +17,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\Audacia.Seed.EntityFrameworkCore\Audacia.Seed.EntityFrameworkCore.csproj" />
 	  <ProjectReference Include="..\Audacia.Seed\Audacia.Seed.csproj" />
 	</ItemGroup>
 

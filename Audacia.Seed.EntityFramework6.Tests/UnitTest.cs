@@ -12,6 +12,7 @@ namespace Audacia.Seed.EntityFramework6.Tests
 				Assert.NotEmpty(db.Holidays);
 				Assert.NotEmpty(db.Jobs);
 				Assert.NotEmpty(db.People);
+				Assert.NotEmpty(db.Locations);
 			}
 		}
 	}

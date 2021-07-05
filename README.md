@@ -8,7 +8,7 @@ An example seed fixture would look as follows:
 ```c#
 public class HolidaySeed : DbSeed<Holiday>,  IDependsOn<Person>
 {
-    protected override Holiday Single()
+    protected override Holiday GetSingle()
     {
         var start = Previous == null
             ? Random.DateTime()
@@ -32,6 +32,37 @@ Notice the usage of the `Previous` property to ensure that the holiday being gen
 `IDependsOn<T>` is an interface used to specify that this seed should run after the one which creates instances of `T`. In this case, `T` is the `Person` type.
 
 Similarly, the `IIncludes<T>` interface can be used to specify that a seed fixture includes some dependant type.
+
+The `Existing` method allows seeds that have already been added to the `SeedContext` to be accessed. Passing no parameters returns all seeds of that type, whilst another overload allows for a specific seed to be returned.
+
+As well as generating a randomised seed, it is also possible to create seeds based on static data using the by overriding the `Defaults()` method instead of `GetSingle()`. See example below:
+
+```c#
+	public class JobSeed : DbSeed<Job>
+	{
+		public override IEnumerable<Job> Defaults()
+		{
+			yield return new Job { Name = "Cleaner" };
+			yield return new Job { Name = "Software Engineer" };
+			yield return new Job { Name = "Director" };
+		}
+	}
+```
+
+Seeds can be made to inherit from `ISeedFromDatabase`, in cases where it is desirable to access pre-existing data in the database. An example of this is shown below:
+
+```c#
+    Location locationInDbContext = null;
+    if (DbContext != null)
+    {
+        locationInDbContext = DbContext.Set<Location>().FirstOrDefault(l => l.Name == "Leeds");
+    }
+
+    if (locationInDbContext != null)
+    {
+        person.Location = locationInDbContext;
+    }
+```
 
 ###Configuration
 

@@ -19,6 +19,8 @@ namespace Audacia.Seed.EntityFramework6.Tests
 
 		public DbSet<Job> Jobs { get; set; }
 
+		public DbSet<Location> Locations { get; set; }
+
 		private static DbConnection GetConnection() => Effort.DbConnectionFactory.CreateTransient();
 	}
 }
