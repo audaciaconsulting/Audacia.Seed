@@ -1,8 +1,6 @@
-using System.Linq;
 using Audacia.Random.Extensions;
 using Audacia.Seed.EntityFrameworkCore;
 using Audacia.Seed.TestFixtures.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace Audacia.Seed.TestFixtures.DbSeeds
 {
@@ -17,8 +15,8 @@ namespace Audacia.Seed.TestFixtures.DbSeeds
             var person = new Person { Name = "Dave" };
 
             // Attempt to get data from DbContext, fallback to seeded entity
-            var locationInDbContext = DbEntity<Location>(l => l.Name == "Leeds") ??
-                                      Existing<Location>(l => l.Name == "Bradford");
+            person.Location = DbEntity<Location>(l => l.Name == "Leeds") ??
+                              Existing<Location>(l => l.Name == "Bradford");
 
             foreach (var job in jobs)
             {

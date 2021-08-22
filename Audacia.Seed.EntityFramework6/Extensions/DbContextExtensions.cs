@@ -26,9 +26,9 @@ namespace Audacia.Seed.EntityFramework6.Extensions
 
             foreach (var seed in seeds)
 			{
-                if (seed is ISeedFromDatabase seedFromDatabase)
+                if (seed is ISetDbContext seedFromDatabase)
                 {
-                    seedFromDatabase.DbContext = dbContext;
+                    seedFromDatabase.SetDbContext(dbContext);
                 }
 
                 var entities = seed.AllObjects();

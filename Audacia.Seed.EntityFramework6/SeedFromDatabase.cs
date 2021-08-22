@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
 
-namespace Audacia.Seed.EntityFrameworkCore
+namespace Audacia.Seed.EntityFramework6.Extensions
 {
     /// <summary>
 	/// Seed entity provider that can return a new entity that is linked to an existing database entity.
@@ -39,20 +39,5 @@ namespace Audacia.Seed.EntityFrameworkCore
         /// </summary>
         protected TEntity DbEntity<TEntity>(Func<TEntity, bool> selectorFunc) where TEntity : class =>
             DbContext?.Set<TEntity>().FirstOrDefault(selectorFunc);
-
-        /// <summary>
-        /// Returns a query for DbEntities that have already been seeded to the DbContext.
-        /// Will return null when initialised by AutoFixture.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of entities to return.</typeparam>
-        protected IEnumerable<TEntity> DbView<TEntity>() where TEntity : class =>
-            DbContext?.Query<TEntity>();
-
-        /// <summary>
-        /// Searches for a specific DbEntity that has already been seeded to the DbContext.
-        /// Will return null when initialised by AutoFixture.
-        /// </summary>
-        protected TEntity DbView<TEntity>(Func<TEntity, bool> selectorFunc) where TEntity : class =>
-            DbContext?.Query<TEntity>().FirstOrDefault(selectorFunc);
     }
 }
