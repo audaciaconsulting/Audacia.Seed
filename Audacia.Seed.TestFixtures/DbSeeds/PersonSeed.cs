@@ -6,11 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Audacia.Seed.TestFixtures.DbSeeds
 {
-    public class PersonSeed : DbSeed<Person>, IDependsOn<Job>, IDependsOn<Location>, ISeedFromDatabase
+    public class PersonSeed : SeedFromDatabase<Person>, IDependsOn<Job>, IDependsOn<Location>
     {
         public override int Count => 10;
-
-        public DbContext DbContext { get; set; }
 
         public override Person GetSingle()
         {
@@ -18,22 +16,9 @@ namespace Audacia.Seed.TestFixtures.DbSeeds
             var jobs = Existing<Job>().TakeRandom(jobCount);
             var person = new Person { Name = "Dave" };
 
-            // Test accessing pre-existing data in DbContext
-            Location locationInDbContext = null;
-            if (DbContext != null)
-            {
-                locationInDbContext = DbContext.Set<Location>().FirstOrDefault(l => l.Name == "Leeds");
-            }
-
-            if (locationInDbContext != null)
-            {
-                person.Location = locationInDbContext;
-            }
-            else
-            {
-                // Test selecting for specific DbSeed instance within existing seeds
-                person.Location = Existing<Location>(l => l.Name == "Bradford");
-            }
+            // Attempt to get data from DbContext, fallback to seeded entity
+            var locationInDbContext = DbEntity<Location>(l => l.Name == "Leeds") ??
+                                      Existing<Location>(l => l.Name == "Bradford");
 
             foreach (var job in jobs)
             {
