@@ -54,24 +54,13 @@ Seeds can be made to get common entities from the database context for cases whe
 ```csharp
     public class PersonSeed : SeedFromDatabase<Person>, IDependsOn<Job>, IDependsOn<Location>
     {
-        public override int Count => 10;
-
         public override Person GetSingle()
         {
-            var jobCount = Random.Next(1, 4);
-            var jobs = Existing<Job>().TakeRandom(jobCount);
-            var person = new Person
+            return new Person
             {
-                Name = "Dave",
+                Name = Random.Forename(),
                 Location = DbEntity<Location>(l => l.Name == "Leeds")
             };
-
-            foreach (var job in jobs)
-            {
-                person.Jobs.Add(job);
-            }
-
-            return person;
         }
     }
 ```
