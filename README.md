@@ -49,18 +49,30 @@ As well as generating a randomised seed, it is also possible to create seeds bas
 	}
 ```
 
-Seeds can be made to inherit from `ISeedFromDatabase`, in cases where it is desirable to access pre-existing data in the database. An example of this is shown below:
+Seeds can be made to get common entities from the database context for cases where it is desirable to access pre-existing data. To do this a seed should inherit from `SeedFromDatabase`, You can use `DbEntity&lt;TEntity&gt;()` to query tables, and `DbView&lt;TEntity&gt;()` to query database views, failing that the database context is accessible as a protected member. An example of this is shown below:
 
 ```c#
-    Location locationInDbContext = null;
-    if (DbContext != null)
+    public class PersonSeed : SeedFromDatabase<Person>, IDependsOn<Job>, IDependsOn<Location>
     {
-        locationInDbContext = DbContext.Set<Location>().FirstOrDefault(l => l.Name == "Leeds");
-    }
+        public override int Count => 10;
 
-    if (locationInDbContext != null)
-    {
-        person.Location = locationInDbContext;
+        public override Person GetSingle()
+        {
+            var jobCount = Random.Next(1, 4);
+            var jobs = Existing<Job>().TakeRandom(jobCount);
+            var person = new Person
+            {
+                Name = "Dave",
+                Location = DbEntity<Location>(l => l.Name == "Leeds")
+            };
+
+            foreach (var job in jobs)
+            {
+                person.Jobs.Add(job);
+            }
+
+            return person;
+        }
     }
 ```
 

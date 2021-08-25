@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Audacia.Seed.EntityFramework6.Extensions
 {
@@ -30,14 +31,14 @@ namespace Audacia.Seed.EntityFramework6.Extensions
         /// Will return null when initialised by AutoFixture.
         /// </summary>
         /// <typeparam name="TEntity">The type of entities to return.</typeparam>
-        protected IEnumerable<TEntity> DbEntity<TEntity>() where TEntity : class =>
+        protected IQueryable<TEntity> DbEntity<TEntity>() where TEntity : class =>
             DbContext?.Set<TEntity>();
 
         /// <summary>
         /// Searches for a specific DbEntity that has already been seeded to the DbContext.
         /// Will return null when initialised by AutoFixture.
         /// </summary>
-        protected TEntity DbEntity<TEntity>(Func<TEntity, bool> selectorFunc) where TEntity : class =>
+        protected TEntity DbEntity<TEntity>(Expression<Func<TEntity, bool>> selectorFunc) where TEntity : class =>
             DbContext?.Set<TEntity>().FirstOrDefault(selectorFunc);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Audacia.Seed.EntityFrameworkCore
@@ -30,14 +31,14 @@ namespace Audacia.Seed.EntityFrameworkCore
         /// Will return null when initialised by AutoFixture.
         /// </summary>
         /// <typeparam name="TEntity">The type of entities to return.</typeparam>
-        protected IEnumerable<TEntity> DbEntity<TEntity>() where TEntity : class =>
+        protected IQueryable<TEntity> DbEntity<TEntity>() where TEntity : class =>
             DbContext?.Set<TEntity>();
 
         /// <summary>
         /// Searches for a specific DbEntity that has already been seeded to the DbContext.
         /// Will return null when initialised by AutoFixture.
         /// </summary>
-        protected TEntity DbEntity<TEntity>(Func<TEntity, bool> selectorFunc) where TEntity : class =>
+        protected TEntity DbEntity<TEntity>(Expression<Func<TEntity, bool>> selectorFunc) where TEntity : class =>
             DbContext?.Set<TEntity>().FirstOrDefault(selectorFunc);
 
         /// <summary>
@@ -45,14 +46,14 @@ namespace Audacia.Seed.EntityFrameworkCore
         /// Will return null when initialised by AutoFixture.
         /// </summary>
         /// <typeparam name="TEntity">The type of entities to return.</typeparam>
-        protected IEnumerable<TEntity> DbView<TEntity>() where TEntity : class =>
+        protected IQueryable<TEntity> DbView<TEntity>() where TEntity : class =>
             DbContext?.Query<TEntity>();
 
         /// <summary>
         /// Searches for a specific DbEntity that has already been seeded to the DbContext.
         /// Will return null when initialised by AutoFixture.
         /// </summary>
-        protected TEntity DbView<TEntity>(Func<TEntity, bool> selectorFunc) where TEntity : class =>
+        protected TEntity DbView<TEntity>(Expression<Func<TEntity, bool>> selectorFunc) where TEntity : class =>
             DbContext?.Query<TEntity>().FirstOrDefault(selectorFunc);
     }
 }
