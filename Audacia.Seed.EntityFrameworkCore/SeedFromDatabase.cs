@@ -38,8 +38,8 @@ namespace Audacia.Seed.EntityFrameworkCore
         /// Searches for a specific DbEntity that has already been seeded to the DbContext.
         /// Will return null when initialised by AutoFixture.
         /// </summary>
-        protected TEntity DbEntity<TEntity>(Expression<Func<TEntity, bool>> selectorFunc) where TEntity : class =>
-            DbContext?.Set<TEntity>().FirstOrDefault(selectorFunc);
+        protected TEntity DbEntity<TEntity>(Expression<Func<TEntity, bool>> selectorExpr) where TEntity : class =>
+            DbContext?.Set<TEntity>().FirstOrDefault(selectorExpr);
 
         /// <summary>
         /// Returns a query for DbEntities that have already been seeded to the DbContext.
@@ -53,7 +53,7 @@ namespace Audacia.Seed.EntityFrameworkCore
         /// Searches for a specific DbEntity that has already been seeded to the DbContext.
         /// Will return null when initialised by AutoFixture.
         /// </summary>
-        protected TEntity DbView<TEntity>(Expression<Func<TEntity, bool>> selectorFunc) where TEntity : class =>
-            DbContext?.Query<TEntity>().FirstOrDefault(selectorFunc);
+        protected TEntity DbView<TEntity>(Expression<Func<TEntity, bool>> selectorExpr) where TEntity : class =>
+            DbContext?.Query<TEntity>().FirstOrDefault(selectorExpr);
     }
 }
