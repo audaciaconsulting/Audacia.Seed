@@ -52,7 +52,7 @@ As well as generating a randomised seed, it is also possible to create seeds bas
 Seeds can be made to get common entities from the database context for cases where it is desirable to access pre-existing data. To do this a seed should inherit from `SeedFromDatabase`, You can use `DbEntity<TEntity>()` to query tables, and `DbView<TEntity>()` to query database views, failing that the database context is accessible as a protected member. An example of this is shown below:
 
 ```csharp
-    public class PersonSeed : SeedFromDatabase<Person>, IDependsOn<Job>, IDependsOn<Location>
+    public class PersonSeed : SeedFromDatabase<Person>, IDependsOn<Location>
     {
         public override Person GetSingle()
         {
