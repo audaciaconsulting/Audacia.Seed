@@ -3,7 +3,7 @@
 namespace Audacia.Seed.EntityFramework6
 {
     /// <summary>
-    /// An interface that allows for the internal database context on a <see cref="SeedFromDatabase{T}"/> to be set.
+    /// An interface that allows for the internal database context on a SeedFromDatabase&lt;T&gt; to be set.
     /// </summary>
     public interface ISetDbContext
     {
