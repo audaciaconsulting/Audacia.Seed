@@ -59,13 +59,45 @@ Seeds can be made to get common entities from the database context for cases whe
             return new Person
             {
                 Name = Random.Forename(),
+                // Queries the database for the first location that matches
                 Location = DbEntity<Location>(l => l.Name == "Leeds")
             };
         }
     }
 ```
 
-###Configuration
+When using `SeedFromDatabase` you may need to randomise what stored entities are attached to a seeded entity. While doing an individual database query in `GetSingle()` may be fine for smaller seed sizes, this can be quite costly when attemping to generate large amounts of data.
+
+To avoid slowing down the seed process due to multiple database calls we recommend that you initialise a subset of data into the DbSeed from which you can then randomise the results.
+
+In the example below, the database will only ever be called on the first usage of `GetSingle()` when configuring seeds, future calls will reuse the Products array as DbSeeds are persisted until all seed data has been processed.
+
+```csharp
+    public class OrderSeed : SeedFromDatabase<Order>, IDependsOn<Product>
+    {
+        private Product[] Products { get; set; }
+
+        public override Order GetSingle()
+        {
+            // Intialise a list of products from the database when null
+            // This list will be persisted until the seed process has completed
+            Products ??= DbEntity<Product>()
+                .Where(p => p.Deleted == null)
+                .Where(p => p.Price > 100)
+                .ToArray();
+
+            var order = new Order();
+
+            // Get 10 random products and add to order
+            var randomProducts = Random.Elements(Products, 10);
+            order.AddRange(randomProducts);
+
+            return order;
+        }
+    }
+```
+
+### Configuration
 
 There are two ways to configure seeding behaviour. All `DbSeed` classes have an overridable `Count` property which can be used to set the number of entities a given seed fixture should produce.
 
