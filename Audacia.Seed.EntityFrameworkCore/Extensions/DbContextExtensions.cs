@@ -44,8 +44,13 @@ namespace Audacia.Seed.EntityFrameworkCore.Extensions
                 throw new ArgumentNullException(nameof(seed));
             }
 
+            if (seed is ISetDbContext seedFromDatabase)
+            {
+                seedFromDatabase.SetDbContext(dbContext);
+            }
+
             var data = seed.AllObjects();
             dbContext.AddRange(data);
-		}
+        }
 	}
 }

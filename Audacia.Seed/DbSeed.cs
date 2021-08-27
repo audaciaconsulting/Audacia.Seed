@@ -136,6 +136,12 @@ namespace Audacia.Seed
 		protected IEnumerable<TEntity> Existing<TEntity>() where TEntity : class =>
 			SeedContext.Entries<TEntity>();
 
+        /// <summary>
+        /// This method can be used to search for a specific DbSeed instance amongst the data that has already been seeded.
+        /// </summary>
+		protected TEntity Existing<TEntity>(Func<TEntity, bool> selectorFunc) where TEntity : class =>
+            SeedContext.Entries<TEntity>().FirstOrDefault(selectorFunc);
+
 		/// <summary>This property references the previous entity of this type to be seeded, or null if the current is the first.</summary>
 		protected T Previous { get; set; }
 

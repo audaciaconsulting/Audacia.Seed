@@ -17,12 +17,22 @@ namespace Audacia.Seed.EntityFramework6.Extensions
                 throw new ArgumentNullException(nameof(dbContext));
             }
 
+            if (assembly == null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
+
             var seeds = DbSeed.FromAssembly(assembly);
 
             foreach (var seed in seeds)
 			{
-				var entities = seed.AllObjects();
-				dbContext.Set(seed.EntityType).AddRange(entities);
+                if (seed is ISetDbContext seedFromDatabase)
+                {
+                    seedFromDatabase.SetDbContext(dbContext);
+                }
+
+                var entities = seed.AllObjects();
+                dbContext.Set(seed.EntityType).AddRange(entities);
 			}
 		}
 	}

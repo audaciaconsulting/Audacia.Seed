@@ -9,14 +9,15 @@ namespace Audacia.Seed.AutoFixture.Tests
 {
 	public class UnitTest
 	{
-		[Fact]
-		public void Test()
+        [Fact]
+        public void Test()
 		{
 			var fixture = new Fixture();
 			var assembly = Assembly.GetAssembly(typeof(JobSeed));
 			fixture.RegisterSeeds(assembly);
 
 			var person = fixture.Create<Person>();
+
 			Assert.Equal("Dave", person.Name); // everyone is dave
 		}
 	}

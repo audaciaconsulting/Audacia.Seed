@@ -16,6 +16,8 @@ namespace Audacia.Seed.EntityFrameworkCore.Tests
 
 		public DbSet<Job> Jobs { get; set; }
 
+		public DbSet<Location> Locations { get; set; }
+
 		private static DbConnection GetConnection() => new SqliteConnection("DataSource=:memory:");
 
 		[SuppressMessage("ReSharper", "IDISP004", Justification = "This is just how EF works, sorry.")]
