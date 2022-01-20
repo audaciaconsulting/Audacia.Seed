@@ -10,9 +10,9 @@ namespace Audacia.Seed
 	/// <summary>The base class for a database seed fixture.</summary>
 	public abstract class DbSeed : IDbSeed
 	{
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DbSeed"/> class.
-        /// </summary>
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DbSeed"/> class.
+		/// </summary>
 		[SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Good luck subclassing this bad boy when its constructor is private.")]
 		protected DbSeed()
 		{
@@ -60,13 +60,13 @@ namespace Audacia.Seed
 		/// <summary>Returns an instance of each of the exported <see cref="DbSeed"/> types from the specified assembly.</summary>
 		public static IEnumerable<DbSeed> FromAssembly(Assembly assembly)
 		{
-            if (assembly == null)
-            {
-                throw new ArgumentNullException(nameof(assembly));
-            }
+			if (assembly == null)
+			{
+				throw new ArgumentNullException(nameof(assembly));
+			}
 
-            var context = new SeedContext();
-            var seeds = assembly.GetExportedTypes()
+			var context = new SeedContext();
+			var seeds = assembly.GetExportedTypes()
 				.Where(t => typeof(DbSeed).IsAssignableFrom(t))
 				.Where(t => t.GetInterfaces()
 					.Where(i => i.IsGenericType)
@@ -75,14 +75,14 @@ namespace Audacia.Seed
 				.Select(seed => (DbSeed)seed)
 				.ToList();
 
-            SeedConfiguration.Configure(seeds);
+			SeedConfiguration.Configure(seeds);
 
-            foreach (var type in seeds)
-            {
-                type.SeedContext = context;
-            }
+			foreach (var type in seeds)
+			{
+				type.SeedContext = context;
+			}
 
-            return TopologicalSort(seeds);
+			return TopologicalSort(seeds);
 		}
 
 		/// <summary>Sorts an enumerable of <see cref="DbSeed"/> topologically, so dependencies are seeded before their dependants.</summary>
@@ -110,9 +110,9 @@ namespace Audacia.Seed
 				}
 
 				foreach (var x in removed)
-                {
-                    list.Remove(x);
-                }
+				{
+					list.Remove(x);
+				}
 			}
 		}
 
@@ -136,11 +136,11 @@ namespace Audacia.Seed
 		protected IEnumerable<TEntity> Existing<TEntity>() where TEntity : class =>
 			SeedContext.Entries<TEntity>();
 
-        /// <summary>
-        /// This method can be used to search for a specific DbSeed instance amongst the data that has already been seeded.
-        /// </summary>
+		/// <summary>
+		/// This method can be used to search for a specific DbSeed instance amongst the data that has already been seeded.
+		/// </summary>
 		protected TEntity Existing<TEntity>(Func<TEntity, bool> selectorFunc) where TEntity : class =>
-            SeedContext.Entries<TEntity>().FirstOrDefault(selectorFunc);
+			SeedContext.Entries<TEntity>().FirstOrDefault(selectorFunc);
 
 		/// <summary>This property references the previous entity of this type to be seeded, or null if the current is the first.</summary>
 		protected T Previous { get; set; }
@@ -164,9 +164,9 @@ namespace Audacia.Seed
 			var results = Defaults().ToList();
 
 			foreach (var result in results)
-            {
-                SeedContext.Add(EntityType, result);
-            }
+			{
+				SeedContext.Add(EntityType, result);
+			}
 
 			return results;
 		}

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 
@@ -19,13 +20,17 @@ namespace Audacia.Seed
 			Maximum = maximum;
 		}
 
-		/// <summary>The minimum number of entities to seed.</summary>
+		/// <summary>Gets the minimum number of entities to seed.</summary>
 		public int Minimum { get; }
 
-		/// <summary>The maximum number of entities to seed.</summary>
+		/// <summary>Gets the maximum number of entities to seed.</summary>
 		public int Maximum { get; }
 
-		/// <summary>Applies the seed settings in the application config file to the specified <see cref="DbSeed"/> instances, overwriting any hard-coded values.</summary>
+		/// <summary>
+		/// Applies the seed settings in the application config file to the specified <see cref="DbSeed"/> instances, overwriting any hard-coded values.
+		/// </summary>
+		/// <param name="seeds">The <see cref="DbSeed"/> instances to configure.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="seeds"/> is <see langword="null"/>.</exception>
 		public static void Configure(IEnumerable<DbSeed> seeds)
 		{
             if (seeds == null)
@@ -42,20 +47,26 @@ namespace Audacia.Seed
 			}
 		}
 
-		/// <summary>Gets the settings specified for a given type.</summary>
-		/// <exception cref="ConfigurationErrorsException">One or more values for seed configurations could not be parsed as an integer or a range.</exception>
-		public static SeedConfiguration ForType(Type type)
+        /// <summary>
+        /// Gets the settings specified for a given type.
+        /// </summary>
+        /// <param name="type">The <see cref="Type"/> for which to get the settings.</param>
+        /// <returns>The <see cref="SeedConfiguration"/> for the given <paramref name="type"/>.</returns>
+        /// <exception cref="ConfigurationErrorsException">One or more values for seed configurations could not be parsed as an integer or a range.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="type"/> is <see langword="null"/>.</exception>
+        [SuppressMessage("Maintainability", "ACL1002:Member or local function contains too many statements", Justification = "Method is readable and maintainable.")]
+        public static SeedConfiguration ForType(Type type)
 		{
             if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
             }
 
-            var key1 = Prefix + type.Name;
-            var key2 = Prefix + type.FullName;
+            var keyOne = Prefix + type.Name;
+            var keyTwo = Prefix + type.FullName;
 
-            var value = ConfigurationManager.AppSettings[key1]
-                        ?? ConfigurationManager.AppSettings[key2];
+            var value = ConfigurationManager.AppSettings[keyOne]
+                        ?? ConfigurationManager.AppSettings[keyTwo];
 
             if (value == null)
             {

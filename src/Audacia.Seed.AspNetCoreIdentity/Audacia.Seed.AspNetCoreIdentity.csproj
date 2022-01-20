@@ -9,8 +9,8 @@
         <Copyright>Copyright © Audacia 2020</Copyright>
         <PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
         <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
-        <CodeAnalysisRuleSet>..\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
+        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <ItemGroup>
@@ -18,6 +18,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Audacia.CodeAnalysis" Version="1.1.22019.3">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.7" />
     </ItemGroup>
 

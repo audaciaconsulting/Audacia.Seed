@@ -3,8 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net47</TargetFramework>
     <Title>Audacia.Seed.EntityFramework6.Tests</Title>
-    <CodeAnalysisRuleSet>..\CodeAnalysis.Tests.ruleset</CodeAnalysisRuleSet>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -16,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Audacia.CodeAnalysis" Version="0.0.65187.20091">
+    <PackageReference Include="Audacia.CodeAnalysis" Version="1.1.22019.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -27,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Audacia.Seed.EntityFramework6\Audacia.Seed.EntityFramework6.csproj" />
+    <ProjectReference Include="..\..\src\Audacia.Seed.EntityFramework6\Audacia.Seed.EntityFramework6.csproj" />
     <ProjectReference Include="..\Audacia.Seed.TestFixtures\Audacia.Seed.TestFixtures.csproj" />
   </ItemGroup>
 
