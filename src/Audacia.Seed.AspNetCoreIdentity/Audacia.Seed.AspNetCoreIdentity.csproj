@@ -14,7 +14,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="..\audacia-logo-circle-blue.png" Pack="true" PackagePath="\" />
+        <None Include="..\..\audacia-logo-circle-blue.png" Pack="true" PackagePath="\" />
     </ItemGroup>
 
     <ItemGroup>
