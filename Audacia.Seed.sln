@@ -1,37 +1,34 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31129.286
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed", "Audacia.Seed\Audacia.Seed.csproj", "{8AFC6609-F183-4759-8D11-A9F965077786}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed", "src\Audacia.Seed\Audacia.Seed.csproj", "{8AFC6609-F183-4759-8D11-A9F965077786}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.EntityFrameworkCore", "Audacia.Seed.EntityFrameworkCore\Audacia.Seed.EntityFrameworkCore.csproj", "{E518D60B-67C6-473C-B471-C05E17DC9154}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.EntityFrameworkCore", "src\Audacia.Seed.EntityFrameworkCore\Audacia.Seed.EntityFrameworkCore.csproj", "{E518D60B-67C6-473C-B471-C05E17DC9154}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.EntityFramework6", "Audacia.Seed.EntityFramework6\Audacia.Seed.EntityFramework6.csproj", "{E9C687E3-ADC2-4FF2-BE8C-277E2EE0108D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.EntityFramework6", "src\Audacia.Seed.EntityFramework6\Audacia.Seed.EntityFramework6.csproj", "{E9C687E3-ADC2-4FF2-BE8C-277E2EE0108D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.Tests", "Audacia.Seed.Tests\Audacia.Seed.Tests.csproj", "{4F25AB2B-2B0C-47C7-B5D2-834E83BB8F29}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.Tests", "tests\Audacia.Seed.Tests\Audacia.Seed.Tests.csproj", "{4F25AB2B-2B0C-47C7-B5D2-834E83BB8F29}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F177C05A-C2CB-4E89-AB30-AFF7CC0CBCA2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.EntityFrameworkCore.Tests", "Audacia.Seed.EntityFrameworkCore.Tests\Audacia.Seed.EntityFrameworkCore.Tests.csproj", "{2AE5ACA3-1417-4844-8757-F69471549FE6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.EntityFrameworkCore.Tests", "tests\Audacia.Seed.EntityFrameworkCore.Tests\Audacia.Seed.EntityFrameworkCore.Tests.csproj", "{2AE5ACA3-1417-4844-8757-F69471549FE6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.AutoFixture", "Audacia.Seed.AutoFixture\Audacia.Seed.AutoFixture.csproj", "{8F845AF5-290A-46F1-87F6-D321F02490E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.AutoFixture", "src\Audacia.Seed.AutoFixture\Audacia.Seed.AutoFixture.csproj", "{8F845AF5-290A-46F1-87F6-D321F02490E4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.AutoFixture.Tests", "Audacia.Seed.AutoFixture.Tests\Audacia.Seed.AutoFixture.Tests.csproj", "{349123BA-A67F-416F-8A91-E2DFB36B32F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.AutoFixture.Tests", "tests\Audacia.Seed.AutoFixture.Tests\Audacia.Seed.AutoFixture.Tests.csproj", "{349123BA-A67F-416F-8A91-E2DFB36B32F4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.TestFixtures", "Audacia.Seed.TestFixtures\Audacia.Seed.TestFixtures.csproj", "{9EBF0134-84CF-458E-8686-2C8725CFAC9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.TestFixtures", "tests\Audacia.Seed.TestFixtures\Audacia.Seed.TestFixtures.csproj", "{9EBF0134-84CF-458E-8686-2C8725CFAC9D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.EntityFramework6.Tests", "Audacia.Seed.EntityFramework6.Tests\Audacia.Seed.EntityFramework6.Tests.csproj", "{246DBD55-CE39-4C66-B055-F5A3E18C9C47}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.EntityFramework6.Tests", "tests\Audacia.Seed.EntityFramework6.Tests\Audacia.Seed.EntityFramework6.Tests.csproj", "{246DBD55-CE39-4C66-B055-F5A3E18C9C47}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F3FDF916-6639-4633-9679-288C79A99E57}"
 	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
 		build.yaml = build.yaml
-		CodeAnalysis.ruleset = CodeAnalysis.ruleset
-		CodeAnalysis.Tests.ruleset = CodeAnalysis.Tests.ruleset
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.AspNetCoreIdentity", "Audacia.Seed.AspNetCoreIdentity\Audacia.Seed.AspNetCoreIdentity.csproj", "{FC508EDC-EF56-46CE-956E-465F5F3CD7E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.AspNetCoreIdentity", "src\Audacia.Seed.AspNetCoreIdentity\Audacia.Seed.AspNetCoreIdentity.csproj", "{FC508EDC-EF56-46CE-956E-465F5F3CD7E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
