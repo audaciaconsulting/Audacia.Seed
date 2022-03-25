@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net47</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <Title>Audacia.Seed.EntityFramework6.Tests</Title>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
