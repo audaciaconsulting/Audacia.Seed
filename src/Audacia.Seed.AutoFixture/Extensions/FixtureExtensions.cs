@@ -23,8 +23,9 @@ namespace Audacia.Seed.AutoFixture.Extensions
 			fixture.RegisterSeeds(seeds);
 		}
 
-		/// <summary>Registers the <see cref="DbSeed"/> types in the specified assembly with an AutoFixture <see cref="Fixture"/> instance.</summary>
-		[SuppressMessage("ReSharper", "REFL045", Justification = "The analyzer can't understand my binding flags are in a local variable.'")]
+        /// <summary>Registers the <see cref="DbSeed"/> types in the specified assembly with an AutoFixture <see cref="Fixture"/> instance.</summary>
+        /// <exception cref="ArgumentNullException"><paramref name="fixture"/> is <see langword="null"/>.</exception>
+        [SuppressMessage("ReSharper", "REFL045", Justification = "The analyzer can't understand my binding flags are in a local variable.'")]
 		[SuppressMessage("ReSharper", "REFL005", Justification = "The analyzer can't understand my binding flags are in a local variable.'")]
 		[SuppressMessage("ReSharper", "REFL008", Justification = "The analyzer can't understand my binding flags are in a local variable.'")]
 		public static void RegisterSeeds(this Fixture fixture, IEnumerable<DbSeed> seeds)

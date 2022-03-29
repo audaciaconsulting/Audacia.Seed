@@ -8,8 +8,10 @@ namespace Audacia.Seed.EntityFrameworkCore.Extensions
 	/// <summary>Extension methods for <see cref="DbContext"/> instances.</summary>
 	public static class DbContextExtensions
 	{
-		/// <summary>Configures the <see cref="DbContext"/> to ensure data is seeded at application startup.</summary>
-		[SuppressMessage("ReSharper", "SA1305", Justification = "That's not hungarian notation you dummy'")]
+        /// <summary>Configures the <see cref="DbContext"/> to ensure data is seeded at application startup.</summary>
+        /// <exception cref="ArgumentNullException"><paramref name="dbContext"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="assembly"/> is <see langword="null"/>.</exception>
+        [SuppressMessage("ReSharper", "SA1305", Justification = "That's not hungarian notation you dummy'")]
 		public static void ConfigureSeeds(this DbContext dbContext, Assembly assembly)
 		{
             if (dbContext == null)
@@ -30,8 +32,10 @@ namespace Audacia.Seed.EntityFrameworkCore.Extensions
 			}
 		}
 
-		/// <summary>Configures the <see cref="DbContext"/> to ensure data is seeded at application startup.</summary>
-		[SuppressMessage("ReSharper", "SA1305", Justification = "That's not hungarian notation you dummy'")]
+        /// <summary>Configures the <see cref="DbContext"/> to ensure data is seeded at application startup.</summary>
+        /// <exception cref="ArgumentNullException"><paramref name="dbContext"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="seed"/> is <see langword="null"/>.</exception>
+        [SuppressMessage("ReSharper", "SA1305", Justification = "That's not hungarian notation you dummy'")]
 		public static void ConfigureSeed(this DbContext dbContext, DbSeed seed)
 		{
             if (dbContext == null)

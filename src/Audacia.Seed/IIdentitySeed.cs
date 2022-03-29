@@ -13,6 +13,7 @@ namespace Audacia.Seed
         /// <summary>
         /// Returns a types list of all identities to seed.
         /// </summary>
+        /// <returns>A list of all identities to seed.</returns>
         IEnumerable<TIdentity> GetAll();
     }
 }
