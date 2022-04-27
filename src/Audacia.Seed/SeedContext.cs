@@ -9,12 +9,9 @@ namespace Audacia.Seed
 	{
 		private readonly IDictionary<Type, HashSet<object>> _dictionary = new Dictionary<Type, HashSet<object>>();
 
-		public IEnumerable<T> Entries<T>()
-		{
-			return Entries(typeof(T)).Cast<T>();
-		}
+		public IEnumerable<T> Entries<T>() => Entries(typeof(T)).Cast<T>();
 
-		public IEnumerable Entries(Type type)
+        public IEnumerable Entries(Type type)
 		{
 			return _dictionary.TryGetValue(type, out var value)
 				? value

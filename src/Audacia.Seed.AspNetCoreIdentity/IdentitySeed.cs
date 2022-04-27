@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,15 +20,17 @@ namespace Audacia.Seed.AspNetCoreIdentity
         where TKey : IEquatable<TKey>
     {
         /// <summary>This method should return entities instances which should be seeded by default.</summary>
+        /// <returns>Entity instances which should be seeded by default.</returns>
         public virtual IEnumerable<IdentitySeedModel<TApplicationUser, TKey>> Defaults()
         {
             return Enumerable.Empty<IdentitySeedModel<TApplicationUser, TKey>>();
         }
 
         /// <summary>This method should return a single instance of the entity to be seeded.</summary>
+        /// <returns>A single instance of the entity to be seeded.</returns>
         public virtual IdentitySeedModel<TApplicationUser, TKey> GetSingle() => default;
 
-        /// <summary>The type of entity this seed class generates.</summary>
+        /// <summary>Gets the type of entity this seed class generates.</summary>
         public override Type EntityType => typeof(IdentitySeedModel<TApplicationUser, TKey>);
 
         public IEnumerable<IdentitySeedModel<TApplicationUser, TKey>> GetAll() => Enumerable
@@ -38,16 +41,18 @@ namespace Audacia.Seed.AspNetCoreIdentity
             .ToArray();
 
         /// <summary>This method should return a single instance of the entity to be seeded.</summary>
+        /// <returns>A single instance of the entity to be seeded.</returns>
         public override object SingleObject() => GetSingle();
 
         /// <summary>This method should return entities instances which should be seeded by default.</summary>
+        /// <returns>A list of entities which should be seeded by default.</returns>
         public override IEnumerable<object> DefaultObjects() => Defaults().ToList();
 
         /// <summary>
         /// Seeds new application users into the database, existing users will be skipped.
         /// </summary>
-        /// <param name="userManager">Asp.NetCore UserManager</param>
-        /// <param name="token">Cancellation token</param>
+        /// <param name="userManager">Asp.NetCore UserManager.</param>
+        /// <param name="token">Cancellation token.</param>
         /// <returns>An awaitable task.</returns>
         /// <exception cref="ArgumentNullException">Occurs when <see cref="UserManager{TUser}"/> or <see cref="IdentitySeed{TApplicationUser,TKey}"/> is null.</exception>
         /// <exception cref="IdentityException">Occurs when the <see cref="UserManager{TUser}"/> was unable to create a user.</exception>
@@ -68,7 +73,7 @@ namespace Audacia.Seed.AspNetCoreIdentity
 
                 // Check if user exists
                 var userIdentifier = identitySeed.ApplicationUser.Email;
-                var existingUser = await userManager.FindByEmailAsync(userIdentifier);
+                var existingUser = await userManager.FindByEmailAsync(userIdentifier).ConfigureAwait(false);
                 if (existingUser == null)
                 {
                     // Create a new user with password (if provided)
@@ -76,7 +81,7 @@ namespace Audacia.Seed.AspNetCoreIdentity
                         ? userManager.CreateAsync(identitySeed.ApplicationUser)
                         : userManager.CreateAsync(identitySeed.ApplicationUser, identitySeed.Password);
 
-                    var identityResult = await createUserTask;
+                    var identityResult = await createUserTask.ConfigureAwait(false);
                     if (!identityResult.Succeeded)
                     {
                         throw new IdentityException(identityResult.Errors, $"Unable to create user. {userIdentifier}");
@@ -87,17 +92,18 @@ namespace Audacia.Seed.AspNetCoreIdentity
                 {
                     var isInRole = await userManager.IsInRoleAsync(
                         existingUser ?? identitySeed.ApplicationUser, 
-                        role);
+                        role).ConfigureAwait(false);
 
                     if (!isInRole)
                     {
                         var addToRoleResult = await userManager.AddToRoleAsync(
                             existingUser ?? identitySeed.ApplicationUser,
-                            role);
+                            role).ConfigureAwait(false);
 
                         if (!addToRoleResult.Succeeded)
                         {
-                            throw new IdentityException(addToRoleResult.Errors,
+                            throw new IdentityException(
+                                addToRoleResult.Errors,
                                 $"Unable to add user ({userIdentifier}) to role {role}.");
                         }
                     }
