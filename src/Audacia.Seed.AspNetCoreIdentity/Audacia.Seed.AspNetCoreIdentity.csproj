@@ -11,6 +11,7 @@
         <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
         <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
