@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,6 +32,10 @@ namespace Audacia.Seed.AspNetCoreIdentity
         /// <summary>Gets the type of entity this seed class generates.</summary>
         public override Type EntityType => typeof(IdentitySeedModel<TApplicationUser, TKey>);
 
+        /// <summary>
+        /// This method should return a collection containing all the identity seeds to be seeded.
+        /// </summary>
+        /// <returns>A collection contaiing all the identity seeds.</returns>
         public IEnumerable<IdentitySeedModel<TApplicationUser, TKey>> GetAll() => Enumerable
             .Range(0, Count)
             .Select(_ => GetSingle())
@@ -58,55 +61,60 @@ namespace Audacia.Seed.AspNetCoreIdentity
         /// <exception cref="IdentityException">Occurs when the <see cref="UserManager{TUser}"/> was unable to create a user.</exception>
         public async Task ConfigureAsync(UserManager<TApplicationUser> userManager, CancellationToken token)
         {
-            if (userManager == null)
-            {
-                throw new ArgumentNullException(nameof(userManager));
-            }
+            if (userManager == null) throw new ArgumentNullException(nameof(userManager));
 
             token.ThrowIfCancellationRequested();
 
-            // Generate all application users to seed.
-            var identitySeeds = GetAll().ToArray();
-            foreach (var identitySeed in identitySeeds)
+            // Generate all application users to seed and loop through.
+            foreach (var identitySeed in GetAll().ToArray())
             {
                 token.ThrowIfCancellationRequested();
 
                 // Check if user exists
-                var userIdentifier = identitySeed.ApplicationUser.Email;
-                var existingUser = await userManager.FindByEmailAsync(userIdentifier).ConfigureAwait(false);
+                var existingUser = await userManager.FindByEmailAsync(identitySeed.ApplicationUser.Email).ConfigureAwait(false);
                 if (existingUser == null)
                 {
                     // Create a new user with password (if provided)
-                    var createUserTask = string.IsNullOrWhiteSpace(identitySeed.Password)
-                        ? userManager.CreateAsync(identitySeed.ApplicationUser)
-                        : userManager.CreateAsync(identitySeed.ApplicationUser, identitySeed.Password);
-
-                    var identityResult = await createUserTask.ConfigureAwait(false);
-                    if (!identityResult.Succeeded)
-                    {
-                        throw new IdentityException(identityResult.Errors, $"Unable to create user. {userIdentifier}");
-                    }
+                    await CreateNewUserAsync(identitySeed, userManager).ConfigureAwait(true);
                 }
 
                 foreach (var role in identitySeed.Roles)
                 {
-                    var isInRole = await userManager.IsInRoleAsync(
-                        existingUser ?? identitySeed.ApplicationUser, 
+                    await AddToRoleIfNotAlreadyAsync(identitySeed, userManager, existingUser, role).ConfigureAwait(true);
+                }
+            }
+        }
+
+        private static async Task CreateNewUserAsync(IdentitySeedModel<TApplicationUser, TKey> identitySeed, UserManager<TApplicationUser> userManager)
+        {
+            var createUserTask = string.IsNullOrWhiteSpace(identitySeed.Password)
+                        ? userManager.CreateAsync(identitySeed.ApplicationUser)
+                        : userManager.CreateAsync(identitySeed.ApplicationUser, identitySeed.Password);
+
+            var identityResult = await createUserTask.ConfigureAwait(false);
+            if (!identityResult.Succeeded)
+            {
+                throw new IdentityException(identityResult.Errors, $"Unable to create user. {identitySeed.ApplicationUser.Email}");
+            }
+        }
+
+        private static async Task AddToRoleIfNotAlreadyAsync(IdentitySeedModel<TApplicationUser, TKey> identitySeed, UserManager<TApplicationUser> userManager, TApplicationUser existingUser, string role)
+        {
+            var isInRole = await userManager.IsInRoleAsync(
+                        existingUser ?? identitySeed.ApplicationUser,
                         role).ConfigureAwait(false);
 
-                    if (!isInRole)
-                    {
-                        var addToRoleResult = await userManager.AddToRoleAsync(
-                            existingUser ?? identitySeed.ApplicationUser,
-                            role).ConfigureAwait(false);
+            if (!isInRole)
+            {
+                var addToRoleResult = await userManager.AddToRoleAsync(
+                    existingUser ?? identitySeed.ApplicationUser,
+                    role).ConfigureAwait(false);
 
-                        if (!addToRoleResult.Succeeded)
-                        {
-                            throw new IdentityException(
-                                addToRoleResult.Errors,
-                                $"Unable to add user ({userIdentifier}) to role {role}.");
-                        }
-                    }
+                if (!addToRoleResult.Succeeded)
+                {
+                    throw new IdentityException(
+                        addToRoleResult.Errors,
+                        $"Unable to add user ({identitySeed.ApplicationUser.Email}) to role {role}.");
                 }
             }
         }
