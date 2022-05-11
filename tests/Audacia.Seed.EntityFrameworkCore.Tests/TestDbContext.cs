@@ -1,12 +1,11 @@
 using System.Data.Common;
-using System.Diagnostics.CodeAnalysis;
 using Audacia.Seed.TestFixtures.Entities;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace Audacia.Seed.EntityFrameworkCore.Tests
 {
-	public class TestDbContext : DbContext
+    public class TestDbContext : DbContext
 	{
 		public TestDbContext() : base(Options) { }
 
@@ -19,10 +18,16 @@ namespace Audacia.Seed.EntityFrameworkCore.Tests
 		public DbSet<Location> Locations { get; set; }
 
 		private static DbConnection GetConnection() => new SqliteConnection("DataSource=:memory:");
-
-		[SuppressMessage("ReSharper", "IDISP004", Justification = "This is just how EF works, sorry.")]
-		private static DbContextOptions<TestDbContext> Options => new DbContextOptionsBuilder<TestDbContext>()
-			.UseSqlite(GetConnection())
-			.Options;
-	}
+        
+		private static DbContextOptions<TestDbContext> Options
+        {
+            get
+            {
+                using var databaseConnection = GetConnection();
+                return new DbContextOptionsBuilder<TestDbContext>()
+                    .UseSqlite(databaseConnection)
+                    .Options;
+            }
+        }
+    }
 }

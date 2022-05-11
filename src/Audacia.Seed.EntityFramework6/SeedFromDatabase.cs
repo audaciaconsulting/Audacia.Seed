@@ -32,6 +32,7 @@ namespace Audacia.Seed.EntityFramework6.Extensions
         /// </summary>
         /// <typeparam name="TEntity">The type of entities to return.</typeparam>
         /// <returns>A query for DbEntities of the specified type.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Member Design", "AV1130:Return type in method signature should be an interface to an unchangeable collection", Justification = "IQueryable fits this criteria")]
         protected IQueryable<TEntity> DbEntities<TEntity>() where TEntity : class =>
             DbContext?.Set<TEntity>();
 

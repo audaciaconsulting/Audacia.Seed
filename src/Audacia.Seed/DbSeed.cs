@@ -48,13 +48,19 @@ namespace Audacia.Seed
 
         /// <summary>This method returns multiple instances of the entity to be seeded, the number of which is specified by the <see cref="Count"/> property.</summary>
         /// <returns>Multiple instances of an entity.</returns>
-        public IEnumerable<object> AllObjects() => Enumerable
-			.Range(0, Count)
-			.Select(_ => SingleObject())
-			.Where(x => x != null)
-			.Concat(DefaultObjects());
+        public IEnumerable<object> AllObjects()
+        {
+            var defaultObjects = DefaultObjects();
+            return Enumerable
+                .Range(0, Count)
+                .Select(_ => SingleObject())
+                .Where(x => x != null)
+                .Concat(defaultObjects)
+                .ToList()
+                .AsEnumerable();
+        }
 
-		/// <summary>
+        /// <summary>
 		/// Gets the seed context for the seed.
 		/// </summary>
 		internal SeedContext SeedContext { get; private set; } = new SeedContext();
@@ -111,15 +117,21 @@ namespace Audacia.Seed
 				}
 
 				if (!removed.Any())
-				{
-					throw new InvalidDataException("Cyclic dependencies detected in the following seed fixtures: " + string.Join(", ", list.Select(x => x.EntityType.Name)));
-				}
+                {
+                    ThrowInvalidDataException(list);
+                }
 
 				list.RemoveAll(s => removed.Contains(s));
 			}
 		}
 
-		/// <summary>Gets dependencies.</summary>
+        private static void ThrowInvalidDataException(List<DbSeed> list)
+        {
+			var names = list.Select(x => x.EntityType.Name);
+            throw new InvalidDataException("Cyclic dependencies detected in the following seed fixtures: " + string.Join(", ", names));
+		}
+
+        /// <summary>Gets dependencies.</summary>
 		internal ICollection<Type> Dependencies { get; }
 
 		/// <summary>Gets included types.</summary>

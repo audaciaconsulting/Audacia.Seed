@@ -76,7 +76,8 @@ namespace Audacia.Seed
 			// Is it just a number
             if (value.All(char.IsDigit))
             {
-                return new SeedConfiguration(int.Parse(value, NumberFormatInfo.InvariantInfo));
+                var count = int.Parse(value, NumberFormatInfo.InvariantInfo);
+                return new SeedConfiguration(count);
             }
 
 			// If its not a range then we can't handle this.

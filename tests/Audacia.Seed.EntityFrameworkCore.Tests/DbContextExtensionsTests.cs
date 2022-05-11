@@ -88,7 +88,8 @@ namespace Audacia.Seed.EntityFrameworkCore.Tests
 
                 var assembly = Assembly.GetAssembly(typeof(JobSeed));
 
-                dbContext.Locations.Add(new Location { Name = "Leeds" });
+                var location = new Location { Name = "Leeds" };
+                dbContext.Locations.Add(location);
                 dbContext.SaveChanges();
 
                 dbContext.ConfigureSeeds(assembly);

@@ -36,12 +36,17 @@ namespace Audacia.Seed.AspNetCoreIdentity
         /// This method should return a collection containing all the identity seeds to be seeded.
         /// </summary>
         /// <returns>A collection contaiing all the identity seeds.</returns>
-        public IEnumerable<IdentitySeedModel<TApplicationUser, TKey>> GetAll() => Enumerable
-            .Range(0, Count)
-            .Select(_ => GetSingle())
-            .Where(x => x != null)
-            .Concat(Defaults())
-            .ToArray();
+        public IEnumerable<IdentitySeedModel<TApplicationUser, TKey>> GetAll()
+        {
+            var defaults = Defaults();
+
+            return Enumerable
+                .Range(0, Count)
+                .Select(_ => GetSingle())
+                .Where(x => x != null)
+                .Concat(defaults)
+                .ToArray();
+        }
 
         /// <summary>This method should return a single instance of the entity to be seeded.</summary>
         /// <returns>A single instance of the entity to be seeded.</returns>
