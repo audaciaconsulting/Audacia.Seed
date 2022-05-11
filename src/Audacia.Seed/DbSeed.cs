@@ -153,16 +153,20 @@ namespace Audacia.Seed
         /// <summary>This property can be used by derived types to check what data has already been seeded.</summary>
         /// <typeparam name="TEntity">The type of entities to return.</typeparam>
         /// <returns>Multiple seeded entities.</returns>
-        protected IEnumerable<TEntity> ExistingEntities<TEntity>() where TEntity : class =>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "AV1551:Method overload should call another overload", Justification = "These are really different methods as they have different return types.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "ACL1009:Method overload should call another overload", Justification = "These are really different methods as they have different return types.")]
+        protected IEnumerable<TEntity> Existing<TEntity>() where TEntity : class =>
 			SeedContext.Entries<TEntity>();
 
-		/// <summary>
-		/// This method can be used to search for a specific DbSeed instance amongst the data that has already been seeded.
-		/// </summary>
-		/// <typeparam name="TEntity">The type of entity to return.</typeparam>
-		/// <param name="selectorFunc">Function providing criteria for selecting the entity.</param>
-		/// <returns>The first entity found matching the criteria in the selector function, or null if none found.</returns>
-		protected TEntity ExistingEntity<TEntity>(Func<TEntity, bool> selectorFunc) where TEntity : class =>
+        /// <summary>
+        /// This method can be used to search for a specific DbSeed instance amongst the data that has already been seeded.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of entity to return.</typeparam>
+        /// <param name="selectorFunc">Function providing criteria for selecting the entity.</param>
+        /// <returns>The first entity found matching the criteria in the selector function, or null if none found.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "AV1551:Method overload should call another overload", Justification = "These are really different methods as they have different return types.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "ACL1009:Method overload should call another overload", Justification = "These are really different methods as they have different return types.")]
+        protected TEntity Existing<TEntity>(Func<TEntity, bool> selectorFunc) where TEntity : class =>
 			SeedContext.Entries<TEntity>().FirstOrDefault(selectorFunc);
 
 		/// <summary>Gets or sets the previous entity of this type to be seeded, or null if the current is the first.</summary>

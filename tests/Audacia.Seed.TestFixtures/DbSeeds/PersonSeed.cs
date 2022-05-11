@@ -11,12 +11,12 @@ namespace Audacia.Seed.TestFixtures.DbSeeds
         public override Person GetSingle()
         {
             var jobCount = Random.Next(1, 4);
-            var jobs = ExistingEntities<Job>().TakeRandom(jobCount);
+            var jobs = Existing<Job>().TakeRandom(jobCount);
             var person = new Person { Name = "Dave" };
 
             // Attempt to get data from DbContext, fallback to seeded entity
             person.Location = DbEntity<Location>(l => l.Name == "Leeds") ??
-                              ExistingEntity<Location>(l => l.Name == "Bradford");
+                              Existing<Location>(l => l.Name == "Bradford");
 
             foreach (var job in jobs)
             {
