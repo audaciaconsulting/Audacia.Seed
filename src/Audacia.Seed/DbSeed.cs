@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 
 namespace Audacia.Seed
 {
-	/// <summary>The base class for a database seed fixture.</summary>
-	public abstract class DbSeed : IDbSeed
+    /// <summary>The base class for a database seed fixture.</summary>
+    public abstract class DbSeed : IDbSeed
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DbSeed"/> class.
 		/// </summary>
-		[SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Good luck subclassing this bad boy when its constructor is private.")]
 		protected DbSeed()
 		{
 			Dependencies = GetType()
@@ -34,10 +32,8 @@ namespace Audacia.Seed
 		/// <summary>Gets the number of entities to be seeded. This can be overridden in a subclass or set in the config file.</summary>
 		public virtual int Count { get; internal set; }
 
-        /// <summary><see cref="System.Random"/> instance for generating random property values.</summary>
-#pragma warning disable SA1623 // Property summary documentation should match accessors
+        /// <summary>Gets a <see cref="System.Random"/> instance for generating random property values.</summary>
         protected Random Random { get; } = new Random();
-#pragma warning restore SA1623 // Property summary documentation should match accessors
 
         /// <summary>Gets the type of entity this seed class generates.</summary>
         public abstract Type EntityType { get; }
@@ -52,16 +48,26 @@ namespace Audacia.Seed
 
         /// <summary>This method returns multiple instances of the entity to be seeded, the number of which is specified by the <see cref="Count"/> property.</summary>
         /// <returns>Multiple instances of an entity.</returns>
-        public IEnumerable<object> AllObjects() => Enumerable
-			.Range(0, Count)
-			.Select(_ => SingleObject())
-			.Where(x => x != null)
-			.Concat(DefaultObjects());
+        public IEnumerable<object> AllObjects()
+        {
+            var defaultObjects = DefaultObjects();
+            return Enumerable
+                .Range(0, Count)
+                .Select(_ => SingleObject())
+                .Where(x => x != null)
+                .Concat(defaultObjects)
+                .ToList()
+                .AsEnumerable();
+        }
 
+        /// <summary>
+		/// Gets the seed context for the seed.
+		/// </summary>
 		internal SeedContext SeedContext { get; private set; } = new SeedContext();
 
 		/// <summary>Returns an instance of each of the exported <see cref="DbSeed"/> types from the specified assembly.</summary>
 		/// <exception cref="ArgumentNullException"><paramref name="assembly"/> is <see langword="null"/>.</exception>
+		/// <param name="assembly">The <see cref="Assembly"/> from which the seeds will be generated.</param>
 		/// <returns>An instance of <see cref="DbSeed"/>.</returns>
 		public static IEnumerable<DbSeed> FromAssembly(Assembly assembly)
 		{
@@ -91,6 +97,8 @@ namespace Audacia.Seed
 
 		/// <summary>Sorts an enumerable of <see cref="DbSeed"/> topologically, so dependencies are seeded before their dependants.</summary>
 		/// <exception cref="InvalidDataException">Occurs when cyclic dependencies are detected in the list of <see cref="DbSeed"/>.</exception>
+		/// <param name="source">The unsorted <see cref="IEnumerable{DbSeed}"/>.</param>
+		/// <returns>The topologically sorted <see cref="IEnumerable{DbSeed}"/>.</returns>
 		public static IEnumerable<DbSeed> TopologicalSort(IEnumerable<DbSeed> source)
 		{
 			var list = source.ToList();
@@ -109,19 +117,21 @@ namespace Audacia.Seed
 				}
 
 				if (!removed.Any())
-				{
-					var cyclicDependencies = string.Join(", ", list.Select(x => x.EntityType.Name));
-					throw new InvalidDataException("Cyclic dependencies detected in the following seed fixtures: " + cyclicDependencies);
-				}
+                {
+                    ThrowInvalidDataException(list);
+                }
 
-				foreach (var item in removed)
-				{
-					list.Remove(item);
-				}
+				list.RemoveAll(s => removed.Contains(s));
 			}
 		}
 
-		/// <summary>Gets dependencies.</summary>
+        private static void ThrowInvalidDataException(List<DbSeed> list)
+        {
+			var names = list.Select(x => x.EntityType.Name);
+            throw new InvalidDataException("Cyclic dependencies detected in the following seed fixtures: " + string.Join(", ", names));
+		}
+
+        /// <summary>Gets dependencies.</summary>
 		internal ICollection<Type> Dependencies { get; }
 
 		/// <summary>Gets included types.</summary>
@@ -143,13 +153,20 @@ namespace Audacia.Seed
         /// <summary>This property can be used by derived types to check what data has already been seeded.</summary>
         /// <typeparam name="TEntity">The type of entities to return.</typeparam>
         /// <returns>Multiple seeded entities.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "AV1551:Method overload should call another overload", Justification = "These are really different methods as they have different return types.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "ACL1009:Method overload should call another overload", Justification = "These are really different methods as they have different return types.")]
         protected IEnumerable<TEntity> Existing<TEntity>() where TEntity : class =>
 			SeedContext.Entries<TEntity>();
 
-		/// <summary>
-		/// This method can be used to search for a specific DbSeed instance amongst the data that has already been seeded.
-		/// </summary>
-		protected TEntity Existing<TEntity>(Func<TEntity, bool> selectorFunc) where TEntity : class =>
+        /// <summary>
+        /// This method can be used to search for a specific DbSeed instance amongst the data that has already been seeded.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of entity to return.</typeparam>
+        /// <param name="selectorFunc">Function providing criteria for selecting the entity.</param>
+        /// <returns>The first entity found matching the criteria in the selector function, or null if none found.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "AV1551:Method overload should call another overload", Justification = "These are really different methods as they have different return types.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "ACL1009:Method overload should call another overload", Justification = "These are really different methods as they have different return types.")]
+        protected TEntity Existing<TEntity>(Func<TEntity, bool> selectorFunc) where TEntity : class =>
 			SeedContext.Entries<TEntity>().FirstOrDefault(selectorFunc);
 
 		/// <summary>Gets or sets the previous entity of this type to be seeded, or null if the current is the first.</summary>
@@ -165,7 +182,7 @@ namespace Audacia.Seed
 			var result = GetSingle();
 			Previous = result;
 
-			SeedContext.Add(EntityType, result);
+			SeedContext.Add(result, EntityType);
 			return result;
 		}
 
@@ -177,7 +194,7 @@ namespace Audacia.Seed
 
 			foreach (var result in results)
 			{
-				SeedContext.Add(EntityType, result);
+				SeedContext.Add(result, EntityType);
 			}
 
 			return results;
