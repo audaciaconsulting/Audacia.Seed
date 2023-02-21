@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using AutoFixture;
 
@@ -24,7 +25,9 @@ namespace Audacia.Seed.AutoFixture.Extensions
 		/// <param name="assembly">The <see cref="Assembly"/> defining the seeds to be added.</param>
 		public static void RegisterSeeds(this Fixture fixture, Assembly assembly)
 		{
-			var seeds = DbSeed.FromAssembly(assembly);
+			var seeds = DbSeed.FromAssembly(assembly).ToArray();
+			
+			SeedConfiguration.Configure(seeds);
 			fixture.RegisterSeeds(seeds);
 		}
 
