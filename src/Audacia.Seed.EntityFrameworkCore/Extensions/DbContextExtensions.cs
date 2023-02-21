@@ -50,12 +50,18 @@ namespace Audacia.Seed.EntityFrameworkCore.Extensions
             {
                 throw new ArgumentNullException(nameof(seed));
             }
-
-            var seeds = new List<DbSeed>() { seed };
-            SeedConfiguration.Configure(seeds);
             
             if (seed is ISetDbContext seedFromDatabase)
             {
+	            if (!seed.Configured)
+	            {
+		            var seeds = new List<DbSeed>()
+		            {
+			            seed
+		            };
+		            SeedConfiguration.Configure(seeds);
+	            }
+	            
                 seedFromDatabase.SetDbContext(databaseContext);
             }
             

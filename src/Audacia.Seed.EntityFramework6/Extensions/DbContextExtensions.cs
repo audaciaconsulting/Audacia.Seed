@@ -27,8 +27,6 @@ namespace Audacia.Seed.EntityFramework6.Extensions
             }
 
             var seeds = DbSeed.FromAssembly(assembly).ToArray();
-
-            SeedConfiguration.Configure(seeds);
             
             foreach (var seed in seeds)
 			{

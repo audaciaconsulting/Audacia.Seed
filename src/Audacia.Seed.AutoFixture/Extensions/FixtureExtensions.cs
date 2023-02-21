@@ -27,7 +27,6 @@ namespace Audacia.Seed.AutoFixture.Extensions
 		{
 			var seeds = DbSeed.FromAssembly(assembly).ToArray();
 			
-			SeedConfiguration.Configure(seeds);
 			fixture.RegisterSeeds(seeds);
 		}
 
@@ -47,7 +46,10 @@ namespace Audacia.Seed.AutoFixture.Extensions
                 throw new ArgumentNullException(nameof(seeds));
             }
 
-            foreach (var seed in seeds)
+            var enumeratedSeeds = seeds.ToArray();
+            SeedConfiguration.Configure(enumeratedSeeds);
+
+            foreach (var seed in enumeratedSeeds)
 			{
 				var flags = new
 				{
