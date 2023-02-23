@@ -40,10 +40,12 @@ namespace Audacia.Seed
 
             var random = new Random();
 
-            foreach (var seed in seeds)
+            foreach (var seed in seeds.Where(seed => !seed.Configured))
 			{
 				var settings = ForType(seed.EntityType);
 				seed.Count = random.Next(settings.Minimum, settings.Maximum + 1);
+				
+				seed.SetHasBeenConfigured();
 			}
 		}
 
