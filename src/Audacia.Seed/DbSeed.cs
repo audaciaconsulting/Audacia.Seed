@@ -138,16 +138,9 @@ namespace Audacia.Seed
         /// <summary>
         /// Sets that an <see cref="DbSeed"/> instance has been configured.
         /// </summary>
-        /// <param name="seed">The seed which has been configured.</param>
-        /// <exception cref="ArgumentNullException">Throw if the seed passed in is null.</exception>
-        public static void SetHasBeenConfigured(DbSeed seed)
+        public void SetHasBeenConfigured()
         {
-            if (seed == null)
-            {
-                throw new ArgumentNullException(nameof(seed));
-            }
-
-            seed.Configured = true;
+            Configured = true;
         }
 
         private static void ThrowInvalidDataException(List<DbSeed> list)

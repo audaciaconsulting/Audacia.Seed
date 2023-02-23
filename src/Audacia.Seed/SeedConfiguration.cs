@@ -45,7 +45,7 @@ namespace Audacia.Seed
 				var settings = ForType(seed.EntityType);
 				seed.Count = random.Next(settings.Minimum, settings.Maximum + 1);
 				
-				DbSeed.SetHasBeenConfigured(seed);
+				seed.SetHasBeenConfigured();
 			}
 		}
 
