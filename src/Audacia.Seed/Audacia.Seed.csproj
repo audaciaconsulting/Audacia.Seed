@@ -11,6 +11,8 @@
     <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
     <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+	<Nullable>enable</Nullable>
+	<LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

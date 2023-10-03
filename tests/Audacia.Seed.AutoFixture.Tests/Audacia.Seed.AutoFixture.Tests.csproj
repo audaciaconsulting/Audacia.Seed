@@ -1,9 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-    <IsPackable>false</IsPackable>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+	  <TargetFramework>net6.0</TargetFramework>
+      <IsPackable>false</IsPackable>
+      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+	  <Nullable>enable</Nullable>
+	  <LangVersion>8.0</LangVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -39,6 +41,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\src\Audacia.Seed.AutoFixture\Audacia.Seed.AutoFixture.csproj" />
+	  <ProjectReference Include="..\..\src\Audacia.Seed.EntityFrameworkCore\Audacia.Seed.EntityFrameworkCore.csproj" />
 	  <ProjectReference Include="..\Audacia.Seed.TestFixtures\Audacia.Seed.TestFixtures.csproj" />
 	</ItemGroup>
 

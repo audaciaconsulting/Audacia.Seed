@@ -49,15 +49,15 @@ namespace Audacia.Seed
 
         /// <summary>This returns a single instance of the entity to be seeded.</summary>
         /// <returns>A single instance an entity.</returns>
-        public abstract object SingleObject();
+        public abstract object? SingleObject();
 
         /// <summary>This returns all instances of the entity's defaults.</summary>
         /// <returns>All instances of an entities default objects.</returns>
-        public abstract IEnumerable<object> DefaultObjects();
+        public abstract IEnumerable<object?> DefaultObjects();
 
         /// <summary>This method returns multiple instances of the entity to be seeded, the number of which is specified by the <see cref="Count"/> property.</summary>
         /// <returns>Multiple instances of an entity.</returns>
-        public IEnumerable<object> AllObjects()
+        public IEnumerable<object?> AllObjects()
         {
             var defaultObjects = DefaultObjects();
             return Enumerable
@@ -73,6 +73,14 @@ namespace Audacia.Seed
         /// Gets the seed context for the seed.
         /// </summary>
         internal SeedContext SeedContext { get; private set; } = new SeedContext();
+
+        /// <summary>
+        /// Sets that an <see cref="DbSeed"/> instance has been configured.
+        /// </summary>
+        public void SetHasBeenConfigured()
+        {
+            Configured = true;
+        }
 
         /// <summary>Returns an instance of each of the exported <see cref="DbSeed"/> types from the specified assembly.</summary>
         /// <exception cref="ArgumentNullException"><paramref name="assembly"/> is <see langword="null"/>.</exception>
@@ -105,7 +113,7 @@ namespace Audacia.Seed
             return TopologicalSort(seeds);
         }
 
-        /// <summary>Sorts an enumerable of <see cref="DbSeed"/> topologically, so dependencies are seeded before their dependants.</summary>
+        /// <summary>Sorts an enumerable of <see cref="DbSeed"/> topologically, so dependencies are seeded before their dependents.</summary>
         /// <exception cref="InvalidDataException">Occurs when cyclic dependencies are detected in the list of <see cref="DbSeed"/>.</exception>
         /// <param name="source">The unsorted <see cref="IEnumerable{DbSeed}"/>.</param>
         /// <returns>The topologically sorted <see cref="IEnumerable{DbSeed}"/>.</returns>
@@ -115,32 +123,33 @@ namespace Audacia.Seed
 
             while (list.Any())
             {
-                var removed = new List<DbSeed>();
-                foreach (var seed in list)
+                foreach (var seed in RemoveDependents(list))
                 {
-                    // If the source contains any dependencies of this, skip over it, don't return it yet.
-                    if (seed.Dependencies.All(d => !list.SelectMany(x => x.IncludedTypes).Contains(d)))
-                    {
-                        removed.Add(seed);
-                        yield return seed;
-                    }
+                    yield return seed;
                 }
-
-                if (!removed.Any())
-                {
-                    ThrowInvalidDataException(list);
-                }
-
-                list.RemoveAll(s => removed.Contains(s));
             }
         }
 
-        /// <summary>
-        /// Sets that an <see cref="DbSeed"/> instance has been configured.
-        /// </summary>
-        public void SetHasBeenConfigured()
+        private static IEnumerable<DbSeed> RemoveDependents(List<DbSeed> list)
         {
-            Configured = true;
+            var removed = new List<DbSeed>();
+
+            foreach (var seed in list)
+            {
+                // If the source contains any dependencies of this, skip over it, don't return it yet.
+                if (seed.Dependencies.All(d => !list.SelectMany(x => x.IncludedTypes).Contains(d)))
+                {
+                    removed.Add(seed);
+                    yield return seed;
+                }
+            }
+
+            if (!removed.Any())
+            {
+                ThrowInvalidDataException(list);
+            }
+
+            list.RemoveAll(s => removed.Contains(s));
         }
 
         private static void ThrowInvalidDataException(List<DbSeed> list)
@@ -167,7 +176,7 @@ namespace Audacia.Seed
 
         /// <summary>This method should return a single instance of the entity to be seeded.</summary>
         /// <returns>A single instance of an entity.</returns>
-        public virtual T GetSingle() => default;
+        public virtual T GetSingle() => default!;
 
         /// <summary>This property can be used by derived types to check what data has already been seeded.</summary>
         /// <typeparam name="TEntity">The type of entities to return.</typeparam>
@@ -197,11 +206,11 @@ namespace Audacia.Seed
             "Maintainability",
             "ACL1009:Method overload should call another overload",
             Justification = "These are really different methods as they have different return types.")]
-        protected TEntity Existing<TEntity>(Func<TEntity, bool> selectorFunc) where TEntity : class =>
+        protected TEntity? Existing<TEntity>(Func<TEntity, bool> selectorFunc) where TEntity : class =>
             SeedContext.Entries<TEntity>().FirstOrDefault(selectorFunc);
 
         /// <summary>Gets or sets the previous entity of this type to be seeded, or null if the current is the first.</summary>
-        protected T Previous { get; set; }
+        protected T? Previous { get; set; }
 
         /// <summary>Gets the type of entity this seed class generates.</summary>
         public override Type EntityType => typeof(T);

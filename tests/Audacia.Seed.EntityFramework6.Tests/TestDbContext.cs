@@ -12,13 +12,13 @@ namespace Audacia.Seed.EntityFramework6.Tests
 			Database.SetInitializer(testDbInitialiser);
 		}
 
-		public DbSet<Person> People { get; set; }
+		public DbSet<Person> People { get; set; } = null!;
 
-		public DbSet<Holiday> Holidays { get; set; }
+		public DbSet<Holiday> Holidays { get; set; } = null!;
 
-		public DbSet<Job> Jobs { get; set; }
+		public DbSet<Job> Jobs { get; set; } = null!;
 
-		public DbSet<Location> Locations { get; set; }
+		public DbSet<Location> Locations { get; set; } = null!;
 
 		private static DbConnection GetConnection() => Effort.DbConnectionFactory.CreateTransient();
 	}

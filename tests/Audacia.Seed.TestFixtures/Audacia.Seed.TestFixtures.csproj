@@ -1,9 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
-		<IsPackable>false</IsPackable>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+	  <TargetFramework>netstandard2.0</TargetFramework>
+	  <IsPackable>false</IsPackable>
+      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+	  <Nullable>enable</Nullable>
+	  <LangVersion>8.0</LangVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

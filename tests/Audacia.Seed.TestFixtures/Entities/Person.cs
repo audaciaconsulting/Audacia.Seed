@@ -7,12 +7,12 @@ namespace Audacia.Seed.TestFixtures.Entities
 	{
 		public int Id { get; set; }
 
-		public string Name { get; set; }
+		public string? Name { get; set; }
 
 		public DateTime Birthday { get; set; }
 
 		public ICollection<Job> Jobs { get; } = new HashSet<Job>();
 
-		public Location Location { get; set; }
-	}
+		public Location Location { get; set; } = null!;
+    }
 }

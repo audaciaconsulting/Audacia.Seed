@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using Audacia.Seed.AutoFixture.Extensions;
 using Audacia.Seed.TestFixtures.DbSeeds;
@@ -13,8 +14,15 @@ namespace Audacia.Seed.AutoFixture.Tests
         public void Test()
 		{
 			var fixture = new Fixture();
-			var assembly = Assembly.GetAssembly(typeof(JobSeed));
-			fixture.RegisterSeeds(assembly);
+            var assemblyType = typeof(JobSeed);
+            var assembly = Assembly.GetAssembly(assemblyType);
+
+            if (assembly == null)
+            {
+                throw new InvalidOperationException($"Invalid assembly name {nameof(assemblyType)}");
+            }
+
+            fixture.RegisterSeeds(assembly);
 
 			var person = fixture.Create<Person>();
 

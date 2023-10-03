@@ -24,7 +24,7 @@ namespace Audacia.Seed.EntityFramework6.Extensions
         /// <summary>
         /// Gets the DbContext for the seed class.
         /// </summary>
-        protected DbContext DbContext { get; private set; }
+        protected DbContext DbContext { get; private set; } = null!;
 
         /// <summary>
         /// Returns a query for DbEntities that have already been seeded to the DbContext.
@@ -35,7 +35,7 @@ namespace Audacia.Seed.EntityFramework6.Extensions
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Member Design", "AV1130:Return type in method signature should be an interface to an unchangeable collection", Justification = "IQueryable fits this criteria")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "AV1551:Method overload should call another overload", Justification = "These are really different methods as they have different return types.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "ACL1009:Method overload should call another overload", Justification = "These are really different methods as they have different return types.")]
-        protected IQueryable<TEntity> DbEntity<TEntity>() where TEntity : class =>
+        protected IQueryable<TEntity>? DbEntity<TEntity>() where TEntity : class =>
             DbContext?.Set<TEntity>();
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace Audacia.Seed.EntityFramework6.Extensions
         /// <returns>The first pre-existing entity meeting the selector function's criteria, or null if none found.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "AV1551:Method overload should call another overload", Justification = "These are really different methods as they have different return types.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "ACL1009:Method overload should call another overload", Justification = "These are really different methods as they have different return types.")]
-        protected TEntity DbEntity<TEntity>(Expression<Func<TEntity, bool>> selectorFunc) where TEntity : class =>
-            DbContext?.Set<TEntity>().FirstOrDefault(selectorFunc);
+        protected TEntity? DbEntity<TEntity>(Expression<Func<TEntity, bool>> selectorFunc) where TEntity : class =>
+            DbContext.Set<TEntity>().FirstOrDefault(selectorFunc);
     }
 }

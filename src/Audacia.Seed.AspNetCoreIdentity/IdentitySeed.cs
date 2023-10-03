@@ -27,7 +27,7 @@ namespace Audacia.Seed.AspNetCoreIdentity
 
         /// <summary>This method should return a single instance of the entity to be seeded.</summary>
         /// <returns>A single instance of the entity to be seeded.</returns>
-        public virtual IdentitySeedModel<TApplicationUser, TKey> GetSingle() => default;
+        public virtual IdentitySeedModel<TApplicationUser, TKey>? GetSingle() => default;
 
         /// <summary>Gets the type of entity this seed class generates.</summary>
         public override Type EntityType => typeof(IdentitySeedModel<TApplicationUser, TKey>);
@@ -35,7 +35,7 @@ namespace Audacia.Seed.AspNetCoreIdentity
         /// <summary>
         /// This method should return a collection containing all the identity seeds to be seeded.
         /// </summary>
-        /// <returns>A collection contaiing all the identity seeds.</returns>
+        /// <returns>A collection containing all the identity seeds.</returns>
         public IEnumerable<IdentitySeedModel<TApplicationUser, TKey>> GetAll()
         {
             var defaults = Defaults();
@@ -45,12 +45,12 @@ namespace Audacia.Seed.AspNetCoreIdentity
                 .Select(_ => GetSingle())
                 .Where(x => x != null)
                 .Concat(defaults)
-                .ToArray();
+                .ToArray()!;
         }
 
         /// <summary>This method should return a single instance of the entity to be seeded.</summary>
         /// <returns>A single instance of the entity to be seeded.</returns>
-        public override object SingleObject() => GetSingle();
+        public override object? SingleObject() => GetSingle();
 
         /// <summary>This method should return entities instances which should be seeded by default.</summary>
         /// <returns>A list of entities which should be seeded by default.</returns>
@@ -92,9 +92,7 @@ namespace Audacia.Seed.AspNetCoreIdentity
 
         private static async Task CreateNewUserAsync(IdentitySeedModel<TApplicationUser, TKey> identitySeed, UserManager<TApplicationUser> userManager)
         {
-            var createUserTask = string.IsNullOrWhiteSpace(identitySeed.Password)
-                        ? userManager.CreateAsync(identitySeed.ApplicationUser)
-                        : userManager.CreateAsync(identitySeed.ApplicationUser, identitySeed.Password);
+            var createUserTask = CreateUserAsync(userManager, identitySeed.ApplicationUser, identitySeed.Password);
 
             var identityResult = await createUserTask.ConfigureAwait(false);
             if (!identityResult.Succeeded)
@@ -103,7 +101,22 @@ namespace Audacia.Seed.AspNetCoreIdentity
             }
         }
 
-        private static async Task AddToRoleIfNotAlreadyAsync(IdentitySeedModel<TApplicationUser, TKey> identitySeed, UserManager<TApplicationUser> userManager, TApplicationUser existingUser, string role)
+        private static Task<IdentityResult> CreateUserAsync(
+            UserManager<TApplicationUser> userManager,
+            TApplicationUser user,
+            string? password)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return string.IsNullOrWhiteSpace(password)
+                ? userManager.CreateAsync(user)
+                : userManager.CreateAsync(user, password);
+        }
+
+        private static async Task AddToRoleIfNotAlreadyAsync(IdentitySeedModel<TApplicationUser, TKey> identitySeed, UserManager<TApplicationUser> userManager, TApplicationUser? existingUser, string role)
         {
             var isInRole = await userManager.IsInRoleAsync(
                         existingUser ?? identitySeed.ApplicationUser,
