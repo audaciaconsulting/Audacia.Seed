@@ -1,14 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.Data.Entity;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
 namespace Audacia.Seed.EntityFramework6.Extensions
 {
-	/// <summary>Extension methods for <see cref="DbContext"/> instances.</summary>
-	public static class DbContextExtensions
+    /// <summary>Extension methods for <see cref="DbContext"/> instances.</summary>
+    public static class DbContextExtensions
 	{
         /// <summary>Configures the <see cref="DbContext"/> to ensure data is seeded at application startup.</summary>
         /// <param name="databaseContext">Database context.</param>
