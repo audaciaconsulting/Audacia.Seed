@@ -1,15 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
-		<Title>Audacia.Seed.AutoFixture</Title>
-		<Authors>Adam Drewery</Authors>
-		<Description>Integration libraries for using Audacia.Seed with the popular AutoFixture library.</Description>
-		<Copyright>Copyright © Audacia 2019</Copyright>
-		<PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
-    <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
-    <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+	  <TargetFramework>netstandard2.0</TargetFramework>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <Title>Audacia.Seed.AutoFixture</Title>
+	  <Authors>Adam Drewery</Authors>
+	  <Description>Integration libraries for using Audacia.Seed with the popular AutoFixture library.</Description>
+	  <Copyright>Copyright © Audacia 2019</Copyright>
+	  <PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
+      <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
+      <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
+      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
