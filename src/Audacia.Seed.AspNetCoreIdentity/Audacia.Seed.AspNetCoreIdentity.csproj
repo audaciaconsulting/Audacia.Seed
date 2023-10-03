@@ -4,7 +4,7 @@
       <TargetFramework>netstandard2.1</TargetFramework>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <Title>Audacia.Seed.AspNetCoreIdentity</Title>
-      <Authors>Techops</Authors>
+      <Authors>Audacia</Authors>
       <Version>1.0.0</Version>
       <Description>ASP.Net Core Identity integration for Audacia.Seed</Description>
       <Copyright>Copyright © Audacia 2020</Copyright>

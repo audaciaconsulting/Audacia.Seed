@@ -4,7 +4,7 @@
     <TargetFramework>net48</TargetFramework>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Title>Audacia.Seed.EntityFramework6</Title>
-    <Authors>Adam Drewery</Authors>
+    <Authors>Audacia</Authors>
     <Description>Entity Framework 6 integration for Audacia.Seed</Description>
     <Copyright>Copyright © Audacia 2019</Copyright>
     <PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
