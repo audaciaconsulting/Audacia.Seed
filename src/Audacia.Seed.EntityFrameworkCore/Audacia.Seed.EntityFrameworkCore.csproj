@@ -5,7 +5,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Title>Audacia.Seed.EntityFrameworkCore</Title>
     <Authors>Audacia</Authors>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
     <Description>Entity Framework Core integration for Audacia.Seed</Description>
     <Copyright>Copyright © Audacia 2019</Copyright>
     <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
