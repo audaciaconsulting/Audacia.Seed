@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using Audacia.Seed.EntityFrameworkCore.Extensions;
 using Audacia.Seed.TestFixtures.DbSeeds;
@@ -23,7 +24,14 @@ namespace Audacia.Seed.EntityFrameworkCore.Tests
                 databaseContext.Database.OpenConnection();
                 databaseContext.Database.EnsureCreated();
 
-                var assembly = Assembly.GetAssembly(typeof(JobSeed));
+                var assemblyType = typeof(JobSeed);
+                var assembly = Assembly.GetAssembly(assemblyType);
+
+                if (assembly == null)
+                {
+                    throw new InvalidOperationException($"Invalid assembly name {nameof(assemblyType)}");
+                }
+                
                 databaseContext.ConfigureSeeds(assembly);
                 databaseContext.SaveChanges();
 
@@ -71,7 +79,12 @@ namespace Audacia.Seed.EntityFrameworkCore.Tests
                 databaseContext.Database.OpenConnection();
                 databaseContext.Database.EnsureCreated();
 
-                var assembly = Assembly.GetAssembly(typeof(JobSeed));
+                var assemblyType = typeof(JobSeed);
+                var assembly = Assembly.GetAssembly(assemblyType);
+                if (assembly == null)
+                {
+                    throw new InvalidOperationException($"Invalid assembly name {nameof(assemblyType)}");
+                }
 
                 databaseContext.ConfigureSeeds(assembly);
                 databaseContext.SaveChanges();
@@ -96,7 +109,13 @@ namespace Audacia.Seed.EntityFrameworkCore.Tests
                 databaseContext.Database.OpenConnection();
                 databaseContext.Database.EnsureCreated();
 
-                var assembly = Assembly.GetAssembly(typeof(JobSeed));
+                var assemblyType = typeof(JobSeed);
+                var assembly = Assembly.GetAssembly(assemblyType);
+
+                if (assembly == null)
+                {
+                    throw new InvalidOperationException($"Invalid assembly name {nameof(assemblyType)}");
+                }
 
                 var location = new Location { Name = "Leeds" };
                 databaseContext.Locations.Add(location);

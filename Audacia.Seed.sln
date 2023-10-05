@@ -26,6 +26,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F3FDF916-6639-4633-9679-288C79A99E57}"
 	ProjectSection(SolutionItems) = preProject
 		build.yaml = build.yaml
+		LICENSE.txt = LICENSE.txt
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audacia.Seed.AspNetCoreIdentity", "src\Audacia.Seed.AspNetCoreIdentity\Audacia.Seed.AspNetCoreIdentity.csproj", "{FC508EDC-EF56-46CE-956E-465F5F3CD7E9}"

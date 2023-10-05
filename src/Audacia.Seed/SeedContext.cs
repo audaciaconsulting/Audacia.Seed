@@ -10,7 +10,7 @@ namespace Audacia.Seed
 	/// </summary>
 	internal class SeedContext
 	{
-		private readonly IDictionary<Type, HashSet<object>> _dictionary = new Dictionary<Type, HashSet<object>>();
+		private readonly IDictionary<Type, HashSet<object?>> _dictionary = new Dictionary<Type, HashSet<object?>>();
 
         /// <summary>
         /// Gets the seed entries of a specified type.
@@ -30,7 +30,7 @@ namespace Audacia.Seed
 		{
 			return _dictionary.TryGetValue(type, out var value)
 				? value
-				: _dictionary[type] = new HashSet<object>();
+				: _dictionary[type] = new HashSet<object?>();
 		}
 
 		/// <summary>
@@ -38,7 +38,7 @@ namespace Audacia.Seed
 		/// </summary>
 		/// <typeparam name="T">The entity type of the seed to be added.</typeparam>
 		/// <param name="entity">The seed object.</param>
-		public void Add<T>(object entity)
+		public void Add<T>(object? entity)
 		{
 			Add(entity, typeof(T));
 		}
@@ -48,7 +48,7 @@ namespace Audacia.Seed
 		/// </summary>
 		/// <param name="entity">The seed object.</param>
 		/// <param name="type">The entity type of the seed to be added.</param>
-		public virtual void Add(object entity, Type type)
+		public virtual void Add(object? entity, Type type)
 		{
 			if (_dictionary.TryGetValue(type, out var value))
 			{
@@ -56,7 +56,7 @@ namespace Audacia.Seed
 			}
 			else
 			{
-				var hashset = new HashSet<object> { entity };
+				var hashset = new HashSet<object?> { entity };
 				_dictionary[type] = hashset;
 			}
 		}

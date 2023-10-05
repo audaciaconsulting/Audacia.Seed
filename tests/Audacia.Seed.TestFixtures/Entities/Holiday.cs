@@ -10,10 +10,10 @@ namespace Audacia.Seed.TestFixtures.Entities
 
 		public DateTime End { get; set; }
 
-		public Person Person { get; set; }
+		public Person Person { get; set; } = null!;
 
-		public int PersonId { get; set; }
+        public int PersonId { get; set; }
 
-		public string Notes { get; set; }
+		public string? Notes { get; set; }
 	}
 }

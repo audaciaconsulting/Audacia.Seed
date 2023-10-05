@@ -74,7 +74,7 @@ namespace Audacia.Seed.AutoFixture.Extensions
 				Debug.Assert(methods.register != null, "methods.register != null");
 
 				var @delegate = Delegate.CreateDelegate(types.func, seed, methods.seed);
-				methods.register.Invoke(null, new object[] { fixture, @delegate });
+				methods.register?.Invoke(null, new object[] { fixture, @delegate });
 			}
 		}
 

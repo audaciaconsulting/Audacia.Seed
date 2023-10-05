@@ -16,12 +16,12 @@ namespace Audacia.Seed.AspNetCoreIdentity
         /// <summary>
         /// Gets or sets the user for the seed.
         /// </summary>
-        public TApplicationUser ApplicationUser { get; set; }
+        public TApplicationUser ApplicationUser { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets the password for the seed.
         /// </summary>
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         /// <summary>
         /// Gets or sets the roles to be assigned to the identity seed.

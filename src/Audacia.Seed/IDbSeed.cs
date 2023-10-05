@@ -16,15 +16,15 @@ namespace Audacia.Seed
 
         /// <summary>This method should return a single instance of the entity to be seeded.</summary>
         /// <returns>A single instance of an entity.</returns>
-        object SingleObject();
+        object? SingleObject();
 
         /// <summary>This method should return entities instances which should be seeded by default.</summary>
         /// <returns>Entity instances which shouldbe seeded by default.</returns>
-        IEnumerable<object> DefaultObjects();
+        IEnumerable<object?> DefaultObjects();
 
         /// <summary>This method returns multiple instances of the entity to be seeded, the number of which is specified by the <see cref="DbSeed.Count"/> property.</summary>
         /// <returns>Multiple instances of the entity to be seeded.</returns>
-        IEnumerable<object> AllObjects();
+        IEnumerable<object?> AllObjects();
     }
 
     /// <summary>
@@ -36,10 +36,10 @@ namespace Audacia.Seed
     {
         /// <summary>This method should return entities instances which should be seeded by default.</summary>
         /// <returns>Entities which should be seeded by default.</returns>
-        IEnumerable<TEntity> Defaults();
+        IEnumerable<TEntity?> Defaults();
 
         /// <summary>This method should return a single instance of the entity to be seeded.</summary>
         /// <returns>A single entity.</returns>
-        TEntity GetSingle();
+        TEntity? GetSingle();
     }
 }

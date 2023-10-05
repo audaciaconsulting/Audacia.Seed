@@ -2,14 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Title>Audacia.Seed.EntityFramework6</Title>
-    <Authors>Adam Drewery</Authors>
+    <Authors>Audacia</Authors>
+	<Version>1.1.0</Version>
     <Description>Entity Framework 6 integration for Audacia.Seed</Description>
     <Copyright>Copyright © Audacia 2019</Copyright>
-    <PackageIconUrl>https://www.audacia.co.uk/media/pkenoobu/audacia-logo-circle-blue.png</PackageIconUrl>
     <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
     <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+	<Nullable>enable</Nullable>
+	<LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -33,11 +36,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-      <None Include="..\..\audacia-logo-circle-blue.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\audacia-logo-circle-blue.png" Pack="true" PackagePath="\" />
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Audacia.CodeAnalysis" Version="1.3.0">
+    <PackageReference Include="Audacia.CodeAnalysis" Version="1.5.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

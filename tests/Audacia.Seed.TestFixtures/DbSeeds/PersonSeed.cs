@@ -15,8 +15,13 @@ namespace Audacia.Seed.TestFixtures.DbSeeds
             var person = new Person { Name = "Dave" };
 
             // Attempt to get data from DbContext, fallback to seeded entity
-            person.Location = DbEntity<Location>(l => l.Name == "Leeds") ??
-                              Existing<Location>(l => l.Name == "Bradford");
+            var location = DbEntity<Location>(l => l.Name == "Leeds") ??
+                           Existing<Location>(l => l.Name == "Bradford");
+
+            if (location != null)
+            {
+                person.Location = location;
+            }
 
             foreach (var job in jobs)
             {
