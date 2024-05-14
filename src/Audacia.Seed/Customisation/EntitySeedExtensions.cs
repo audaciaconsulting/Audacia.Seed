@@ -237,7 +237,7 @@ public static class EntitySeedExtensions
     /// <typeparam name="TSeed">Seed configuration for <typeparamref name="TNavigation"/>.</typeparam>
     /// <returns>This object containing this additional customisation.</returns>
     /// <exception cref="DataSeedingException">If the provided expression does not access data on a <typeparamref name="TEntity"/>.</exception>
-    public static EntitySeed<TEntity> WithDifferent<TEntity, TNavigation, TSeed>(
+    private static EntitySeed<TEntity> WithDifferent<TEntity, TNavigation, TSeed>(
         this EntitySeed<TEntity> entitySeed,
         Expression<Func<TEntity, TNavigation?>> getter,
         TSeed seedConfiguration)
