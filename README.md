@@ -1,5 +1,3 @@
-[[_TOC_]]
-
 # Audacia.Seed
 
 ## Overview
@@ -83,7 +81,9 @@ When seeding without a class, we figure out the `Prerequisites` as follows:
 3. For each mandatory navigation property, we try to find a `EntitySeed<TNavigation>` class for it. If none is found, we'll repeat this process for `TNavigation`.
 
 #### `GetDefault` default behaviour
-When seeding without a class, the library will call the first constructor it finds for `TEntity`, using example values for any constructor arguments as needed.
+When seeding without a class, the library will call the first constructor it finds for `TEntity`, using example values for any constructor arguments as needed:
+- if it is a `string`, a random `Guid` will be used.
+- otherwise, the default value for the type will be used.
 
 ### When to override `Prerequisites` / `GetDfault`
 Both the `Prerequisites` and `GetDefault` methods are optional. If you don't need to explicitly state what this behaviour will be, the library will behave [as above](#seeding-without-a-class).
@@ -209,13 +209,19 @@ Note that this isn't necessary if these relationships are mandatory.
 
 #### Set a navigation property to the provided seeds in order
 ```csharp
+List<MemberSeed> memberSeeds = [ new MemberSeed(), new MemberSeed() ];
+
 new BookingSeed().WithPrerequisite(
     b => b.Coupon,
-    // First booking gets this coupoon
-    new CouponSeed().With(...), 
-    // Second booking gets this coupon
-    new CouponSeed().With(...));
+    // First 3 bookings are for the first member
+    memberSeeds[0], 
+    memberSeeds[0], 
+    memberSeeds[0], 
+    // Remaining 2 bookings are for the second member
+    memberSeeds[1], 
+    memberSeeds[1]);
 ```
+Note that if all you need is for the parents to be different, you can use [WithDifferent](#withdifferent-multiple-entities) instead.
 
 #### Set a navigation property to the same value for all entities:
 ```csharp
