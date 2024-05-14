@@ -1,30 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>CS1591</NoWarn>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Title>Audacia.Seed.EntityFrameworkCore</Title>
-        <Authors>Audacia</Authors>
-        <Version>2.0.0</Version>
-        <Description>Entity Framework Core integration for Audacia.Seed.</Description>
-        <Copyright>Copyright © Audacia 2024</Copyright>
-        <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Audacia.Seed\Audacia.Seed.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="..\..\audacia-logo-circle-blue.png" Pack="true" PackagePath="\" />
-    </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Audacia.CodeAnalysis" Version="1.8.0">
