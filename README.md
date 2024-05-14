@@ -118,6 +118,16 @@ new BookingSeed().WithPrerequisite(b => b.Member, new MemberSeed().With(m => m.F
 new MemberSeed().WithChildren(m => m.Bookings);
 ```
 
+Depending on whether you're seeding one or many entities, these customisations can then be seeded into the database context as follows:
+
+```csharp
+// When you're seeding one entity
+_context.Seed(seed);
+
+// When you're seeding more than one entity
+_context.SeedMany(5, seed);
+```
+
 Entities can be customised within the test via the following:
 ### `With` (single entity)
 #### Set properties on an entity:
@@ -177,6 +187,7 @@ new BookingSeed().Without(b => b.Name);
 
 
 ### `WithPrerequisite` (single entity)
+Specify that an navigation optional property should be non-null, or override the default behaviour for a mandatory navigation property.
 #### Set a navigation property without a seed:
 ```csharp
 new BookingSeed().WithPrerequisite(b => b.Coupon);
@@ -215,7 +226,7 @@ new BookingSeed().WithPrerequisite(
 ```
 
 ### `WithDifferent` (multiple entities)
-You can only use `WithDifferent` if you are seeding more than one entity.
+You can only use `WithDifferent` if you are seeding more than one entity. As such, the library will throw an exception if passed into `Seed` rather than `SeedMany`.
 #### Specify that two entities should not share a parent:
 ```csharp
 new BookingSeed().WithDifferent(b => b.Member);
@@ -310,10 +321,10 @@ var bookings = _context.SeedMany(bookingsToSeed, seed).ToList();
 // Seeds the following:
 // > Facility 1 (in Building 1)
 //     > Booking 1
-// > Facility 3 (in Building 1)
-//     > Booking 3
 // > Facility 2 (no building)
 //     > Booking 2
+// > Facility 3 (in Building 1)
+//     > Booking 3
 ```
 
 #### Bookings belong to different facilities, some of which are the same. 
@@ -464,4 +475,30 @@ _context.Seed(new AddressSeed(), new BookingSeed());
 ## Seed your most complicated data separately
 
 It is most performant to seed everything in a single save. However, for complex data setups it's recommended to split out the seeding in stages to improve readability.
-Sometimes you need complicated seed data, and can't work out how to set it all up using the seed configuration classes. In some scenarios, this may be made easier by seeding the data in two stages.
+Sometimes you need complicated seed data, and can't work out how to set it all up using the `EntitySeed` classes. In some scenarios, this may be made easier by seeding the data in two stages.
+
+If a specific test in the class is more complex than others, consider seeding the data for that test from within the test, rather than the constructor:
+
+```csharp
+public class MyTests
+{
+    public MyTests() 
+    {
+        // Seed simple data here that all tests need
+    }
+    
+    [Fact]
+    public void MySimpleUnitTests()
+    {
+        // No addititional setup required        
+    }
+    
+    [Fact]
+    public void MyComplexUnitTests()
+    {
+        // Additional commplex seeding goes here        
+    }
+}
+
+
+```
