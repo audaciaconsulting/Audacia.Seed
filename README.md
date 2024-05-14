@@ -9,7 +9,7 @@
 - Entity Framework (`Audacia.Seed.EntityFramework`)
 
 The aim of this library is to reduce the overhead of setting up data for testing. It provides a fluent API for seeding data, and supports customisation of the data being seeded. 
-This library has taken inspiration from really libraries such as [Bogus](https://github.com/bchavez/Bogus) and [AutoFixture](https://github.com/AutoFixture/AutoFixture), with the following key differences.
+This library has taken inspiration from libraries such as [Bogus](https://github.com/bchavez/Bogus) and [AutoFixture](https://github.com/AutoFixture/AutoFixture), with the following key differences.
 - **Conservative seeding**: children will share a parent by default. Parents that are deemed to be optional will not be seeded unless otherwise specified.
 - **ORM-centric approach**: All data seeding actions are into a provided `ISeedableRepository`, rather than generating POCOs on the fly.
 
@@ -48,7 +48,7 @@ _context.SeedMany<Booking>(amountOfBookingsToSeed);
 
 ### How does it work?
 
-Inheritors of `EntitySeed<TEntity>` are searched for using reflection. If none can be found, the library will attempt to create a valid instance of `TEntity` on its own (see [here](#seeding-without-a-class)).
+Inheritors of `EntitySeed<TEntity>` are searched for using reflection. If none can be found, the library will attempt to create a valid instance of `TEntity` on its own (see [Seeding without a class](#seeding-without-a-class)).
 
 ## The `EntitySeed<TEntity>` class
 The `EntitySeed<TEntity>` class provides a way of creating a default `TEntity` to be seeded into the database.
@@ -80,7 +80,7 @@ It's possible to seed an entity without a dedicated class for it. In this scenar
 When seeding without a class, we figure out the `Prerequisites` as follows:
 1. The library finds all fields that it thinks are navigation properties. This is based on the property being a `class`, and the existance of another property with the name `{PropertyName}Id`.
 2. A navigation property is considered as mandatory if its corresponding foreign key is not nullable.
-3. For each navigation property, we try to find a `EntitySeed<TNavigation>` class for it. If none is found, we'll repeat this process for `TNavigation`.
+3. For each mandatory navigation property, we try to find a `EntitySeed<TNavigation>` class for it. If none is found, we'll repeat this process for `TNavigation`.
 
 #### `GetDefault` default behaviour
 When seeding without a class, the library will call the first constructor it finds for `TEntity`, using example values for any constructor arguments as needed.
@@ -93,6 +93,31 @@ Both the `Prerequisites` and `GetDefault` methods are optional. If you don't nee
 `GetDefault` should be overridden if creating a `new TEntity()`, and immediately saving throws errors that aren't related to foreign keys (e.g a required `string` field). For example, a `Coupon` must have a non-zero `discount`.
 
 ## Customisation
+At a high level:
+
+```csharp
+// When you want to override any default behaviour to specify a value that is meaningful to the test.
+new BookingSeed().With(b => b.Name, "Booking Name");
+
+// When you want to override any default behaviour to set a property as null.
+new BookingSeed().Without(b => b.Name);
+
+// When your database already contains the data you want to join up to.
+new BookingSeed().WithExisting(b => b.Member);
+
+// When you want each child to have a different parent.
+new BookingSeed().WithDifferent(b => b.Member);
+
+// When you want to specify an optional navigation property.
+new BookingSeed().WithPrerequisite(b => b.Coupon);
+
+// When you want to override the default behaviour for a mandatory navigation property.
+new BookingSeed().WithPrerequisite(b => b.Member, new MemberSeed().With(m => m.FirstName, "Member Name"));
+
+//  When you're seeding from the parent level, but want to ensure the children are set up.
+new MemberSeed().WithChildren(m => m.Bookings);
+```
+
 Entities can be customised within the test via the following:
 ### `With` (single entity)
 #### Set properties on an entity:
@@ -101,7 +126,7 @@ new BookingSeed()
     .With(b => b.Name, "Booking Name")
     .With(b => b.StartDate, new DateTime(2024, 1, 1));
 ```
-_Note: this can be done for navigation properties if it's possible to save without them being specified._
+_Note: this can be also done for navigation properties so long as you provide a valid instance of the navigation property._
 
 #### Set a property on a parent entity:
 ```csharp
@@ -154,18 +179,18 @@ new BookingSeed().Without(b => b.Name);
 ### `WithPrerequisite` (single entity)
 #### Set a navigation property without a seed:
 ```csharp
-new BookingSeed().With(b => b.Coupon);
+new BookingSeed().WithPrerequisite(b => b.Coupon);
 ```
 In this scenario, we will look for inheritors of `EntitySeed<Coupon>`, falling back on the default behaviour if none are found (see [Seeding without a class](#seeding-without-a-class)).
 
 #### Set a navigation property with a seed
 ```csharp
-new BookingSeed().With(b => b.Coupon, new CouponSeed().With(...));
+new BookingSeed().WithPrerequisite(b => b.Coupon, new CouponSeed().With(...));
 ```
 
 #### Seed a grandparent entity
 ```csharp
-new BookingSeed().With(b => b.Facility.Building);
+new BookingSeed().WithPrerequisite(b => b.Facility.Building);
 ```
 Note that this isn't necessary if these relationships are mandatory.
 
@@ -183,9 +208,9 @@ new BookingSeed().WithPrerequisite(
 
 #### Set a navigation property to the same value for all entities:
 ```csharp
-new BookingSeed().With(
+new BookingSeed().WithPrerequisite(
+    // All bookings get the same member with the provided first name.
     b => b.Member, 
-    // All bookings get this Member
     new MemberSeed().With(m => m.FirstName, "Member Name"));
 ```
 
@@ -201,7 +226,7 @@ new BookingSeed().WithDifferent(b => b.Member.MembershipGroup);
 ```
 
 ### `WithExisting`
-Use `WithExisting` to seed an entity that already exists in the database.
+Use `WithExisting` to seed an entity that already exists in the database. Use this when you've already seeded other entities, or you're testing against a readily-seeded database.
 
 #### Set a navigation property to an existing entity from the database
 ```csharp
@@ -237,6 +262,12 @@ new MemberSeed().WithChildren(
     new BookingSeed().With(b => b.Name, "First Booking", "Second Booking"));
 ```
 
+Note that you cannot use `WithChildren` to join up to existing data in the database (like with `WithExisting`). You can use the `With` extension method to do this:
+```csharp
+var existingBooking = _context.Bookings.First();
+new MemberSeed().With(m => m.Bookings, [existingBooking]);
+```
+
 ### Add your own customisation
 Consider the following interface:
 ```csharp
@@ -266,7 +297,7 @@ And will therefore automatically set the `Name` property of all `Member`s.
 
 ### More complex seeding scenarios
 
-#### Bookings are for different facilities, some of which are in the same building group
+#### Bookings are for different facilities, some of which are in the same building
 ```csharp
 var building = _context.Seed<Building>();
 var seed = new BookingSeed()
@@ -275,16 +306,31 @@ var seed = new BookingSeed()
 
 const int bookingsToSeed = 3;
 var bookings = _context.SeedMany(bookingsToSeed, seed).ToList();
+
+// Seeds the following:
+// > Facility 1 (in Building 1)
+//     > Booking 1
+// > Facility 3 (in Building 1)
+//     > Booking 3
+// > Facility 2 (no building)
+//     > Booking 2
 ```
 
-#### Facilities have a booking and many bookings respectively. 
+#### Bookings belong to different facilities, some of which are the same. 
 ```csharp
 var facilitySeeds = new[] { new FacilitySeed(), new FacilitySeed() };
 var seed = new BookingSeed()
     .WithPrerequisite(b => b.Facility, facilitySeeds[0], facilitySeeds[0], facilitySeeds[1]);
 
 const int bookingsToSeed = 3;
-_context.SeedMany(bookingsToSeedm seed);
+_context.SeedMany(bookingsToSeed, seed);
+
+// Seeds the following:
+// > Facility 1
+//     > Booking 1
+//     > Booking 2
+// > Facility 2
+//     > Booking 3
 ```
 
 #### A member has a conflicting booking in a different building
@@ -292,19 +338,27 @@ _context.SeedMany(bookingsToSeedm seed);
 var start = DateTime.Now;
 var finish = start.AddHours(1);
 var seed = new BookingSeed()
-    .With(b => b.Start, start, start)
-    .With(b => b.Finish, finish, finish)
+    .With(b => b.Start, start)
+    .With(b => b.Finish, finish)
     .WithDifferent(b => b.Facility.Building);
 
 const int amountToCreate = 2;
 var bookings = _context.SeedMany(amountToCreate, seed).ToList();
+
+// Seeds the following:
+// > Building 1
+//     > Facility 1
+//         > Booking 1 (Start: Now, Finish: Now + 1 hour)
+// > Building 2
+//     > Facility 2
+//         > Booking 2 (Start: Now, Finish: Now + 1 hour)
 ```
 
 #### Facilities are owned and managed by different employees
 ```csharp
-// Employee A manages Building A and Building B
-// Employee B manages Building C and Owns Building A
-// Employee C owns Building B and Building C
+// Employee A manages Facility A and Facility B
+// Employee B manages Facility C and Owns Facility A
+// Employee C owns Facility B and Facility C
 var employeeSeeds = new[]
 {
     new EmployeeSeed().With(e => e.FirstName, "A"),
@@ -313,11 +367,16 @@ var employeeSeeds = new[]
 };
 var seed = new FacilitySeed()
     .With(f => f.Name, "A", "B", "C")
-    .WithPrerequisite(b => b.Owner, employeeSeeds[1], employeeSeeds[2], employeeSeeds[2])
-    .WithPrerequisite(b => b.Manager, employeeSeeds[0], employeeSeeds[0], employeeSeeds[1]);
+    .WithPrerequisite(f => f.Owner, employeeSeeds[1], employeeSeeds[2], employeeSeeds[2])
+    .WithPrerequisite(f => f.Manager, employeeSeeds[0], employeeSeeds[0], employeeSeeds[1]);
 
 const int amountToCreate = 3;
 _context.SeedMany(amountToCreate, seed);
+
+// Seeds the following:
+// > Facility A (Owned by Employee B, Managed by Employee A)
+// > Facility B (Owned by Employee C, Managed by Employee A)
+// > Facility C (Owned by Employee C, Managed by Employee B)
 ```
 
 #### Two members have two bookings each
@@ -328,6 +387,14 @@ var seed = new MemberSeed()
 
 const int amountOfMembers = 2;
 _context.SeedMany(amountOfMembers, seed);
+
+// Seeds the following:
+// > Member 1
+//     > Booking 1
+//     > Booking 2
+// > Member 2
+//     > Booking 3
+//     > Booking 4
 ```
 
 ## Use seeds from a separate project
@@ -348,7 +415,9 @@ var seed = new BookingSeed()
 
 _context.SeedMany(3, seed); 
 ```
-In this scenario, a `DataSeedingException` will be thrown. This will also happen if you providd 3 values, but only 2 entities are being seeded.
+In this scenario, a `DataSeedingException` will be thrown. This will also happen if you provide 3 values, but only 2 entities are being seeded.
+
+Note that you can still provide a single value for a property, and seed multiple entities. In this scenario, all entities will have the same value for the property.
 
 
 ### Children share parents by default.
@@ -363,7 +432,18 @@ _context.Set<Member>.Count();// 1 Member for all Bookings
 ```
 This is also true for optional navigations. 
 
-To override this behaviour, use `WithDifferent.`
+To override this behaviour, use [WithDifferent](#withdifferent-multiple-entities):
+```csharp
+_context.SeedMany(
+    5, 
+    new BookingSeed()
+        .WithDifferent(b => b.Member)
+        .WithDifferent(b => b.Facility));
+
+_context.Set<Booking>.Count();// 5 Bookings
+_context.Set<Facility>.Count();// 5 Facilities, one for each Booking
+_context.Set<Member>.Count();// 5 Members, one for each Booking
+```
 
 ## Pass one seed per branch of the data model into `WithSeeds`
 
