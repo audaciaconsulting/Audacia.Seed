@@ -1,5 +1,6 @@
 using Audacia.Seed.Customisation;
 using Audacia.Seed.EntityFrameworkCore.Extensions;
+using Audacia.Seed.EntityFrameworkCore.Repositories;
 using Audacia.Seed.Exceptions;
 using Audacia.Seed.Testing.Helpers.Seeds;
 using Audacia.Seed.Tests.ExampleProject.Entities;
@@ -41,6 +42,7 @@ public sealed class EntitySeedTests : IDisposable
     public void Prerequisites_EntityHasRequiredParents_PrerequisitesContainParents()
     {
         var seed = new EntitySeed<Booking>();
+        seed.Repository = new EntityFrameworkCoreSeedableRepository(_context);
 
         var prerequisites = seed.Prerequisites().ToList();
 
@@ -59,6 +61,7 @@ public sealed class EntitySeedTests : IDisposable
     public void Prerequisites_EntityHasOptionalParents_PrerequisitesDoesNotContainParent()
     {
         var seed = new EntitySeed<Facility>();
+        seed.Repository = new EntityFrameworkCoreSeedableRepository(_context);
 
         var prerequisites = seed.Prerequisites().ToList();
 
@@ -71,6 +74,7 @@ public sealed class EntitySeedTests : IDisposable
     public void Prerequisites_EntityHasParentsOfTheSameType_PrerequisitesContainBothParent()
     {
         var seed = new EntitySeed<Facility>();
+        seed.Repository = new EntityFrameworkCoreSeedableRepository(_context);
 
         var prerequisites = seed.Prerequisites().ToList();
 

@@ -3,7 +3,6 @@ using Audacia.Seed.EntityFrameworkCore.Extensions;
 using Audacia.Seed.Exceptions;
 using Audacia.Seed.Testing.Helpers.Seeds;
 using Audacia.Seed.Tests.ExampleProject.Entities;
-using Audacia.Seed.Tests.ExampleProject.Entities.Enums;
 using Audacia.Seed.Tests.ExampleProject.EntityFrameworkCore;
 using Audacia.Seed.Tests.TestHelpers;
 using FluentAssertions;
@@ -1122,20 +1121,52 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void SeedingManyEntitiesWithCompositeKey_CanSpecifySamePartOfKeyForMultipleEntities()
+    public void SeedingManyEntitiesWithCompositeKey_DataSeededWithUniqueKeyInformation()
     {
-        //171670
-        var employee = _context.Seed<Employee>();
-        var entitySeed = new EntitySeed<CouponIssuer>()
-            .With(ci => ci.IssuerId, employee.Id);
+        var entitySeed = new EntitySeed<CouponIssuer>();
+
         const int amountToCreate = 2;
         var couponIssuers = _context.SeedMany(amountToCreate, entitySeed).ToList();
 
         using (new AssertionScope())
         {
-            couponIssuers.Select(ci => ci.IssuerId).Should().AllBeEquivalentTo(employee.Id);
-            couponIssuers.Select(ci => ci.CouponId).Should().HaveCount(amountToCreate);
+            couponIssuers.Select(ci => ci.CouponId).Distinct().Should().HaveCount(amountToCreate);
+            couponIssuers.Select(ci => ci.IssuerId).Distinct().Should().HaveCount(amountToCreate);
         }
+    }
+
+    [Fact]
+    public void SpecifyingUniqueValuesForCompositeKey_DataSeededCorrectly()
+    {
+        const int amountToCreate = 2;
+        var coupons = _context.SeedMany<Coupon>(amountToCreate).ToList();
+        var employees = _context.SeedMany<Employee>(amountToCreate).ToList();
+        var entitySeed = new EntitySeed<CouponIssuer>()
+            .With(ci => ci.CouponId, coupons[0].Id, coupons[1].Id)
+            .With(ci => ci.IssuerId, employees[0].Id, employees[1].Id);
+
+        var couponIssuers = _context.SeedMany(amountToCreate, entitySeed).ToList();
+
+        using (new AssertionScope())
+        {
+            couponIssuers.Select(ci => ci.CouponId).Should().ContainInOrder(coupons[0].Id, coupons[1].Id);
+            couponIssuers.Select(ci => ci.IssuerId).Should().ContainInOrder(employees[0].Id, employees[1].Id);
+        }
+    }
+
+    [Fact]
+    public void SpecifyingNonUniqueValuesForCompositeKey_ExceptionThrown()
+    {
+        var coupon = _context.Seed<Coupon>();
+        var employee = _context.Seed<Employee>();
+        var entitySeed = new EntitySeed<CouponIssuer>()
+            .With(ci => ci.CouponId, coupon.Id)
+            .With(ci => ci.IssuerId, employee.Id);
+
+        const int amountToCreate = 2;
+        var act = () => _context.SeedMany(amountToCreate, entitySeed).ToList();
+
+        act.Should().Throw<Exception>();
     }
 
     [Fact]

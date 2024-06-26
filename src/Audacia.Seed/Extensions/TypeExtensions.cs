@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using Audacia.Seed.Constants;
+using Audacia.Seed.Contracts;
 using Audacia.Seed.Exceptions;
 
 namespace Audacia.Seed.Extensions;

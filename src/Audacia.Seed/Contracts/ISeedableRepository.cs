@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Audacia.Seed.Models;
 
 namespace Audacia.Seed.Contracts;
 
@@ -29,4 +30,11 @@ public interface ISeedableRepository
     /// <typeparam name="TEntity">The type of entity to find.</typeparam>
     /// <returns>The first entity that matches the predicate.</returns>
     TEntity? FindLocal<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class;
+
+    /// <summary>
+    /// Gets the entity model information for the provided entity type.
+    /// </summary>
+    /// <typeparam name="TEntity">The type to get the model information from.</typeparam>
+    /// <returns>Entity model information for <typeparamref name="TEntity"/>.</returns>
+    EntityModelInformation GetEntityModelInformation<TEntity>() where TEntity : class;
 }

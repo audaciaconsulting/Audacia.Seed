@@ -1,6 +1,9 @@
 using System.Data.Entity;
 using System.Linq.Expressions;
+using System.Reflection;
 using Audacia.Seed.Contracts;
+using Audacia.Seed.Extensions;
+using Audacia.Seed.Models;
 
 namespace Audacia.Seed.EntityFramework.Repositories;
 
@@ -32,6 +35,20 @@ public class EntityFrameworkSeedableRepository : ISeedableRepository
         ArgumentNullException.ThrowIfNull(predicate);
 
         return _context.Set(typeof(TEntity)).Local.Cast<TEntity>().FirstOrDefault(predicate.Compile());
+    }
+
+    /// <inheritdoc cref="ISeedableRepository.GetEntityModelInformation{TEntity}"/>
+    public EntityModelInformation GetEntityModelInformation<TEntity>() where TEntity : class
+    {
+        var requiredNavigationProperties = typeof(TEntity).GetRequiredNavigationProperties()
+            .Select(p => new NavigationPropertyConfiguration(p, null))
+            .ToList();
+
+        return new EntityModelInformation
+        {
+            EntityType = typeof(TEntity),
+            RequiredNavigationProperties = requiredNavigationProperties!
+        };
     }
 
     /// <inheritdoc />

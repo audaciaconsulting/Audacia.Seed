@@ -6,6 +6,7 @@ using Audacia.Seed.Customisation;
 using Audacia.Seed.Exceptions;
 using Audacia.Seed.Extensions;
 using Audacia.Seed.Helpers;
+using Audacia.Seed.Models;
 using Audacia.Seed.Options;
 using Audacia.Seed.Properties;
 
@@ -48,23 +49,51 @@ public class EntitySeed<TEntity> : IEntitySeed
     /// <returns>A list of prerequisites that will be seeded before this.</returns>
     public virtual IEnumerable<ISeedPrerequisite> Prerequisites()
     {
-        var assembly = EntryPointAssembly.Load();
-        var requiredNavigationProperties = typeof(TEntity).GetRequiredNavigationProperties();
-        foreach (var requiredNavigationProperty in requiredNavigationProperties)
+        var modelInformation = Repository!.GetEntityModelInformation<TEntity>();
+        List<ISeedPrerequisite> prerequisites = [];
+        if (!modelInformation.RequiredNavigationProperties.Any())
         {
-            var prerequisiteSeed = assembly.FindSeed(requiredNavigationProperty.PropertyType);
-            var par = Expression.Parameter(typeof(TEntity), "x");
-
-            var lambda = Expression.Lambda(Expression.Property(par, requiredNavigationProperty.Name), par);
-
-            var prerequisiteSeedType =
-                typeof(SeedPrerequisite<,>).MakeGenericType(typeof(TEntity), requiredNavigationProperty.PropertyType);
-            var seedPrerequisite = (ISeedPrerequisite)Activator.CreateInstance(
-                prerequisiteSeedType,
-                lambda,
-                prerequisiteSeed)!;
-            yield return seedPrerequisite;
+            return prerequisites;
         }
+
+        var assembly = EntryPointAssembly.Load();
+        foreach (var requiredNavigationProperty in modelInformation.RequiredNavigationProperties)
+        {
+            var seedPrerequisite = GetSeedPrerequisite(assembly, requiredNavigationProperty, modelInformation);
+            prerequisites.Add(seedPrerequisite);
+        }
+
+        return prerequisites;
+    }
+
+    private static ISeedPrerequisite GetSeedPrerequisite(
+        Assembly assembly,
+        NavigationPropertyConfiguration requiredNavigationProperty,
+        EntityModelInformation modelInformation)
+    {
+        var prerequisiteSeed = assembly.FindSeed(requiredNavigationProperty.NavigationProperty.PropertyType);
+        var par = Expression.Parameter(typeof(TEntity), "x");
+
+        var lambda = Expression.Lambda(
+            Expression.Property(par, requiredNavigationProperty.NavigationProperty.Name),
+            par);
+
+        var prerequisiteSeedType =
+            typeof(SeedPrerequisite<,>).MakeGenericType(
+                typeof(TEntity),
+                requiredNavigationProperty.NavigationProperty.PropertyType);
+        var seedPrerequisite = (ISeedPrerequisite)Activator.CreateInstance(
+            prerequisiteSeedType,
+            lambda,
+            prerequisiteSeed)!;
+
+        // Override the default behaviour to re-use existing entities if the navigation property is a primary key.
+        if (modelInformation.PrimaryKey?.Any(p => p == requiredNavigationProperty.ForeignKeyProperty) == true)
+        {
+            seedPrerequisite.GetSeed().Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
+        }
+
+        return seedPrerequisite;
     }
 
     /// <inheritdoc />

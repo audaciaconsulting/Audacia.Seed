@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Audacia.Seed.Contracts;
+using Audacia.Seed.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Audacia.Seed.EntityFrameworkCore.Repositories;
@@ -7,7 +8,7 @@ namespace Audacia.Seed.EntityFrameworkCore.Repositories;
 /// <summary>
 /// A seedable repository for an Entity Framework Core database context.
 /// </summary>
-internal class EntityFrameworkCoreSeedableRepository : ISeedableRepository
+public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
 {
     private readonly DbContext _context;
 
@@ -30,6 +31,36 @@ internal class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     public virtual TEntity? FindLocal<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
     {
         return _context.Set<TEntity>().Local.FirstOrDefault(predicate.Compile());
+    }
+
+    /// <inheritdoc cref="ISeedableRepository.GetEntityModelInformation{TEntity}"/>
+    public EntityModelInformation GetEntityModelInformation<TEntity>() where TEntity : class
+    {
+        var entityType = _context.Model.FindEntityType(typeof(TEntity)) ?? throw new InvalidOperationException($"Entity type {typeof(TEntity).Name} not found in the model.");
+
+        var foreignKeys = entityType.GetForeignKeys().Where(fk => fk.IsRequired);
+
+        var requiredNavigations = entityType.GetNavigations()
+            .Where(n => n.ForeignKey.IsRequired && n.ForeignKey.DeclaringEntityType == entityType)
+            .Where(n => n.PropertyInfo != null)
+            .Select(n =>
+            {
+                var matchedForeignKey = foreignKeys.FirstOrDefault(fk => n.ForeignKey == fk)?.Properties
+                    .ToList()
+                    .FirstOrDefault()
+                    ?.PropertyInfo;
+                return new NavigationPropertyConfiguration(n.PropertyInfo!, matchedForeignKey);
+            })
+            .ToList();
+
+        return new EntityModelInformation
+        {
+            EntityType = entityType.ClrType,
+            RequiredNavigationProperties = requiredNavigations,
+            PrimaryKey = entityType.FindPrimaryKey()?.Properties
+                .Where(n => n.PropertyInfo != null)
+                .Select(n => n.PropertyInfo!).ToList()
+        };
     }
 
     /// <inheritdoc />
