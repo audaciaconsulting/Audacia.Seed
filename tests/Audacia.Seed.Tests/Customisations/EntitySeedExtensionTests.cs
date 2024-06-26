@@ -1066,6 +1066,106 @@ public sealed class EntitySeedExtensionTests : IDisposable
         }
     }
 
+    [Fact]
+    public void MultipleWithDifferentSpecified_IsNotOverwritten()
+    {
+        var entitySeed = new BookingSeed()
+            .WithDifferent(b => b.Member.MembershipGroup)
+            .WithDifferent(b => b.Facility.Owner)
+            .WithDifferent(b => b.Facility.Pool);
+
+        const int bookingsToCreate = 2;
+        _context.SeedMany(bookingsToCreate, entitySeed);
+
+        var bookingAfterSave = _context.Set<Booking>()
+            .Include(b => b.Member.MembershipGroup)
+            .Include(b => b.Facility.Owner)
+            .Include(b => b.Facility.Pool)
+            .ToList();
+        var ownerIds = bookingAfterSave.ConvertAll(b => b.Facility.OwnerId).Distinct().ToList();
+        var poolIds = bookingAfterSave.ConvertAll(b => b.Facility.PoolId).Distinct().ToList();
+        var membershipGroupIds = bookingAfterSave.ConvertAll(b => b.Member.MembershipGroupId).Distinct().ToList();
+
+        using (new AssertionScope())
+        {
+            ownerIds.Should().HaveCount(bookingsToCreate);
+            poolIds.Should().HaveCount(bookingsToCreate);
+            membershipGroupIds.Should().HaveCount(bookingsToCreate);
+        }
+    }
+
+    [Fact]
+    public void WithDifferentSpecifiedAfterWithExistingForSameParent_AppliesWithDifferentFirst()
+    {
+        _context.Seed<Employee>();
+        var entitySeed = new BookingSeed()
+            // The order we specify this in should not matter
+            .WithExisting(b => b.Facility.Manager)
+            .WithDifferent(b => b.Facility.Room);
+
+        const int bookingsToCreate = 2;
+        _context.SeedMany(bookingsToCreate, entitySeed);
+
+        var bookingAfterSave = _context.Set<Booking>()
+            .Include(b => b.Facility.Manager)
+            .Include(b => b.Facility.Room)
+            .ToList();
+        var managerIds = bookingAfterSave.ConvertAll(b => b.Facility.ManagerId).Distinct().ToList();
+        var facilityIds = bookingAfterSave.ConvertAll(b => b.FacilityId).Distinct().ToList();
+        var roomIds = bookingAfterSave.ConvertAll(b => b.Facility.RoomId).Distinct().ToList();
+        using (new AssertionScope())
+        {
+            managerIds.Should().HaveCount(1);
+            facilityIds.Should().HaveCount(2);
+            roomIds.Should().HaveCount(2);
+        }
+    }
+
+    [Fact]
+    public void SeedingManyEntitiesWithCompositeKey_CanSpecifySamePartOfKeyForMultipleEntities()
+    {
+        //171670
+        var employee = _context.Seed<Employee>();
+        var entitySeed = new EntitySeed<CouponIssuer>()
+            .With(ci => ci.IssuerId, employee.Id);
+        const int amountToCreate = 2;
+        var couponIssuers = _context.SeedMany(amountToCreate, entitySeed).ToList();
+
+        using (new AssertionScope())
+        {
+            couponIssuers.Select(ci => ci.IssuerId).Should().AllBeEquivalentTo(employee.Id);
+            couponIssuers.Select(ci => ci.CouponId).Should().HaveCount(amountToCreate);
+        }
+    }
+
+    [Fact]
+    public void SeedingDifferentEntityBetweenMultiStageSeeding_DataSavedCorrectly()
+    {
+        // 170394
+        var facility = _context.Seed<Facility>();
+        _context.Seed<Facility>();
+
+        var bookingSeed = new BookingSeed().With(b => b.Facility, facility);
+
+        var booking = _context.Seed(bookingSeed);
+
+        booking.FacilityId.Should().Be(facility.Id);
+    }
+
+    [Fact]
+    public void SpecifyingExplicitIdForGrandparentInOrder_CanBeSetCorrectly()
+    {
+        // 172318
+        var managers = _context.SeedMany<Employee>(2).ToList();
+        var bookingSeed = new EntitySeed<Booking>()
+            .With(b => b.Facility.ManagerId, managers[0].Id, managers[0].Id, managers[1].Id);
+        _context.SeedMany(3, bookingSeed);
+
+        var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Facility).ToList();
+        bookingsAfterSave.Select(b => b.Facility.ManagerId).Should()
+            .BeEquivalentTo([managers[0].Id, managers[0].Id, managers[1].Id], "The Manager Ids should be set as specified in the seed configuration.");
+    }
+
     public void Dispose()
     {
         _context.Dispose();

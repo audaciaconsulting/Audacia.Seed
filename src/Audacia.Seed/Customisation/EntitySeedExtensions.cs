@@ -523,19 +523,23 @@ public static class EntitySeedExtensions
         var (left, right) = getter.SplitMemberAccessLayer();
 
         // For a x => x.Parent.GrandParent, get a EntitySeed<Parent>
-        var seed = GetParentSeed<TNavigation>(left, right);
+        var seed = GetOrCreateParentSeed<TEntity, TNavigation>(entitySeed, left, right);
 
         // Add a WithDifferent for the EntitySeed<Parent> with getter x => x.GrandParent
         AddWithDifferentForParent(entitySeed, left, seed);
     }
 
-    private static IEntitySeed GetParentSeed<TNavigation>(LambdaExpression left, LambdaExpression right)
+    private static IEntitySeed GetOrCreateParentSeed<TEntity, TNavigation>(EntitySeed<TEntity> entitySeed, LambdaExpression left,
+        LambdaExpression right)
+        where TEntity : class
         where TNavigation : class
     {
         var withDifferent = typeof(EntitySeedExtensions).GetMethods()
             .Single(method => method.Name == nameof(WithDifferent) && method.GetParameters().Length == 2)
             .MakeGenericMethod(left.Body.Type, typeof(TNavigation));
-        var seed = EntryPointAssembly.Load().FindSeed(left.Body.Type);
+        // Augment the seed in the existing customisation if we've already added a WithDifferent for this property.
+        var existingSeed = entitySeed.Customisations.Select(c => c.FindSeedForGetter(left)).FirstOrDefault(s => s != null);
+        var seed = existingSeed ?? EntryPointAssembly.Load().FindSeed(left.Body.Type);
         object[] args = [seed, right];
         withDifferent.Invoke(null, args);
 

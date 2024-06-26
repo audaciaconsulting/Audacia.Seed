@@ -21,6 +21,28 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation, TSeed>(
     where TNavigation : class
     where TSeed : EntitySeed<TNavigation>
 {
+    /// <inheritdoc/>
+    public int Order => 0;
+
+    /// <inheritdoc/>
+    public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
+    {
+        ArgumentNullException.ThrowIfNull(getter);
+
+        if (getter.Body.Type != typeof(TNavigation))
+        {
+            return null;
+        }
+
+        if (getter.GetPropertyInfo() != Getter.GetPropertyInfo())
+        {
+            return null;
+        }
+
+        var seedToReturn = SeedConfiguration as EntitySeed<TNavigation>;
+        return seedToReturn;
+    }
+
     /// <summary>
     /// Gets a lambda to the property to populate.
     /// </summary>

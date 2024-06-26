@@ -14,6 +14,12 @@ public class SeedNullPropertyConfiguration<TEntity, TProperty>(Expression<Func<T
     : ISeedCustomisation<TEntity>
     where TEntity : class
 {
+    /// <inheritdoc/>
+    public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
+    {
+        return null;
+    }
+
     /// <summary>
     /// Gets a lambda to the property to set as null.
     /// </summary>

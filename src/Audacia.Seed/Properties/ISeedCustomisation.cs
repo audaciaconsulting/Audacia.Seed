@@ -27,7 +27,7 @@ public interface ISeedCustomisation<TEntity>
     bool EqualsPrerequisite(ISeedPrerequisite prerequisite) => false;
 
     /// <summary>
-    /// Return a predicate that would match a <typeparamref name="TEntity"/> to the cusomisation this represents.
+    /// Return a predicate that would match a <typeparamref name="TEntity"/> to the customisation this represents.
     /// </summary>
     /// <returns>A predicate to match to.</returns>
     Expression<Func<TEntity, bool>> ToPredicate() => _ => true;
@@ -43,6 +43,14 @@ public interface ISeedCustomisation<TEntity>
     /// <summary>
     /// Gets a value indicating the order in which this customisation should be applied.
     /// The lower the number, the higher the priority.
+    /// Defaults to 100 so that we can insert customisations at the start or end of the pipeline.
     /// </summary>
-    int Order => 0;
+    int Order => 100;
+
+    /// <summary>
+    /// Based on the provided <paramref name="getter"/>, return a <see cref="EntitySeed{TNavigation}"/>.
+    /// </summary>
+    /// <param name="getter">An expression lambda to the property being customised.</param>
+    /// <returns>A seed configuration if the getter represents the same member as this. Otherwise null.</returns>
+    IEntitySeed? FindSeedForGetter(LambdaExpression getter);
 }

@@ -21,6 +21,25 @@ public class
     where TChildNavigation : class
     where TSeed : EntitySeed<TChildNavigation>
 {
+    /// <inheritdoc/>
+    public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
+    {
+        ArgumentNullException.ThrowIfNull(getter);
+
+        if (getter.Parameters[0].Type != typeof(TChildNavigation))
+        {
+            return null;
+        }
+
+        if (getter.GetPropertyInfo() != Getter.GetPropertyInfo())
+        {
+            return null;
+        }
+
+        var seedToReturn = SeedConfiguration as EntitySeed<TChildNavigation>;
+        return seedToReturn;
+    }
+
     /// <summary>
     /// Gets a lambda to the property to populate.
     /// </summary>

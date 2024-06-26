@@ -19,6 +19,12 @@ public class SeedExistingNavigationPropertyConfiguration<TEntity, TNavigation>(
     where TEntity : class
     where TNavigation : class
 {
+    /// <inheritdoc/>
+    public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
+    {
+        return null;
+    }
+
     /// <summary>
     /// Gets a lambda to the property to populate.
     /// </summary>
