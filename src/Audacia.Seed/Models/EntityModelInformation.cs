@@ -3,7 +3,7 @@ using System.Reflection;
 namespace Audacia.Seed.Models;
 
 /// <summary>
-/// Gets model information for a provided entity
+/// Gets model information for a provided entity.
 /// </summary>
 public record EntityModelInformation
 {
@@ -17,5 +17,8 @@ public record EntityModelInformation
     /// </summary>
     public List<PropertyInfo>? PrimaryKey { get; set; }
 
+    /// <summary>
+    /// Gets or sets the list of required navigation properties for the entity.
+    /// </summary>
     public List<NavigationPropertyConfiguration> RequiredNavigationProperties { get; set; } = [];
 }

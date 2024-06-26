@@ -30,6 +30,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <inheritdoc cref="ISeedableRepository.FindLocal{TEntity}"/>
     public virtual TEntity? FindLocal<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
     {
+        ArgumentNullException.ThrowIfNull(predicate);
         return _context.Set<TEntity>().Local.FirstOrDefault(predicate.Compile());
     }
 
