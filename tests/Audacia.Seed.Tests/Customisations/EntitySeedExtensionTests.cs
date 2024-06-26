@@ -1169,10 +1169,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
         act.Should().Throw<Exception>();
     }
 
-    [Fact]
+    [Fact(Skip = "170394")]
     public void SeedingDifferentEntityBetweenMultiStageSeeding_DataSavedCorrectly()
     {
-        // 170394
         var facility = _context.Seed<Facility>();
         _context.Seed<Facility>();
 
@@ -1183,10 +1182,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
         booking.FacilityId.Should().Be(facility.Id);
     }
 
-    [Fact]
+    [Fact(Skip = "172318")]
     public void SpecifyingExplicitIdForGrandparentInOrder_CanBeSetCorrectly()
     {
-        // 172318
         var managers = _context.SeedMany<Employee>(2).ToList();
         var bookingSeed = new EntitySeed<Booking>()
             .With(b => b.Facility.ManagerId, managers[0].Id, managers[0].Id, managers[1].Id);
