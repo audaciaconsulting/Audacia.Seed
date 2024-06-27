@@ -27,6 +27,17 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
         return _context.Set<TEntity>();
     }
 
+    /// <inheritdoc cref="ISeedableRepository.PrepareToSet{TEntity}"/>
+    public void PrepareToSet<TEntity>(TEntity value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+
+        if (_context.Model.FindEntityType(typeof(TEntity)) != null)
+        {
+            _context.Entry(value).Reload();
+        }
+    }
+
     /// <inheritdoc cref="ISeedableRepository.FindLocal{TEntity}"/>
     public virtual TEntity? FindLocal<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
     {

@@ -51,6 +51,16 @@ public class EntityFrameworkSeedableRepository : ISeedableRepository
         };
     }
 
+    /// <inheritdoc cref="ISeedableRepository.PrepareToSet{TEntity}"/>
+    public void PrepareToSet<TEntity>(TEntity value)
+    {
+        var entityEntry = _context.Entry(value);
+        if (entityEntry != null)
+        {
+            _context.Entry(value).Reload();
+        }
+    }
+
     /// <inheritdoc />
     public void Add<TEntity>(TEntity entity) where TEntity : class
     {

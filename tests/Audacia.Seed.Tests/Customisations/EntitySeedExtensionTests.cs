@@ -1169,7 +1169,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         act.Should().Throw<Exception>();
     }
 
-    [Fact(Skip = "170394")]
+    [Fact]
     public void SeedingDifferentEntityBetweenMultiStageSeeding_DataSavedCorrectly()
     {
         var facility = _context.Seed<Facility>();

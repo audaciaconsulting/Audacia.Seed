@@ -36,10 +36,13 @@ public class SeedPropertyConfiguration<TEntity, TProperty>(Expression<Func<TEnti
     /// <inheritdoc />
     public void Apply(TEntity entity, ISeedableRepository repository, int index, TEntity? previous)
     {
+        ArgumentNullException.ThrowIfNull(repository);
+
         var obj = Getter.GetPropertyOwner(entity);
 
         if (Getter.Body is MemberExpression memberSelectorExpression)
         {
+            repository.PrepareToSet(Value);
             var property = (PropertyInfo)memberSelectorExpression.Member;
             property.SetValue(obj, Value, null);
         }
