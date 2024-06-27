@@ -43,5 +43,5 @@ public interface ISeedableRepository
     /// </summary>
     /// <param name="value">The value to perpare for setting.</param>
     /// <typeparam name="TEntity">The type of entity we're looking for.</typeparam>
-    void PrepareToSet<TEntity>(TEntity value);
+    void PrepareToSet<TEntity>(TEntity? value);
 }

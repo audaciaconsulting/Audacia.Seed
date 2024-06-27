@@ -28,13 +28,11 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     }
 
     /// <inheritdoc cref="ISeedableRepository.PrepareToSet{TEntity}"/>
-    public void PrepareToSet<TEntity>(TEntity value)
+    public void PrepareToSet<TEntity>(TEntity? value)
     {
-        ArgumentNullException.ThrowIfNull(value);
-
-        if (_context.Model.FindEntityType(typeof(TEntity)) != null)
+        if (!EqualityComparer<TEntity?>.Default.Equals(value, default) && _context.Model.FindEntityType(typeof(TEntity)) != null)
         {
-            _context.Entry(value).Reload();
+            _context.Entry(value!).Reload();
         }
     }
 

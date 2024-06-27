@@ -54,7 +54,7 @@ public class EntityFrameworkSeedableRepository : ISeedableRepository
 
     /// <inheritdoc cref="ISeedableRepository.PrepareToSet{TEntity}"/>
     [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Required by the interface.")]
-    public void PrepareToSet<TEntity>(TEntity value)
+    public void PrepareToSet<TEntity>(TEntity? value)
     {
     }
 
