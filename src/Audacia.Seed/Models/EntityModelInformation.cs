@@ -15,10 +15,10 @@ public record EntityModelInformation
     /// <summary>
     /// Gets or sets the property info(s) that make up the primary key.
     /// </summary>
-    public List<PropertyInfo>? PrimaryKey { get; set; }
+    internal List<PropertyInfo>? PrimaryKey { get; set; }
 
     /// <summary>
     /// Gets or sets the list of required navigation properties for the entity.
     /// </summary>
-    public List<NavigationPropertyConfiguration> RequiredNavigationProperties { get; set; } = [];
+    internal List<NavigationPropertyConfiguration> RequiredNavigationProperties { get; set; } = [];
 }

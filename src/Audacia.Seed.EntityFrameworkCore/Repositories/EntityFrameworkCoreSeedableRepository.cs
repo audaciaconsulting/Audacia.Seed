@@ -38,18 +38,22 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     public EntityModelInformation GetEntityModelInformation<TEntity>() where TEntity : class
     {
         var entityType = _context.Model.FindEntityType(typeof(TEntity)) ?? throw new InvalidOperationException($"Entity type {typeof(TEntity).Name} not found in the model.");
-
-        var foreignKeys = entityType.GetForeignKeys().Where(fk => fk.IsRequired);
+        // This is the lowest-level base type
+        var baseType = entityType.GetAllBaseTypes().FirstOrDefault(bt => bt.BaseType == null) ?? entityType;
+        var foreignKeys = entityType.GetProperties().Where(p => p.IsForeignKey());
 
         var requiredNavigations = entityType.GetNavigations()
-            .Where(n => n.ForeignKey.IsRequired && n.ForeignKey.DeclaringEntityType == entityType)
+            .Where(n =>
+            {
+                var typeTheNavigationBelongsTo = n.ForeignKey.DeclaringEntityType;
+                var navigationBaseType = typeTheNavigationBelongsTo.GetAllBaseTypes()
+                    .FirstOrDefault(bt => bt.BaseType == null) ?? typeTheNavigationBelongsTo;
+                return n.ForeignKey.IsRequired && navigationBaseType == baseType;
+            })
             .Where(n => n.PropertyInfo != null)
             .Select(n =>
             {
-                var matchedForeignKey = foreignKeys.FirstOrDefault(fk => n.ForeignKey == fk)?.Properties
-                    .ToList()
-                    .FirstOrDefault()
-                    ?.PropertyInfo;
+                var matchedForeignKey = foreignKeys.FirstOrDefault(fk => n.ForeignKey.Properties[0] == fk)?.PropertyInfo;
                 return new NavigationPropertyConfiguration(n.PropertyInfo!, matchedForeignKey);
             })
             .ToList();
