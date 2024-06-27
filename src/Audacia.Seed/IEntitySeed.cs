@@ -16,6 +16,12 @@ public interface IEntitySeed
     Type EntityType { get; }
 
     /// <summary>
+    /// Gets or sets the destination of where this data will be seeded.
+    /// This is used to look up data that may already exist in the repository.
+    /// </summary>
+    ISeedableRepository? Repository { get; set; }
+
+    /// <summary>
     /// Gets the options for how we will seed this entity.
     /// </summary>
     EntitySeedOptions Options { get; }

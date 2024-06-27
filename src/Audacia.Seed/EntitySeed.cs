@@ -19,10 +19,7 @@ namespace Audacia.Seed;
 public class EntitySeed<TEntity> : IEntitySeed
     where TEntity : class
 {
-    /// <summary>
-    /// Gets or sets the destination of where this data will be seeded.
-    /// This is used to look up data that may already exist in the repository.
-    /// </summary>
+    /// <inheritdoc />
     public ISeedableRepository? Repository { get; set; }
 
     /// <summary>
