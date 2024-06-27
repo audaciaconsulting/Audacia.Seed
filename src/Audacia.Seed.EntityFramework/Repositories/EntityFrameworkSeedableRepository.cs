@@ -1,4 +1,5 @@
 using System.Data.Entity;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using Audacia.Seed.Contracts;
@@ -52,13 +53,9 @@ public class EntityFrameworkSeedableRepository : ISeedableRepository
     }
 
     /// <inheritdoc cref="ISeedableRepository.PrepareToSet{TEntity}"/>
+    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Required by the interface.")]
     public void PrepareToSet<TEntity>(TEntity value)
     {
-        var entityEntry = _context.Entry(value);
-        if (entityEntry != null)
-        {
-            _context.Entry(value).Reload();
-        }
     }
 
     /// <inheritdoc />
