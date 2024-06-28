@@ -1174,7 +1174,6 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         var facility = _context.Seed<Facility>();
         _context.Seed<Facility>();
-
         var bookingSeed = new BookingSeed().With(b => b.Facility, facility);
 
         var booking = _context.Seed(bookingSeed);
@@ -1182,7 +1181,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         booking.FacilityId.Should().Be(facility.Id);
     }
 
-    [Fact(Skip = "172318")]
+    [Fact]
     public void SpecifyingExplicitIdForGrandparentInOrder_CanBeSetCorrectly()
     {
         var managers = _context.SeedMany<Employee>(2).ToList();
@@ -1193,6 +1192,19 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Facility).ToList();
         bookingsAfterSave.Select(b => b.Facility.ManagerId).Should()
             .BeEquivalentTo([managers[0].Id, managers[0].Id, managers[1].Id], "The Manager Ids should be set as specified in the seed configuration.");
+    }
+
+    [Fact]
+    public void SpecifyingExplicitIdForGreatGrandparentInOrder_CanBeSetCorrectly()
+    {
+        var groups = _context.SeedMany<MembershipGroup>(2).ToList();
+        var bookingSeed = new EntitySeed<Booking>()
+            .With(b => b.Member.MembershipGroup.ParentId, groups[0].Id, groups[0].Id, groups[1].Id);
+        _context.SeedMany(3, bookingSeed);
+
+        var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Facility).ToList();
+        bookingsAfterSave.Select(b => b.Member.MembershipGroup.ParentId).Should()
+            .BeEquivalentTo([groups[0].Id, groups[0].Id, groups[1].Id], "The Manager Ids should be set as specified in the seed configuration.");
     }
 
     public void Dispose()

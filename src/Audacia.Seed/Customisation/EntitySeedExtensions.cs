@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using System.Reflection;
 using Audacia.Core.Extensions;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.Exceptions;
@@ -74,11 +73,21 @@ public static class EntitySeedExtensions
             throw new DataSeedingException($"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
         }
 
+        // Check the getter passed in is setting a nested property or not
+        // E.g x => x.Parent.GrandParentId is nested, but x => x.ParentId is not.
+        if (getter.Body is MemberExpression m && m.Expression?.Type != typeof(TEntity) && values.Length > 1)
+        {
+            // If specifying > 1, we will therefore want each parent to be different if the property belongs to a parent.
+            var (left, _) = getter.SplitLastMemberAccessLayer();
+            entitySeed.WithDifferentReflection(left, typeof(TEntity), left.Body.Type);
+        }
+
         Func<int, TEntity?, TProperty> valueSetter = (index, _) => values[index];
         var customisation = new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, valueSetter);
         customisation.AmountOfValuesToSet = values.Length;
 
         entitySeed.AddCustomisation(customisation);
+
         return entitySeed;
     }
 
@@ -520,30 +529,42 @@ public static class EntitySeedExtensions
         where TEntity : class
         where TNavigation : class
     {
-        var (left, right) = getter.SplitMemberAccessLayer();
+        var (left, right) = getter.SplitFirstMemberAccessLayer();
 
-        // For a x => x.Parent.GrandParent, get a EntitySeed<Parent>
-        var seed = GetOrCreateParentSeed<TEntity, TNavigation>(entitySeed, left, right);
+        // For a x => x.Parent.GrandParent, get a EntitySeed<Parent>, with WithDifferent applied
+        var parentSeed = GetOrCreateParentSeed(entitySeed, left, 1);
+
+        parentSeed.WithDifferentReflection(right, left.Body.Type, typeof(TNavigation));
 
         // Add a WithDifferent for the EntitySeed<Parent> with getter x => x.GrandParent
-        AddWithDifferentForParent(entitySeed, left, seed);
+        AddWithDifferentForParent(entitySeed, left, parentSeed);
     }
 
-    private static IEntitySeed GetOrCreateParentSeed<TEntity, TNavigation>(EntitySeed<TEntity> entitySeed, LambdaExpression left,
-        LambdaExpression right)
-        where TEntity : class
-        where TNavigation : class
+    private static void WithDifferentReflection(
+        this IEntitySeed seed,
+        LambdaExpression getter,
+        Type sourceType,
+        Type destinationType)
     {
         var withDifferent = typeof(EntitySeedExtensions).GetMethods()
             .Single(method => method.Name == nameof(WithDifferent) && method.GetParameters().Length == 2)
-            .MakeGenericMethod(left.Body.Type, typeof(TNavigation));
+            .MakeGenericMethod(sourceType, destinationType);
+        object[] args = [seed, getter];
+        withDifferent.Invoke(null, args);
+    }
+
+    private static IEntitySeed GetOrCreateParentSeed<TEntity>(
+        EntitySeed<TEntity> entitySeed,
+        LambdaExpression left,
+        int amountToCreate)
+        where TEntity : class
+    {
         // Augment the seed in the existing customisation if we've already added a WithDifferent for this property.
         var existingSeed = entitySeed.Customisations.Select(c => c.FindSeedForGetter(left)).FirstOrDefault(s => s != null);
         var seed = existingSeed ?? EntryPointAssembly.Load().FindSeed(left.Body.Type);
-        object[] args = [seed, right];
-        withDifferent.Invoke(null, args);
 
         seed.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
+        seed.Options.AmountToCreate = amountToCreate;
 
         return seed;
     }
