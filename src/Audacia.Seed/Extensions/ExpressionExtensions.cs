@@ -137,7 +137,7 @@ internal static class ExpressionExtensions
     }
 
     /// <summary>
-    /// Split a member access expression into two separate expressions based on the next level up.
+    /// Split a member access expression into two separate expressions based on the first level up.
     /// <example>
     /// <para>
     /// For example:
@@ -150,13 +150,38 @@ internal static class ExpressionExtensions
     /// <typeparam name="TRoot">The type of the parameter of the provided <paramref name="expression"/>.</typeparam>
     /// <typeparam name="TDestination">The type of the property returned by the expression.</typeparam>
     /// <returns>Two expressions that represent the inputted <paramref name="expression"/> when combined together.</returns>
-    internal static (LambdaExpression Left, LambdaExpression Right) SplitMemberAccessLayer<TRoot, TDestination>(
+    internal static (LambdaExpression Left, LambdaExpression Right) SplitFirstMemberAccessLayer<TRoot, TDestination>(
         this Expression<Func<TRoot, TDestination>> expression)
     {
         var memberAccessChain = expression.SplitMemberAccessChain().ToList();
         var left = memberAccessChain[0];
         var remainingAccessChain = memberAccessChain[1..memberAccessChain.Count];
         var right = remainingAccessChain.JoinMemberAccessChain();
+
+        return (left, right);
+    }
+
+    /// <summary>
+    /// Split a member access expression into two separate expressions based on the last level up.
+    /// <example>
+    /// <para>
+    /// For example:
+    /// <c> x => x.Foo.Bar.Baz </c>
+    /// becomes <c>x => x.Foo.Bar</c> and <c>x => x.Baz</c>
+    /// </para>
+    /// </example>
+    /// </summary>
+    /// <param name="expression">The expression to split.</param>
+    /// <typeparam name="TRoot">The type of the parameter of the provided <paramref name="expression"/>.</typeparam>
+    /// <typeparam name="TDestination">The type of the property returned by the expression.</typeparam>
+    /// <returns>Two expressions that represent the inputted <paramref name="expression"/> when combined together.</returns>
+    internal static (LambdaExpression Left, LambdaExpression Right) SplitLastMemberAccessLayer<TRoot, TDestination>(
+        this Expression<Func<TRoot, TDestination>> expression)
+    {
+        var memberAccessChain = expression.SplitMemberAccessChain().ToList();
+        var initialAccessChain = memberAccessChain[..^1];
+        var right = memberAccessChain[^1];
+        var left = initialAccessChain.JoinMemberAccessChain();
 
         return (left, right);
     }
