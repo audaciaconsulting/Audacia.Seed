@@ -82,9 +82,10 @@ public static class EntitySeedExtensions
             entitySeed.WithDifferentReflection(left, typeof(TEntity), left.Body.Type);
         }
 
-        Func<int, TEntity?, TProperty> valueSetter = (index, _) => values[index];
-        var customisation = new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, valueSetter);
-        customisation.AmountOfValuesToSet = values.Length;
+        var customisation = new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, (index, _) => values[index])
+        {
+            AmountOfValuesToSet = values.Length
+        };
 
         entitySeed.AddCustomisation(customisation);
 
