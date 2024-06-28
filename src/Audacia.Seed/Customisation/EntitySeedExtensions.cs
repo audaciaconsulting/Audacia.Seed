@@ -75,7 +75,8 @@ public static class EntitySeedExtensions
 
         // Check the getter passed in is setting a nested property or not
         // E.g x => x.Parent.GrandParentId is nested, but x => x.ParentId is not.
-        if (getter.Body is MemberExpression m && m.Expression?.Type != typeof(TEntity) && values.Length > 1)
+        if (getter.Body is MemberExpression m
+            && m.Expression?.Type != typeof(TEntity) && values.Length > 1)
         {
             // If specifying > 1, we will therefore want each parent to be different if the property belongs to a parent.
             var (left, _) = getter.SplitLastMemberAccessLayer();

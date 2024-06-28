@@ -57,4 +57,29 @@ public class SeedNullPropertyConfiguration<TEntity, TProperty>(Expression<Func<T
     public void Validate(EntitySeed<TEntity> entitySeed)
     {
     }
+
+    /// <summary>
+    /// Custom implementation so that we can ensure we don't apply duplicate customisations.
+    /// </summary>
+    /// <param name="obj">The other object to compare to.</param>
+    /// <returns>Whether this object equals the <paramref name="obj"/>.</returns>
+    public override bool Equals(object? obj)
+    {
+        if (obj is SeedNullPropertyConfiguration<TEntity, TProperty> other)
+        {
+            // Protect against doing the same WithDifferent twice
+            return Getter.GetPropertyInfo() == other.Getter.GetPropertyInfo();
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Custom implementation so that equality operations only care about the type.
+    /// </summary>
+    /// <returns>The hashcode unique to this.</returns>
+    public override int GetHashCode()
+    {
+        return Getter.GetPropertyInfo().GetHashCode();
+    }
 }

@@ -279,7 +279,8 @@ public class EntitySeed<TEntity> : IEntitySeed
 
     private void PopulateCustomisations(int index, TEntity? previous, TEntity entity)
     {
-        foreach (var customisation in Customisations.OrderBy(c => c.Order))
+        var uniqueCustomisations = Customisations.OrderBy(c => c.Order).Distinct().ToList();
+        foreach (var customisation in uniqueCustomisations)
         {
             try
             {

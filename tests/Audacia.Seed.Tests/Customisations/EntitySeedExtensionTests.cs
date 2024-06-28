@@ -1202,9 +1202,23 @@ public sealed class EntitySeedExtensionTests : IDisposable
             .With(b => b.Member.MembershipGroup.ParentId, groups[0].Id, groups[0].Id, groups[1].Id);
         _context.SeedMany(3, bookingSeed);
 
-        var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Facility).ToList();
+        var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
         bookingsAfterSave.Select(b => b.Member.MembershipGroup.ParentId).Should()
             .BeEquivalentTo([groups[0].Id, groups[0].Id, groups[1].Id], "The Manager Ids should be set as specified in the seed configuration.");
+    }
+
+    [Fact]
+    public void SpecifyingExplicitPropertyForParentInOrder_CanBeSetCorrectly()
+    {
+        var bookingSeed = new EntitySeed<Booking>()
+            .WithDifferent(b => b.Member)
+            .With(b => b.Member.FirstName, "John", "Jane");
+        _context.SeedMany(2, bookingSeed);
+
+        var members = _context.Set<Member>().ToList();
+        var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member).ToList();
+        bookingsAfterSave.Select(b => b.Member.FirstName).Should()
+            .BeEquivalentTo(["John", "Jane"]);
     }
 
     public void Dispose()

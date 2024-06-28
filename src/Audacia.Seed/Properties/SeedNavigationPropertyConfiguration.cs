@@ -108,4 +108,30 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation, TSeed>(
 
         return prerequisite.PropertyInfo == Getter.GetPropertyInfo();
     }
+
+    /// <summary>
+    /// Custom implementation so that we can ensure we don't apply duplicate customisations.
+    /// </summary>
+    /// <param name="obj">The other object to compare to.</param>
+    /// <returns>Whether this object equals the <paramref name="obj"/>.</returns>
+    public override bool Equals(object? obj)
+    {
+        if (obj is SeedNavigationPropertyConfiguration<TEntity, TNavigation, TSeed> other)
+        {
+            // Protect against doing the same WithDifferent twice
+            return Getter.GetPropertyInfo() == other.Getter.GetPropertyInfo()
+                && SeedConfiguration == other.SeedConfiguration;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Custom implementation so that equality operations only care about the type.
+    /// </summary>
+    /// <returns>The hashcode unique to this.</returns>
+    public override int GetHashCode()
+    {
+        return Getter.GetPropertyInfo().GetHashCode() ^ SeedConfiguration.GetHashCode();
+    }
 }
