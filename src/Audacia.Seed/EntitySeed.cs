@@ -156,10 +156,26 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     protected TNavigation FromDb<TNavigation>()
         where TNavigation : class
     {
-        var query = Repository?.DbSet<TNavigation>() ??
-                    throw new DataSeedingException("Unable to seed data as the repository is null.");
+        Expression<Func<TNavigation, bool>> predicate = _ => true;
+        return FromDb(predicate);
+    }
 
-        var matchedEntities = query.ToList();
+    /// <summary>
+    /// Get a pre-existing entity from the database.
+    /// </summary>
+    /// <param name="predicate">The predicate to match the entity.</param>
+    /// <typeparam name="TNavigation">The type of the navigation property to set.</typeparam>
+    /// <returns>An entity returned from the database.</returns>
+    /// <exception cref="DataSeedingException">If no existing entities could be found matching the predicate.</exception>
+    protected virtual TNavigation FromDb<TNavigation>(Expression<Func<TNavigation, bool>> predicate)
+        where TNavigation : class
+    {
+        var query = Repository?.DbSet<TNavigation>() ??
+                    throw new DataSeedingException($"Unable to seed data as the repository is null. Make sure you are calling this from the {nameof(GetDefault)} method.");
+
+        var matchedEntities = query
+            .Where(predicate)
+            .ToList();
         if (!matchedEntities.Any())
         {
             var sb = new StringBuilder($"You must set up at least one {typeof(TNavigation)} ");
