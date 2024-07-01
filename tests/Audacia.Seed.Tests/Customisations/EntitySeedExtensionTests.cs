@@ -1060,8 +1060,10 @@ public sealed class EntitySeedExtensionTests : IDisposable
         using (new AssertionScope())
         {
             bookings.Should().HaveCount(expectedCount);
-            bookings.Count(b => b.Facility is { PoolId: not null, RoomId: null }).Should().Be(1, "one of the bookings should be in a pool");
-            bookings.Count(b => b.Facility is { PoolId: null, RoomId: not null }).Should().Be(1, "one of the bookings should be in a room");
+            bookings.Count(b => b.Facility is { PoolId: not null, RoomId: null }).Should()
+                .Be(1, "one of the bookings should be in a pool");
+            bookings.Count(b => b.Facility is { PoolId: null, RoomId: not null }).Should()
+                .Be(1, "one of the bookings should be in a room");
         }
     }
 
@@ -1191,7 +1193,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Facility).ToList();
         bookingsAfterSave.Select(b => b.Facility.ManagerId).Should()
-            .BeEquivalentTo([managers[0].Id, managers[0].Id, managers[1].Id], "The Manager Ids should be set as specified in the seed configuration.");
+            .BeEquivalentTo(
+                [managers[0].Id, managers[0].Id, managers[1].Id],
+                "The Manager Ids should be set as specified in the seed configuration.");
     }
 
     [Fact]
@@ -1204,21 +1208,52 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
         bookingsAfterSave.Select(b => b.Member.MembershipGroup.ParentId).Should()
-            .BeEquivalentTo([groups[0].Id, groups[0].Id, groups[1].Id], "The Manager Ids should be set as specified in the seed configuration.");
+            .BeEquivalentTo(
+                [groups[0].Id, groups[0].Id, groups[1].Id],
+                "The Manager Ids should be set as specified in the seed configuration.");
     }
 
     [Fact]
-    public void SpecifyingExplicitPropertyForParentInOrder_CanBeSetCorrectly()
+    public void SpecifyingExplicitPropertyForParentInOrder_DoesNotSeedMoreDataThanItShould()
     {
         var bookingSeed = new EntitySeed<Booking>()
             .WithDifferent(b => b.Member)
             .With(b => b.Member.FirstName, "John", "Jane");
-        _context.SeedMany(2, bookingSeed);
+        const int amountToCreate = 2;
+        _context.SeedMany(amountToCreate, bookingSeed);
 
-        var members = _context.Set<Member>().ToList();
-        var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member).ToList();
-        bookingsAfterSave.Select(b => b.Member.FirstName).Should()
-            .BeEquivalentTo(["John", "Jane"]);
+        using (new AssertionScope())
+        {
+            var members = _context.Set<Member>().ToList();
+            members.Should().HaveCount(amountToCreate, "we should overwrite the default seed doing a WithDifferent explicitly");
+            var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member).ToList();
+            bookingsAfterSave.Select(b => b.Member.FirstName).Should()
+                .BeEquivalentTo(["John", "Jane"]);
+        }
+    }
+
+    [Fact]
+    public void SeedingChildrenWithDifferentBaseClassInheritors_CanChildrenOfDifferentTypes()
+    {
+        IEntitySeed<Asset>[] seeds =
+        [
+            new EntitySeed<EmployeeAsset>(),
+            new EntitySeed<PoolAsset>(),
+            new EntitySeed<RoomAsset>()
+        ];
+
+        var seed = new EntitySeed<CompanyAsset>()
+            .WithPrerequisite(ca => ca.Asset, seeds);
+        _context.SeedMany(3, seed);
+
+        using (new AssertionScope())
+        {
+            var savedAssets = _context.Set<Asset>().ToList();
+            savedAssets.Should().HaveCount(3);
+            savedAssets.OfType<EmployeeAsset>().Should().HaveCount(1);
+            savedAssets.OfType<PoolAsset>().Should().HaveCount(1);
+            savedAssets.OfType<RoomAsset>().Should().HaveCount(1);
+        }
     }
 
     public void Dispose()

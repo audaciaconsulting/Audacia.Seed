@@ -4,17 +4,11 @@ public class CompanyAsset
 {
     public int Id { get; set; }
 
-    //public ICollection<>
-}
+    public int CompanyId { get; set; }
 
-public class RoomAsset : CompanyAsset
-{
-}
+    public Company Company { get; set; } = null!;
 
-public class PoolAsset : CompanyAsset
-{
-}
+    public int AssetId { get; set; }
 
-public class EmployeeAsset : CompanyAsset
-{
+    public Asset Asset { get; set; } = null!;
 }

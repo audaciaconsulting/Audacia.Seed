@@ -215,7 +215,7 @@ public static class EntitySeedExtensions
     /// <br/>
     /// To be used if building > 1 entity.
     /// <br/>
-    /// Usage note: if you want to control how the entities are different, use the <see cref="WithPrerequisite{TEntity,TNavigation,TSeed}"/> method, explicitly providing the configurations.
+    /// Usage note: if you want to control how the entities are different, use the WithPrerequisite method, explicitly providing the configurations.
     /// </summary>
     /// <param name="entitySeed">The seed class.</param>
     /// <param name="getter">A lambda to the property to set.</param>
@@ -315,17 +315,15 @@ public static class EntitySeedExtensions
     /// <param name="seedConfigurations">The seed configurations to use for each navigation property.</param>
     /// <typeparam name="TEntity">The type of the entity being seeded.</typeparam>
     /// <typeparam name="TNavigation">The type of the navigation property to set.</typeparam>
-    /// <typeparam name="TSeed">Seed configuration for <typeparamref name="TNavigation"/>.</typeparam>
     /// <returns>This object containing this additional customisation.</returns>
     /// <exception cref="ArgumentException">If no seed configurations are provided.</exception>
     /// <exception cref="DataSeedingException">If the provided expression does not access data on a <typeparamref name="TEntity"/>.</exception>
-    public static EntitySeed<TEntity> WithPrerequisite<TEntity, TNavigation, TSeed>(
+    public static EntitySeed<TEntity> WithPrerequisite<TEntity, TNavigation>(
         this EntitySeed<TEntity> entitySeed,
         Expression<Func<TEntity, TNavigation?>> getter,
-        params TSeed[] seedConfigurations)
+        params IEntitySeed<TNavigation>[] seedConfigurations)
         where TEntity : class
         where TNavigation : class
-        where TSeed : EntitySeed<TNavigation>
     {
         ArgumentNullException.ThrowIfNull(entitySeed);
         ArgumentNullException.ThrowIfNull(seedConfigurations);
@@ -343,13 +341,13 @@ public static class EntitySeedExtensions
 
         if (seedConfigurations.Length > 1)
         {
-            entitySeed.AddCustomisation(new SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation, TSeed>(
+            entitySeed.AddCustomisation(new SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation>(
                 getter,
                 seedConfigurations.ToList()));
         }
         else
         {
-            entitySeed.AddCustomisation(new SeedNavigationPropertyConfiguration<TEntity, TNavigation, TSeed>(
+            entitySeed.AddCustomisation(new SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
                 getter,
                 seedConfigurations[0]));
         }
@@ -576,10 +574,9 @@ public static class EntitySeedExtensions
         LambdaExpression left,
         IEntitySeed seed) where TEntity : class
     {
-        var typeInfo = typeof(SeedNavigationPropertyConfiguration<,,>).MakeGenericType(
+        var typeInfo = typeof(SeedNavigationPropertyConfiguration<,>).MakeGenericType(
             typeof(TEntity),
-            left.Body.Type,
-            seed.GetType());
+            left.Body.Type);
         object[] newArgs = [left, seed];
         var customisation = Activator.CreateInstance(typeInfo, newArgs);
         entitySeed.GetType().GetMethod(nameof(EntitySeed<TEntity>.AddCustomisation))!

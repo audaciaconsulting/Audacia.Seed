@@ -12,14 +12,12 @@ namespace Audacia.Seed.Properties;
 /// </summary>
 /// <typeparam name="TEntity">The type with the property to populate.</typeparam>
 /// <typeparam name="TNavigation">The type of the destination property.</typeparam>
-/// <typeparam name="TSeed">An <see cref="IEntitySeed"/> for the navigation property.</typeparam>
-public class SeedNavigationPropertyConfiguration<TEntity, TNavigation, TSeed>(
+public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     Expression<Func<TEntity, TNavigation?>> getter,
-    TSeed seedConfiguration)
+    IEntitySeed<TNavigation> seedConfiguration)
     : ISeedCustomisation<TEntity>
     where TEntity : class
     where TNavigation : class
-    where TSeed : EntitySeed<TNavigation>
 {
     /// <inheritdoc/>
     public int Order => 0;
@@ -51,7 +49,7 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation, TSeed>(
     /// <summary>
     /// Gets a list of seed configurations to use, in order in which they will be used.
     /// </summary>
-    private TSeed SeedConfiguration { get; } = seedConfiguration;
+    private IEntitySeed<TNavigation> SeedConfiguration { get; } = seedConfiguration;
 
     /// <inheritdoc />
     public void Apply(TEntity entity, ISeedableRepository repository, int index, TEntity? previous)
@@ -75,13 +73,14 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation, TSeed>(
     }
 
     private static TNavigation GetValueToSet(ISeedableRepository repository, int index, TEntity? previous,
-        TSeed navigationSeed)
+        IEntitySeed<TNavigation> navigationSeed)
     {
         TNavigation? value = null;
-        if (navigationSeed.Options.InsertionBehavior == SeedingInsertionBehaviour.MustFindExisting ||
-            (navigationSeed.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew && !navigationSeed.HasCustomisations))
+        if ((navigationSeed.Options.InsertionBehavior == SeedingInsertionBehaviour.MustFindExisting ||
+            navigationSeed.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew && !navigationSeed.HasCustomisations)
+            && navigationSeed is EntitySeed<TNavigation> navigationSeedAsEntitySeed)
         {
-            value = repository.FindLocal(navigationSeed.ToPredicate(index));
+            value = repository.FindLocal(navigationSeedAsEntitySeed.ToPredicate(index));
         }
 
         if (value == null)
@@ -116,7 +115,7 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation, TSeed>(
     /// <returns>Whether this object equals the <paramref name="obj"/>.</returns>
     public override bool Equals(object? obj)
     {
-        if (obj is SeedNavigationPropertyConfiguration<TEntity, TNavigation, TSeed> other)
+        if (obj is SeedNavigationPropertyConfiguration<TEntity, TNavigation> other)
         {
             // Protect against doing the same WithDifferent twice
             return Getter.GetPropertyInfo() == other.Getter.GetPropertyInfo()

@@ -16,7 +16,7 @@ namespace Audacia.Seed;
 /// Base class for seeding a specific entity to the database, with utility methods to facilitate customisability.
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity being seeded.</typeparam>
-public class EntitySeed<TEntity> : IEntitySeed
+public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     where TEntity : class
 {
     /// <inheritdoc />
@@ -204,7 +204,7 @@ public class EntitySeed<TEntity> : IEntitySeed
     /// Build the entity that is to be added to the database.
     /// </summary>
     /// <returns>A valid entity to seed.</returns>
-    internal TEntity Build()
+    public TEntity Build()
     {
         var entity = GetOrCreateEntity(0, null);
         return entity;
@@ -303,7 +303,7 @@ public class EntitySeed<TEntity> : IEntitySeed
         {
             var seed = seedPrerequisite.GetSeed();
             seed.GetType().GetProperty(nameof(Repository))?.SetValue(seed, Repository);
-            var buildMethod = seed.GetType().GetMethod(nameof(Build), BindingFlags.Instance | BindingFlags.NonPublic);
+            var buildMethod = seed.GetType().GetMethod(nameof(Build), BindingFlags.Instance | BindingFlags.Public);
             var navigationProperty = buildMethod?.Invoke(seed, null)!;
             seedPrerequisite.PropertyInfo.SetValue(entity, navigationProperty);
 

@@ -14,14 +14,12 @@ namespace Audacia.Seed.Properties;
 /// </summary>
 /// <typeparam name="TEntity">The type with the property to populate.</typeparam>
 /// <typeparam name="TNavigation">The type of the destination property.</typeparam>
-/// <typeparam name="TSeed">An <see cref="IEntitySeed"/> for the navigation property.</typeparam>
-public class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation, TSeed>(
+public class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation>(
     Expression<Func<TEntity, TNavigation?>> getter,
-    List<TSeed> seedConfigurations)
+    List<IEntitySeed<TNavigation>> seedConfigurations)
     : ISeedCustomisation<TEntity>
     where TEntity : class
     where TNavigation : class
-    where TSeed : EntitySeed<TNavigation>
 {
     /// <inheritdoc/>
     public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
@@ -37,7 +35,7 @@ public class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation,
     /// <summary>
     /// Gets a list of seed configurations to use, in order in which they will be used.
     /// </summary>
-    private List<TSeed> SeedConfigurations { get; } = seedConfigurations;
+    private List<IEntitySeed<TNavigation>> SeedConfigurations { get; } = seedConfigurations;
 
     /// <inheritdoc />
     public void Apply(TEntity entity, ISeedableRepository repository, int index, TEntity? previous)
@@ -59,10 +57,12 @@ public class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation,
     }
 
     private TNavigation GetValueToSet(ISeedableRepository repository, int index, TEntity? previous,
-        TSeed seedConfiguration)
+        IEntitySeed<TNavigation> seedConfiguration)
     {
-        var predicate = seedConfiguration.ToPredicate(index);
         Expression<Func<TNavigation, bool>> defaultPredicate = _ => true;
+        var predicate = seedConfiguration is EntitySeed<TNavigation> seedConfigurationAsEntitySeed
+            ? seedConfigurationAsEntitySeed.ToPredicate(index)
+            : defaultPredicate;
         var value = repository.FindLocal(predicate);
         if (index > 0
             && !ReferenceEquals(SeedConfigurations[index], SeedConfigurations[index - 1])
