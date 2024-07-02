@@ -46,10 +46,42 @@ _context.SeedMany<Booking>(amountOfBookingsToSeed);
 
 ### How does it work?
 
-Inheritors of `EntitySeed<TEntity>` are searched for using reflection. If none can be found, the library will attempt to create a valid instance of `TEntity` on its own (see [Seeding without a class](#seeding-without-a-class)).
+Inheritors of `EntitySeed<TEntity>` are searched for using reflection. If none can be found, the library will attempt to create a valid instance of `TEntity` on its own (see below).
 
 ## The `EntitySeed<TEntity>` class
-The `EntitySeed<TEntity>` class provides a way of creating a default `TEntity` to be seeded into the database.
+The `EntitySeed<TEntity>` has two important methods:
+
+- `Prerequisites`: get the navigations that should be created as a predecessor to `TEntity`, e.g a required parent.
+
+- `GetDefault`: create an instance of `TEntity` (without prerequisites).
+
+When used together, these methods create a valid instance of `TEntity`.
+
+There are two ways that the library implements the above two methods to seed data.
+
+### Model configuration-based seeding
+> [!IMPORTANT]
+> This is only supported in `Audacia.Seed.EntityFrameworkCore`. For EF6, please see [reflection-based-seeding](#reflection-based-seeding) below.
+
+The library uses EF Core's [`IModel` interface](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.metadata.imodel) to get information about what prerequisites `TEntity` needs to be created - namely, it's required foreign keys. Once we've determined all required foreign keys, we'll construct a `EntitySeed<TNavigation>` for it.
+
+### Reflection-based seeding
+
+#### `Prerequisites` 
+When seeding without a class, we figure out the `Prerequisites` as follows:
+1. The library finds all fields that it thinks are navigation properties. This is based on the property being a `class`, and the existance of another property with the name `{PropertyName}Id`.
+2. A navigation property is considered as mandatory if its corresponding foreign key is not nullable.
+3. For each mandatory navigation property, we try to find a `EntitySeed<TNavigation>` class for it. If none is found, we'll repeat this process for `TNavigation`.
+
+#### `GetDefault` 
+When seeding without a class, the library will call the first constructor it finds for `TEntity`, using example values for any constructor arguments as needed:
+- if it is a `string`, a random `Guid` will be used.
+- otherwise, the default value for the type will be used.
+
+
+
+## Custom `EntitySeed<TEntity>`s
+Creating a child class of `EntitySeed<TEntity>` class allows you define a valid default `TEntity` to be seeded looks like.
 It should seed _exactly_ the information required for an instance of `TEntity` to be considered valid. For example, it may be that you have two optional navigation properties, but your domain ensures exactly one is populated. This is a good use-case for a custom class as the default behaviour will be to seed neither of these navigation properties.
 
 You can create a class that inherits from `EntitySeed<TEntity>` to represent a single valid instance of `TEntity` as below: 
@@ -71,19 +103,6 @@ public class BookingSeed : EntitySeed<Booking>
     }
 }
 ```
-
-### Seeding without a class
-It's possible to seed an entity without a dedicated class for it. In this scenario, the library will seed the entity by attempting to create a valid instance on it's own.
-#### `Prerequisites` default behaviour
-When seeding without a class, we figure out the `Prerequisites` as follows:
-1. The library finds all fields that it thinks are navigation properties. This is based on the property being a `class`, and the existance of another property with the name `{PropertyName}Id`.
-2. A navigation property is considered as mandatory if its corresponding foreign key is not nullable.
-3. For each mandatory navigation property, we try to find a `EntitySeed<TNavigation>` class for it. If none is found, we'll repeat this process for `TNavigation`.
-
-#### `GetDefault` default behaviour
-When seeding without a class, the library will call the first constructor it finds for `TEntity`, using example values for any constructor arguments as needed:
-- if it is a `string`, a random `Guid` will be used.
-- otherwise, the default value for the type will be used.
 
 ### When to override `Prerequisites` / `GetDfault`
 Both the `Prerequisites` and `GetDefault` methods are optional. If you don't need to explicitly state what this behaviour will be, the library will behave [as above](#seeding-without-a-class).
@@ -116,6 +135,9 @@ new BookingSeed().WithPrerequisite(b => b.Member, new MemberSeed().With(m => m.F
 
 //  When you're seeding from the parent level, but want to ensure the children are set up.
 new MemberSeed().WithChildren(m => m.Bookings);
+
+//  When you want to control what the primary key is set to.
+new MemberSeed().WithPrimaryKey(1);
 ```
 
 Depending on whether you're seeding one or many entities, these customisations can then be seeded into the database context as follows:
@@ -137,7 +159,7 @@ new BookingSeed()
     .With(b => b.StartDate, new DateTime(2024, 1, 1));
 ```
 > [!NOTE]
-> _Note: this can be also done for navigation properties so long as you provide a valid instance of the navigation property._
+> This can be also done for navigation properties so long as you provide a valid instance of the navigation property.
 
 
 #### Set a property on a parent entity:
@@ -156,7 +178,8 @@ The following examples apply to when you're seeding multiple entities (i.e with 
 ```csharp
 new BookingSeed().With(b => b.Name, "Booking Name");
 ```
-Note: in this scenario, all entities will have the same value for the property.
+> [!NOTE]
+> In this scenario, all entities will have the same value for the property.
 
 #### Set a property to multiple values in order:
 ```csharp
@@ -205,7 +228,8 @@ new BookingSeed().WithPrerequisite(b => b.Coupon, new CouponSeed().With(...));
 ```csharp
 new BookingSeed().WithPrerequisite(b => b.Facility.Building);
 ```
-Note that this isn't necessary if these relationships are mandatory.
+> [!NOTE]
+> This isn't necessary if these relationships are mandatory.
 
 ### `WithPrerequisite` (multiple entities)
 
@@ -223,7 +247,9 @@ new BookingSeed().WithPrerequisite(
     memberSeeds[1], 
     memberSeeds[1]);
 ```
-Note that if all you need is for the parents to be different, you can use [WithDifferent](#withdifferent-multiple-entities) instead.
+
+> [!NOTE]
+> If all you need is for the parents to be different, you can use [WithDifferent](#withdifferent-multiple-entities) instead.
 
 #### Set a navigation property to the same value for all entities:
 ```csharp
@@ -281,7 +307,8 @@ new MemberSeed().WithChildren(
     new BookingSeed().With(b => b.Name, "First Booking", "Second Booking"));
 ```
 
-Note that you cannot use `WithChildren` to join up to existing data in the database (like with `WithExisting`). You can use the `With` extension method to do this:
+> [!NOTE]
+> You cannot use `WithChildren` to join up to existing data in the database (like with `WithExisting`). You can use the `With` extension method to do this:
 ```csharp
 var existingBooking = _context.Bookings.First();
 new MemberSeed().With(m => m.Bookings, [existingBooking]);
@@ -436,7 +463,8 @@ _context.SeedMany(3, seed);
 ```
 In this scenario, a `DataSeedingException` will be thrown. This will also happen if you provide 3 values, but only 2 entities are being seeded.
 
-Note that you can still provide a single value for a property, and seed multiple entities. In this scenario, all entities will have the same value for the property.
+> [!NOTE]
+> You can still provide a single value for a property, and seed multiple entities. In this scenario, all entities will have the same value for the property.
 
 
 ### Children share parents by default.
