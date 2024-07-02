@@ -45,8 +45,9 @@ public static class DbContextExtensions
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        var seed1 = EntryPointAssembly.Load().FindSeed<T1>();
-        var seed2 = EntryPointAssembly.Load().FindSeed<T2>();
+        var assembly = EntryPointAssembly.Load();
+        var seed1 = assembly.FindSeed<T1>();
+        var seed2 = assembly.FindSeed<T2>();
 
         return context.Seed(seed1, seed2);
     }
@@ -69,9 +70,10 @@ public static class DbContextExtensions
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        var seed1 = EntryPointAssembly.Load().FindSeed<T1>();
-        var seed2 = EntryPointAssembly.Load().FindSeed<T2>();
-        var seed3 = EntryPointAssembly.Load().FindSeed<T3>();
+        var assembly = EntryPointAssembly.Load();
+        var seed1 = assembly.FindSeed<T1>();
+        var seed2 = assembly.FindSeed<T2>();
+        var seed3 = assembly.FindSeed<T3>();
 
         return context.Seed(seed1, seed2, seed3);
     }
@@ -96,10 +98,11 @@ public static class DbContextExtensions
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        var seed1 = EntryPointAssembly.Load().FindSeed<T1>();
-        var seed2 = EntryPointAssembly.Load().FindSeed<T2>();
-        var seed3 = EntryPointAssembly.Load().FindSeed<T3>();
-        var seed4 = EntryPointAssembly.Load().FindSeed<T4>();
+        var assembly = EntryPointAssembly.Load();
+        var seed1 = assembly.FindSeed<T1>();
+        var seed2 = assembly.FindSeed<T2>();
+        var seed3 = assembly.FindSeed<T3>();
+        var seed4 = assembly.FindSeed<T4>();
 
         return context.Seed(seed1, seed2, seed3, seed4);
     }
@@ -126,11 +129,12 @@ public static class DbContextExtensions
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        var seed1 = EntryPointAssembly.Load().FindSeed<T1>();
-        var seed2 = EntryPointAssembly.Load().FindSeed<T2>();
-        var seed3 = EntryPointAssembly.Load().FindSeed<T3>();
-        var seed4 = EntryPointAssembly.Load().FindSeed<T4>();
-        var seed5 = EntryPointAssembly.Load().FindSeed<T5>();
+        var assembly = EntryPointAssembly.Load();
+        var seed1 = assembly.FindSeed<T1>();
+        var seed2 = assembly.FindSeed<T2>();
+        var seed3 = assembly.FindSeed<T3>();
+        var seed4 = assembly.FindSeed<T4>();
+        var seed5 = assembly.FindSeed<T5>();
 
         return context.Seed(seed1, seed2, seed3, seed4, seed5);
     }
@@ -159,12 +163,13 @@ public static class DbContextExtensions
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        var seed1 = EntryPointAssembly.Load().FindSeed<T1>();
-        var seed2 = EntryPointAssembly.Load().FindSeed<T2>();
-        var seed3 = EntryPointAssembly.Load().FindSeed<T3>();
-        var seed4 = EntryPointAssembly.Load().FindSeed<T4>();
-        var seed5 = EntryPointAssembly.Load().FindSeed<T5>();
-        var seed6 = EntryPointAssembly.Load().FindSeed<T6>();
+        var assembly = EntryPointAssembly.Load();
+        var seed1 = assembly.FindSeed<T1>();
+        var seed2 = assembly.FindSeed<T2>();
+        var seed3 = assembly.FindSeed<T3>();
+        var seed4 = assembly.FindSeed<T4>();
+        var seed5 = assembly.FindSeed<T5>();
+        var seed6 = assembly.FindSeed<T6>();
 
         return context.Seed(seed1, seed2, seed3, seed4, seed5, seed6);
     }
@@ -195,13 +200,14 @@ public static class DbContextExtensions
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        var seed1 = EntryPointAssembly.Load().FindSeed<T1>();
-        var seed2 = EntryPointAssembly.Load().FindSeed<T2>();
-        var seed3 = EntryPointAssembly.Load().FindSeed<T3>();
-        var seed4 = EntryPointAssembly.Load().FindSeed<T4>();
-        var seed5 = EntryPointAssembly.Load().FindSeed<T5>();
-        var seed6 = EntryPointAssembly.Load().FindSeed<T6>();
-        var seed7 = EntryPointAssembly.Load().FindSeed<T7>();
+        var assembly = EntryPointAssembly.Load();
+        var seed1 = assembly.FindSeed<T1>();
+        var seed2 = assembly.FindSeed<T2>();
+        var seed3 = assembly.FindSeed<T3>();
+        var seed4 = assembly.FindSeed<T4>();
+        var seed5 = assembly.FindSeed<T5>();
+        var seed6 = assembly.FindSeed<T6>();
+        var seed7 = assembly.FindSeed<T7>();
 
         return context.Seed(seed1, seed2, seed3, seed4, seed5, seed6, seed7);
     }
@@ -234,14 +240,15 @@ public static class DbContextExtensions
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        var seed1 = EntryPointAssembly.Load().FindSeed<T1>();
-        var seed2 = EntryPointAssembly.Load().FindSeed<T2>();
-        var seed3 = EntryPointAssembly.Load().FindSeed<T3>();
-        var seed4 = EntryPointAssembly.Load().FindSeed<T4>();
-        var seed5 = EntryPointAssembly.Load().FindSeed<T5>();
-        var seed6 = EntryPointAssembly.Load().FindSeed<T6>();
-        var seed7 = EntryPointAssembly.Load().FindSeed<T7>();
-        var seed8 = EntryPointAssembly.Load().FindSeed<T8>();
+        var assembly = EntryPointAssembly.Load();
+        var seed1 = assembly.FindSeed<T1>();
+        var seed2 = assembly.FindSeed<T2>();
+        var seed3 = assembly.FindSeed<T3>();
+        var seed4 = assembly.FindSeed<T4>();
+        var seed5 = assembly.FindSeed<T5>();
+        var seed6 = assembly.FindSeed<T6>();
+        var seed7 = assembly.FindSeed<T7>();
+        var seed8 = assembly.FindSeed<T8>();
 
         return context.Seed(seed1, seed2, seed3, seed4, seed5, seed6, seed7, seed8);
     }
@@ -610,6 +617,29 @@ public static class DbContextExtensions
         var (entity1, entity2, entity3, entity4, entity5, entity6, entity7, entity8) = repository.PerformSeeding(seed1, seed2, seed3, seed4, seed5, seed6, seed7, seed8);
 
         return (entity1, entity2, entity3, entity4, entity5, entity6, entity7, entity8);
+    }
+
+    /// <summary>
+    /// Seed many entities and immediately return it.
+    /// </summary>
+    /// <param name="context">The database context to insert into.</param>
+    /// <param name="seeds">The entity seed configurations.</param>
+    [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
+        Justification = "We want to save once so each method is doing everything itself.")]
+    public static void Seed(
+        this DbContext context,
+        params IEntitySeed[] seeds)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(seeds);
+
+        var repository = new EntityFrameworkCoreSeedableRepository(context);
+        foreach (var seed in seeds)
+        {
+            seed.PerformSeeding(repository);
+        }
+
+        repository.Save();
     }
 
     /// <summary>
