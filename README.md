@@ -136,7 +136,9 @@ new BookingSeed()
     .With(b => b.Name, "Booking Name")
     .With(b => b.StartDate, new DateTime(2024, 1, 1));
 ```
-_Note: this can be also done for navigation properties so long as you provide a valid instance of the navigation property._
+> [!NOTE]
+> _Note: this can be also done for navigation properties so long as you provide a valid instance of the navigation property._
+
 
 #### Set a property on a parent entity:
 ```csharp
