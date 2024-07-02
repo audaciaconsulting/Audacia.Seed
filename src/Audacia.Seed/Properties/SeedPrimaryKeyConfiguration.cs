@@ -9,6 +9,7 @@ namespace Audacia.Seed.Properties;
 /// </summary>
 /// <param name="primaryKeyValue">The primary key value to set.</param>
 /// <typeparam name="TEntity">The type of the entity we are setting the primary key on.</typeparam>
+/// <typeparam name="TKey">The type of the primary key we are setting.</typeparam>
 public class SeedPrimaryKeyConfiguration<TEntity, TKey>(TKey[] primaryKeyValue) : ISeedCustomisation<TEntity> where TEntity : class
 {
     private readonly TKey[] _primaryKeyValue = primaryKeyValue;

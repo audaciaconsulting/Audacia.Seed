@@ -1287,7 +1287,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         using (new AssertionScope())
         {
             var members = _context.Set<Member>().ToList();
-            members.Should().HaveCount(amountToCreate,
+            members.Should().HaveCount(
+                amountToCreate,
                 "we should overwrite the default seed doing a WithDifferent explicitly");
             var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member).ToList();
             bookingsAfterSave.Select(b => b.Member.FirstName).Should()

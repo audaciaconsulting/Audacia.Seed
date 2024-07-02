@@ -477,13 +477,21 @@ public static class EntitySeedExtensions
         return entitySeed;
     }
 
-    public static EntitySeed<TEntity> WithPrimaryKey<TEntity, TKey>(this EntitySeed<TEntity> seed, params TKey[] primaryKeyValues)
+    /// <summary>
+    /// Explicitly set the primary key, rather than it being automatically generated on save.
+    /// </summary>
+    /// <param name="entitySeed">The seed class.</param>
+    /// <param name="primaryKeyValues">The primary key values to set in order.</param>
+    /// <typeparam name="TEntity">The type of the entity being seeded.</typeparam>
+    /// <typeparam name="TKey">The type of the primary key to set.</typeparam>
+    /// <returns>This object containing this additional customisation.</returns>
+    public static EntitySeed<TEntity> WithPrimaryKey<TEntity, TKey>(this EntitySeed<TEntity> entitySeed, params TKey[] primaryKeyValues)
         where TEntity : class
     {
-        ArgumentNullException.ThrowIfNull(seed);
+        ArgumentNullException.ThrowIfNull(entitySeed);
 
-        seed.AddCustomisation(new SeedPrimaryKeyConfiguration<TEntity, TKey>(primaryKeyValues));
-        return seed;
+        entitySeed.AddCustomisation(new SeedPrimaryKeyConfiguration<TEntity, TKey>(primaryKeyValues));
+        return entitySeed;
     }
 
     /// <summary>

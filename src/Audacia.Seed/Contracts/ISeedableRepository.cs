@@ -39,11 +39,18 @@ public interface ISeedableRepository
     IEntityModelInformation GetEntityModelInformation<TEntity>() where TEntity : class;
 
     /// <summary>
+    /// Set the primary key of <paramref name="entity"/> to <paramref name="primaryKeyValue"/>.
+    /// </summary>
+    /// <param name="entity">The entity to set the primary key on.</param>
+    /// <param name="primaryKeyValue">The value of the primary key.</param>
+    /// <typeparam name="TEntity">The type of entity we're setting the primary key on.</typeparam>
+    /// <typeparam name="TKey">The type of the primary key we're setting.</typeparam>
+    void SetPrimaryKey<TEntity, TKey>(TEntity entity, TKey primaryKeyValue) where TEntity : class;
+
+    /// <summary>
     /// Prepare the provided <paramref name="value"/> for setting if it exists in the repository.
     /// </summary>
     /// <param name="value">The value to perpare for setting.</param>
     /// <typeparam name="TEntity">The type of entity we're looking for.</typeparam>
     void PrepareToSet<TEntity>(TEntity? value);
-
-    void SetPrimaryKey<TEntity, TKey>(TEntity entity, TKey primaryKeyValue) where TEntity : class;
 }

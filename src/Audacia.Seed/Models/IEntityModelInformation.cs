@@ -13,7 +13,7 @@ public interface IEntityModelInformation
     Type EntityType { get; set; }
 
     /// <summary>
-    /// Gets or sets the property info(s) that make up the primary key.
+    /// Gets the property info(s) that make up the primary key.
     /// </summary>
     public List<PropertyInfo>? PrimaryKey { get; }
 

@@ -38,6 +38,12 @@ public class EntityFrameworkSeedableRepository : ISeedableRepository
         return _context.Set(typeof(TEntity)).Local.Cast<TEntity>().FirstOrDefault(predicate.Compile());
     }
 
+    /// <inheritdoc cref="ISeedableRepository.PrepareToSet{TEntity}"/>
+    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Required by the interface.")]
+    public void PrepareToSet<TEntity>(TEntity? value)
+    {
+    }
+
     /// <inheritdoc cref="ISeedableRepository.GetEntityModelInformation{TEntity}"/>
     public IEntityModelInformation GetEntityModelInformation<TEntity>() where TEntity : class
     {
@@ -52,16 +58,11 @@ public class EntityFrameworkSeedableRepository : ISeedableRepository
         };
     }
 
+    /// <inheritdoc />
     public void SetPrimaryKey<TEntity, TKey>(TEntity entity, TKey primaryKeyValue)
         where TEntity : class
     {
         throw new NotSupportedException("Getting the primary key for an EF6 entity is not supported");
-    }
-
-    /// <inheritdoc cref="ISeedableRepository.PrepareToSet{TEntity}"/>
-    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Required by the interface.")]
-    public void PrepareToSet<TEntity>(TEntity? value)
-    {
     }
 
     /// <inheritdoc />
