@@ -5,20 +5,20 @@ namespace Audacia.Seed.Models;
 /// <summary>
 /// Gets model information for a provided entity.
 /// </summary>
-public record EntityModelInformation
+public interface IEntityModelInformation
 {
     /// <summary>
     /// Gets or sets the type of the entity.
     /// </summary>
-    public required Type EntityType { get; set; }
+    Type EntityType { get; set; }
 
     /// <summary>
     /// Gets or sets the property info(s) that make up the primary key.
     /// </summary>
-    internal List<PropertyInfo>? PrimaryKey { get; set; }
+    public List<PropertyInfo>? PrimaryKey { get; }
 
     /// <summary>
     /// Gets or sets the list of required navigation properties for the entity.
     /// </summary>
-    internal List<NavigationPropertyConfiguration> RequiredNavigationProperties { get; set; } = [];
+    List<NavigationPropertyConfiguration> RequiredNavigationProperties { get; set; }
 }

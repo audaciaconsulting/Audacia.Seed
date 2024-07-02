@@ -267,7 +267,7 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed);
 
         var repository = new EntityFrameworkSeedableRepository(context);
-        seed.PrepareToAdd(repository);
+        seed.PrepareToSeed(repository);
         var entity = seed.Build();
 
         repository.Add(entity);
@@ -303,8 +303,8 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed2);
 
         var repository = new EntityFrameworkSeedableRepository(context);
-        seed1.PrepareToAdd(repository);
-        seed2.PrepareToAdd(repository);
+        seed1.PrepareToSeed(repository);
+        seed2.PrepareToSeed(repository);
         var entity1 = seed1.Build();
         repository.Add(entity1);
         var entity2 = seed2.Build();
@@ -347,9 +347,9 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed3);
 
         var repository = new EntityFrameworkSeedableRepository(context);
-        seed1.PrepareToAdd(repository);
-        seed2.PrepareToAdd(repository);
-        seed3.PrepareToAdd(repository);
+        seed1.PrepareToSeed(repository);
+        seed2.PrepareToSeed(repository);
+        seed3.PrepareToSeed(repository);
         var entity1 = seed1.Build();
         repository.Add(entity1);
         var entity2 = seed2.Build();
@@ -401,10 +401,10 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed4);
 
         var repository = new EntityFrameworkSeedableRepository(context);
-        seed1.PrepareToAdd(repository);
-        seed2.PrepareToAdd(repository);
-        seed3.PrepareToAdd(repository);
-        seed4.PrepareToAdd(repository);
+        seed1.PrepareToSeed(repository);
+        seed2.PrepareToSeed(repository);
+        seed3.PrepareToSeed(repository);
+        seed4.PrepareToSeed(repository);
         var entity1 = seed1.Build();
         repository.Add(entity1);
         var entity2 = seed2.Build();
@@ -463,11 +463,11 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed5);
 
         var repository = new EntityFrameworkSeedableRepository(context);
-        seed1.PrepareToAdd(repository);
-        seed2.PrepareToAdd(repository);
-        seed3.PrepareToAdd(repository);
-        seed4.PrepareToAdd(repository);
-        seed5.PrepareToAdd(repository);
+        seed1.PrepareToSeed(repository);
+        seed2.PrepareToSeed(repository);
+        seed3.PrepareToSeed(repository);
+        seed4.PrepareToSeed(repository);
+        seed5.PrepareToSeed(repository);
         var entity1 = seed1.Build();
         repository.Add(entity1);
         var entity2 = seed2.Build();
@@ -533,12 +533,12 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed6);
 
         var repository = new EntityFrameworkSeedableRepository(context);
-        seed1.PrepareToAdd(repository);
-        seed2.PrepareToAdd(repository);
-        seed3.PrepareToAdd(repository);
-        seed4.PrepareToAdd(repository);
-        seed5.PrepareToAdd(repository);
-        seed6.PrepareToAdd(repository);
+        seed1.PrepareToSeed(repository);
+        seed2.PrepareToSeed(repository);
+        seed3.PrepareToSeed(repository);
+        seed4.PrepareToSeed(repository);
+        seed5.PrepareToSeed(repository);
+        seed6.PrepareToSeed(repository);
         var entity1 = seed1.Build();
         repository.Add(entity1);
         var entity2 = seed2.Build();
@@ -611,13 +611,13 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed7);
 
         var repository = new EntityFrameworkSeedableRepository(context);
-        seed1.PrepareToAdd(repository);
-        seed2.PrepareToAdd(repository);
-        seed3.PrepareToAdd(repository);
-        seed4.PrepareToAdd(repository);
-        seed5.PrepareToAdd(repository);
-        seed6.PrepareToAdd(repository);
-        seed7.PrepareToAdd(repository);
+        seed1.PrepareToSeed(repository);
+        seed2.PrepareToSeed(repository);
+        seed3.PrepareToSeed(repository);
+        seed4.PrepareToSeed(repository);
+        seed5.PrepareToSeed(repository);
+        seed6.PrepareToSeed(repository);
+        seed7.PrepareToSeed(repository);
         var entity1 = seed1.Build();
         repository.Add(entity1);
         var entity2 = seed2.Build();
@@ -697,14 +697,14 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed8);
 
         var repository = new EntityFrameworkSeedableRepository(context);
-        seed1.PrepareToAdd(repository);
-        seed2.PrepareToAdd(repository);
-        seed3.PrepareToAdd(repository);
-        seed4.PrepareToAdd(repository);
-        seed5.PrepareToAdd(repository);
-        seed6.PrepareToAdd(repository);
-        seed7.PrepareToAdd(repository);
-        seed8.PrepareToAdd(repository);
+        seed1.PrepareToSeed(repository);
+        seed2.PrepareToSeed(repository);
+        seed3.PrepareToSeed(repository);
+        seed4.PrepareToSeed(repository);
+        seed5.PrepareToSeed(repository);
+        seed6.PrepareToSeed(repository);
+        seed7.PrepareToSeed(repository);
+        seed8.PrepareToSeed(repository);
         var entity1 = seed1.Build();
         repository.Add(entity1);
         var entity2 = seed2.Build();

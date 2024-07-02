@@ -66,7 +66,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     private static ISeedPrerequisite GetSeedPrerequisite(
         Assembly assembly,
         NavigationPropertyConfiguration requiredNavigationProperty,
-        EntityModelInformation modelInformation)
+        IEntityModelInformation modelInformation)
     {
         var prerequisiteSeed = assembly.FindSeed(requiredNavigationProperty.NavigationProperty.PropertyType);
         var par = Expression.Parameter(typeof(TEntity), "x");
@@ -91,6 +91,19 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         }
 
         return seedPrerequisite;
+    }
+
+    /// <summary>
+    /// Prepare this to be added to the <paramref name="repository"/>.
+    /// </summary>
+    /// <param name="repository">The repository to seed into.</param>
+    public void PrepareToSeed(ISeedableRepository repository)
+    {
+        Repository = repository;
+        if (Options.InsertionBehavior != SeedingInsertionBehaviour.MustFindExisting)
+        {
+            Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
+        }
     }
 
     /// <inheritdoc />

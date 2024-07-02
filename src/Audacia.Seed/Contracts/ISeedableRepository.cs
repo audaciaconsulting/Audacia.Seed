@@ -36,7 +36,7 @@ public interface ISeedableRepository
     /// </summary>
     /// <typeparam name="TEntity">The type to get the model information from.</typeparam>
     /// <returns>Entity model information for <typeparamref name="TEntity"/>.</returns>
-    EntityModelInformation GetEntityModelInformation<TEntity>() where TEntity : class;
+    IEntityModelInformation GetEntityModelInformation<TEntity>() where TEntity : class;
 
     /// <summary>
     /// Prepare the provided <paramref name="value"/> for setting if it exists in the repository.
@@ -44,4 +44,6 @@ public interface ISeedableRepository
     /// <param name="value">The value to perpare for setting.</param>
     /// <typeparam name="TEntity">The type of entity we're looking for.</typeparam>
     void PrepareToSet<TEntity>(TEntity? value);
+
+    void SetPrimaryKey<TEntity, TKey>(TEntity entity, TKey primaryKeyValue) where TEntity : class;
 }

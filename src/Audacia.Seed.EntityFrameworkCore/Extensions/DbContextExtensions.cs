@@ -251,7 +251,7 @@ public static class DbContextExtensions
     /// </summary>
     /// <param name="context">The database context to insert into.</param>
     /// <param name="seed">The seed configuration that creates the entity.</param>
-    /// <typeparam name="T1">The type of the entity to seed.</typeparam>
+    /// <typeparam name="T">The type of the entity to seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
@@ -259,25 +259,16 @@ public static class DbContextExtensions
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
-    public static T1 Seed<T1>(
+    public static T Seed<T>(
         this DbContext context,
-        EntitySeed<T1> seed)
-        where T1 : class
+        EntitySeed<T> seed)
+        where T : class
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(seed);
 
-        seed.PrepareToAdd(new EntityFrameworkCoreSeedableRepository(context));
-
-        var entity = seed.Build();
-        seed.Repository!.Add(entity);
-        context.SaveChanges();
-
-        // This removes all entity information that is currently in memory and would therefore be eagerly loaded by EF Core.
-        context.ChangeTracker.Clear();
-
-        // Reload the entity so that the state is `Unchanged` rather than `Detached` and we can subsequently use this entity for setting up other relationships.
-        context.Entry(entity).Reload();
+        var repository = new EntityFrameworkCoreSeedableRepository(context);
+        var entity = repository.PerformSeeding(seed);
 
         return entity;
     }
@@ -309,20 +300,7 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed2);
 
         var repository = new EntityFrameworkCoreSeedableRepository(context);
-        seed1.PrepareToAdd(repository);
-        seed2.PrepareToAdd(repository);
-        var entity1 = seed1.Build();
-        repository.Add(entity1);
-        var entity2 = seed2.Build();
-        repository.Add(entity2);
-
-        context.SaveChanges();
-        // This removes all entity information that is currently in memory and would therefore be eagerly loaded by EF Core.
-        context.ChangeTracker.Clear();
-
-        // Reload the entity so that the state is `Unchanged` rather than `Detached` and we can subsequently use this entity for setting up other relationships.
-        context.Entry(entity1).Reload();
-        context.Entry(entity2).Reload();
+        var (entity1, entity2) = repository.PerformSeeding(seed1, seed2);
 
         return (entity1, entity2);
     }
@@ -359,24 +337,7 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed3);
 
         var repository = new EntityFrameworkCoreSeedableRepository(context);
-        seed1.PrepareToAdd(repository);
-        seed2.PrepareToAdd(repository);
-        seed3.PrepareToAdd(repository);
-        var entity1 = seed1.Build();
-        repository.Add(entity1);
-        var entity2 = seed2.Build();
-        repository.Add(entity2);
-        var entity3 = seed3.Build();
-        repository.Add(entity3);
-
-        context.SaveChanges();
-        // This removes all entity information that is currently in memory and would therefore be eagerly loaded by EF Core.
-        context.ChangeTracker.Clear();
-
-        // Reload the entity so that the state is `Unchanged` rather than `Detached` and we can subsequently use this entity for setting up other relationships.
-        context.Entry(entity1).Reload();
-        context.Entry(entity2).Reload();
-        context.Entry(entity3).Reload();
+        var (entity1, entity2, entity3) = repository.PerformSeeding(seed1, seed2, seed3);
 
         return (entity1, entity2, entity3);
     }
@@ -420,28 +381,7 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed4);
 
         var repository = new EntityFrameworkCoreSeedableRepository(context);
-        seed1.PrepareToAdd(repository);
-        seed2.PrepareToAdd(repository);
-        seed3.PrepareToAdd(repository);
-        seed4.PrepareToAdd(repository);
-        var entity1 = seed1.Build();
-        repository.Add(entity1);
-        var entity2 = seed2.Build();
-        repository.Add(entity2);
-        var entity3 = seed3.Build();
-        repository.Add(entity3);
-        var entity4 = seed4.Build();
-        repository.Add(entity4);
-
-        context.SaveChanges();
-        // This removes all entity information that is currently in memory and would therefore be eagerly loaded by EF Core.
-        context.ChangeTracker.Clear();
-
-        // Reload the entity so that the state is `Unchanged` rather than `Detached` and we can subsequently use this entity for setting up other relationships.
-        context.Entry(entity1).Reload();
-        context.Entry(entity2).Reload();
-        context.Entry(entity3).Reload();
-        context.Entry(entity4).Reload();
+        var (entity1, entity2, entity3, entity4) = repository.PerformSeeding(seed1, seed2, seed3, seed4);
 
         return (entity1, entity2, entity3, entity4);
     }
@@ -490,32 +430,7 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed5);
 
         var repository = new EntityFrameworkCoreSeedableRepository(context);
-        seed1.PrepareToAdd(repository);
-        seed2.PrepareToAdd(repository);
-        seed3.PrepareToAdd(repository);
-        seed4.PrepareToAdd(repository);
-        seed5.PrepareToAdd(repository);
-        var entity1 = seed1.Build();
-        repository.Add(entity1);
-        var entity2 = seed2.Build();
-        repository.Add(entity2);
-        var entity3 = seed3.Build();
-        repository.Add(entity3);
-        var entity4 = seed4.Build();
-        repository.Add(entity4);
-        var entity5 = seed5.Build();
-        repository.Add(entity5);
-
-        context.SaveChanges();
-        // This removes all entity information that is currently in memory and would therefore be eagerly loaded by EF Core.
-        context.ChangeTracker.Clear();
-
-        // Reload the entity so that the state is `Unchanged` rather than `Detached` and we can subsequently use this entity for setting up other relationships.
-        context.Entry(entity1).Reload();
-        context.Entry(entity2).Reload();
-        context.Entry(entity3).Reload();
-        context.Entry(entity4).Reload();
-        context.Entry(entity5).Reload();
+        var (entity1, entity2, entity3, entity4, entity5) = repository.PerformSeeding(seed1, seed2, seed3, seed4, seed5);
 
         return (entity1, entity2, entity3, entity4, entity5);
     }
@@ -569,36 +484,7 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed6);
 
         var repository = new EntityFrameworkCoreSeedableRepository(context);
-        seed1.PrepareToAdd(repository);
-        seed2.PrepareToAdd(repository);
-        seed3.PrepareToAdd(repository);
-        seed4.PrepareToAdd(repository);
-        seed5.PrepareToAdd(repository);
-        seed6.PrepareToAdd(repository);
-        var entity1 = seed1.Build();
-        repository.Add(entity1);
-        var entity2 = seed2.Build();
-        repository.Add(entity2);
-        var entity3 = seed3.Build();
-        repository.Add(entity3);
-        var entity4 = seed4.Build();
-        repository.Add(entity4);
-        var entity5 = seed5.Build();
-        repository.Add(entity5);
-        var entity6 = seed6.Build();
-        repository.Add(entity6);
-
-        context.SaveChanges();
-        // This removes all entity information that is currently in memory and would therefore be eagerly loaded by EF Core.
-        context.ChangeTracker.Clear();
-
-        // Reload the entity so that the state is `Unchanged` rather than `Detached` and we can subsequently use this entity for setting up other relationships.
-        context.Entry(entity1).Reload();
-        context.Entry(entity2).Reload();
-        context.Entry(entity3).Reload();
-        context.Entry(entity4).Reload();
-        context.Entry(entity5).Reload();
-        context.Entry(entity6).Reload();
+        var (entity1, entity2, entity3, entity4, entity5, entity6) = repository.PerformSeeding(seed1, seed2, seed3, seed4, seed5, seed6);
 
         return (entity1, entity2, entity3, entity4, entity5, entity6);
     }
@@ -657,40 +543,7 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed7);
 
         var repository = new EntityFrameworkCoreSeedableRepository(context);
-        seed1.PrepareToAdd(repository);
-        seed2.PrepareToAdd(repository);
-        seed3.PrepareToAdd(repository);
-        seed4.PrepareToAdd(repository);
-        seed5.PrepareToAdd(repository);
-        seed6.PrepareToAdd(repository);
-        seed7.PrepareToAdd(repository);
-        var entity1 = seed1.Build();
-        repository.Add(entity1);
-        var entity2 = seed2.Build();
-        repository.Add(entity2);
-        var entity3 = seed3.Build();
-        repository.Add(entity3);
-        var entity4 = seed4.Build();
-        repository.Add(entity4);
-        var entity5 = seed5.Build();
-        repository.Add(entity5);
-        var entity6 = seed6.Build();
-        repository.Add(entity6);
-        var entity7 = seed7.Build();
-        repository.Add(entity7);
-
-        context.SaveChanges();
-        // This removes all entity information that is currently in memory and would therefore be eagerly loaded by EF Core.
-        context.ChangeTracker.Clear();
-
-        // Reload the entity so that the state is `Unchanged` rather than `Detached` and we can subsequently use this entity for setting up other relationships.
-        context.Entry(entity1).Reload();
-        context.Entry(entity2).Reload();
-        context.Entry(entity3).Reload();
-        context.Entry(entity4).Reload();
-        context.Entry(entity5).Reload();
-        context.Entry(entity6).Reload();
-        context.Entry(entity7).Reload();
+        var (entity1, entity2, entity3, entity4, entity5, entity6, entity7) = repository.PerformSeeding(seed1, seed2, seed3, seed4, seed5, seed6, seed7);
 
         return (entity1, entity2, entity3, entity4, entity5, entity6, entity7);
     }
@@ -754,44 +607,7 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed8);
 
         var repository = new EntityFrameworkCoreSeedableRepository(context);
-        seed1.PrepareToAdd(repository);
-        seed2.PrepareToAdd(repository);
-        seed3.PrepareToAdd(repository);
-        seed4.PrepareToAdd(repository);
-        seed5.PrepareToAdd(repository);
-        seed6.PrepareToAdd(repository);
-        seed7.PrepareToAdd(repository);
-        seed8.PrepareToAdd(repository);
-        var entity1 = seed1.Build();
-        repository.Add(entity1);
-        var entity2 = seed2.Build();
-        repository.Add(entity2);
-        var entity3 = seed3.Build();
-        repository.Add(entity3);
-        var entity4 = seed4.Build();
-        repository.Add(entity4);
-        var entity5 = seed5.Build();
-        repository.Add(entity5);
-        var entity6 = seed6.Build();
-        repository.Add(entity6);
-        var entity7 = seed7.Build();
-        repository.Add(entity7);
-        var entity8 = seed8.Build();
-        repository.Add(entity8);
-
-        context.SaveChanges();
-        // This removes all entity information that is currently in memory and would therefore be eagerly loaded by EF Core.
-        context.ChangeTracker.Clear();
-
-        // Reload the entity so that the state is `Unchanged` rather than `Detached` and we can subsequently use this entity for setting up other relationships.
-        context.Entry(entity1).Reload();
-        context.Entry(entity2).Reload();
-        context.Entry(entity3).Reload();
-        context.Entry(entity4).Reload();
-        context.Entry(entity5).Reload();
-        context.Entry(entity6).Reload();
-        context.Entry(entity7).Reload();
-        context.Entry(entity8).Reload();
+        var (entity1, entity2, entity3, entity4, entity5, entity6, entity7, entity8) = repository.PerformSeeding(seed1, seed2, seed3, seed4, seed5, seed6, seed7, seed8);
 
         return (entity1, entity2, entity3, entity4, entity5, entity6, entity7, entity8);
     }
@@ -813,25 +629,9 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(seed);
 
-        seed.Repository = new EntityFrameworkCoreSeedableRepository(context);
-        var entities = seed.BuildMany(amountToCreate).ToList();
-
-        foreach (var entity in entities)
-        {
-            seed.Repository!.Add(entity);
-        }
-
-        context.SaveChanges();
-
-        // This removes all entity information that is currently in memory and would therefore be eagerly loaded by EF Core.
-        context.ChangeTracker.Clear();
-
-        foreach (var entity in entities)
-        {
-            // Reload the entity so that the state is `Unchanged` rather than `Detached` and we can subsequently use this entity for setting up other relationships.
-            context.Entry(entity).Reload();
-        }
-
+        var repository = new EntityFrameworkCoreSeedableRepository(context);
+        var entities = repository.SeedMany(amountToCreate, seed);
+        repository.Save();
         return entities;
     }
 
@@ -852,35 +652,5 @@ public static class DbContextExtensions
         var seed = EntryPointAssembly.Load().FindSeed<TEntity>();
 
         return context.SeedMany(amountToCreate, seed);
-    }
-
-    /// <summary>
-    /// Seed many entities and immediately return it.
-    /// </summary>
-    /// <param name="context">The database context to insert into.</param>
-    /// <param name="seeds">The entity seed configurations.</param>
-    [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
-        Justification = "We want to save once so each method is doing everything itself.")]
-    public static void Seed(
-        this DbContext context,
-        params IEntitySeed[] seeds)
-    {
-        ArgumentNullException.ThrowIfNull(context);
-        ArgumentNullException.ThrowIfNull(seeds);
-
-        foreach (var seed in seeds)
-        {
-            if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.MustFindExisting)
-            {
-                seed.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
-            }
-
-            seed.PerformSeeding(new EntityFrameworkCoreSeedableRepository(context));
-        }
-
-        context.SaveChanges();
-
-        // This removes all entity information that is currently in memory and would therefore be eagerly loaded by EF Core.
-        context.ChangeTracker.Clear();
     }
 }

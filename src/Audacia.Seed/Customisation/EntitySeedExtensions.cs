@@ -477,6 +477,15 @@ public static class EntitySeedExtensions
         return entitySeed;
     }
 
+    public static EntitySeed<TEntity> WithPrimaryKey<TEntity, TKey>(this EntitySeed<TEntity> seed, params TKey[] primaryKeyValues)
+        where TEntity : class
+    {
+        ArgumentNullException.ThrowIfNull(seed);
+
+        seed.AddCustomisation(new SeedPrimaryKeyConfiguration<TEntity, TKey>(primaryKeyValues));
+        return seed;
+    }
+
     /// <summary>
     /// Return a predicate that can be used to match an entity seed to an entity.
     /// </summary>
@@ -500,27 +509,6 @@ public static class EntitySeedExtensions
             .Aggregate((first, second) => first.And(second)));
 
         return combinedFilter;
-    }
-
-    /// <summary>
-    /// Prepare the <paramref name="seed"/> to be added to the <paramref name="repository"/>.
-    /// </summary>
-    /// <param name="seed">The seed to prepare.</param>
-    /// <param name="repository">The repository to seed into.</param>
-    /// <typeparam name="TEntity">The type of entity to seed.</typeparam>
-    /// <returns>The entity seed.</returns>
-    public static EntitySeed<TEntity> PrepareToAdd<TEntity>(this EntitySeed<TEntity> seed, ISeedableRepository repository)
-        where TEntity : class
-    {
-        ArgumentNullException.ThrowIfNull(seed);
-
-        seed.Repository = repository;
-        if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.MustFindExisting)
-        {
-            seed.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
-        }
-
-        return seed;
     }
 
     private static void WithDifferentRecursive<TEntity, TNavigation>(

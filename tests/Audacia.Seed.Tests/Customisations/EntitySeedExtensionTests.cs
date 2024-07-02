@@ -893,6 +893,68 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
+    public void WithPrimaryKey_IncorrectPropertyTypeProvided_ExceptionThrown()
+    {
+        var seed = new EntitySeed<Booking>()
+            .WithPrimaryKey(Guid.NewGuid().ToString());
+
+        var act = () => _context.Seed(seed);
+
+        act.Should()
+            .ThrowExactly<DataSeedingException>("we should not be able to set the incorrect type for the primary key");
+    }
+
+    [Fact]
+    public void WithPrimaryKey_EntityHasCompositeKey_ExceptionThrown()
+    {
+        var seed = new EntitySeed<CouponIssuer>()
+            .WithPrimaryKey(1);
+
+        var act = () => _context.Seed(seed);
+
+        act.Should()
+            .ThrowExactly<DataSeedingException>("we should not be able to do this for entities with composite keys");
+    }
+
+    [Fact]
+    public void WithPrimaryKey_ExampleProvided_SavesThePrimaryKeyCorrectly()
+    {
+        // Arbitrary primary key value
+        const int firstPimaryKeyValue = 12834238;
+        var firstSeed = new EntitySeed<Booking>()
+            .WithPrimaryKey(firstPimaryKeyValue);
+        var firstBooking = _context.Seed(firstSeed);
+
+        // See if we can seed another one with a lower int PK
+        const int secondPrimaryKeyValue = 11111;
+        var secondSeed = new EntitySeed<Booking>()
+            .WithPrimaryKey(secondPrimaryKeyValue);
+        var secondBooking = _context.Seed(secondSeed);
+
+        using (new AssertionScope())
+        {
+            firstBooking.Id.Should().Be(firstPimaryKeyValue);
+            secondBooking.Id.Should().Be(secondPrimaryKeyValue);
+        }
+    }
+
+    [Fact]
+    public void WithPrimaryKey_SeedingMany_SavesThePrimaryKeyCorrectly()
+    {
+        // Arbitrary primary key value
+        int[] primaryKeyValues = [50, 55, 12];
+        var firstSeed = new EntitySeed<Booking>()
+            .WithPrimaryKey(primaryKeyValues);
+
+        var bookings = _context.SeedMany(3, firstSeed);
+
+        using (new AssertionScope())
+        {
+            bookings.Select(b => b.Id).Should().BeEquivalentTo(primaryKeyValues);
+        }
+    }
+
+    [Fact]
     public void BookingBelongsToFacilitiesWhichMayNotBeInTheSameRoom_DataSeededCorrectly()
     {
         var room = _context.Seed<Room>();
@@ -1225,7 +1287,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         using (new AssertionScope())
         {
             var members = _context.Set<Member>().ToList();
-            members.Should().HaveCount(amountToCreate, "we should overwrite the default seed doing a WithDifferent explicitly");
+            members.Should().HaveCount(amountToCreate,
+                "we should overwrite the default seed doing a WithDifferent explicitly");
             var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member).ToList();
             bookingsAfterSave.Select(b => b.Member.FirstName).Should()
                 .BeEquivalentTo(["John", "Jane"]);

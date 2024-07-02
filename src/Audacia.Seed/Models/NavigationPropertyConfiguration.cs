@@ -7,4 +7,4 @@ namespace Audacia.Seed.Models;
 /// </summary>
 /// <param name="NavigationProperty">Property info for the navigation property.</param>
 /// <param name="ForeignKeyProperty">Property info for the corresponding FK, if exists.</param>
-internal record NavigationPropertyConfiguration(PropertyInfo NavigationProperty, PropertyInfo? ForeignKeyProperty);
+public record NavigationPropertyConfiguration(PropertyInfo NavigationProperty, PropertyInfo? ForeignKeyProperty);

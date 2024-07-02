@@ -1,8 +1,8 @@
 using System.Data.Entity;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
-using System.Reflection;
 using Audacia.Seed.Contracts;
+using Audacia.Seed.EntityFramework.Models;
 using Audacia.Seed.Extensions;
 using Audacia.Seed.Models;
 
@@ -39,17 +39,23 @@ public class EntityFrameworkSeedableRepository : ISeedableRepository
     }
 
     /// <inheritdoc cref="ISeedableRepository.GetEntityModelInformation{TEntity}"/>
-    public EntityModelInformation GetEntityModelInformation<TEntity>() where TEntity : class
+    public IEntityModelInformation GetEntityModelInformation<TEntity>() where TEntity : class
     {
         var requiredNavigationProperties = typeof(TEntity).GetRequiredNavigationProperties()
             .Select(p => new NavigationPropertyConfiguration(p, null))
             .ToList();
 
-        return new EntityModelInformation
+        return new EntityFrameworkModelInformation
         {
             EntityType = typeof(TEntity),
             RequiredNavigationProperties = requiredNavigationProperties!
         };
+    }
+
+    public void SetPrimaryKey<TEntity, TKey>(TEntity entity, TKey primaryKeyValue)
+        where TEntity : class
+    {
+        throw new NotSupportedException("Getting the primary key for an EF6 entity is not supported");
     }
 
     /// <inheritdoc cref="ISeedableRepository.PrepareToSet{TEntity}"/>
