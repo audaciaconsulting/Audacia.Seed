@@ -21,6 +21,21 @@ public class
     where TChildNavigation : class
     where TSeed : EntitySeed<TChildNavigation>
 {
+    /// <summary>
+    /// Gets a lambda to the property to populate.
+    /// </summary>
+    private Expression<Func<TEntity, IEnumerable<TChildNavigation>>> Getter { get; } = getter;
+
+    /// <summary>
+    /// Gets a list of seed configurations to use, in order in which they will be used.
+    /// </summary>
+    private TSeed SeedConfiguration { get; } = seedConfiguration;
+
+    /// <summary>
+    /// Gets how many children to create.
+    /// </summary>
+    private int AmountOfChildren { get; } = amountOfChildren;
+
     /// <inheritdoc/>
     public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
     {
@@ -40,20 +55,20 @@ public class
         return seedToReturn;
     }
 
-    /// <summary>
-    /// Gets a lambda to the property to populate.
-    /// </summary>
-    private Expression<Func<TEntity, IEnumerable<TChildNavigation>>> Getter { get; } = getter;
-
-    /// <summary>
-    /// Gets a list of seed configurations to use, in order in which they will be used.
-    /// </summary>
-    private TSeed SeedConfiguration { get; } = seedConfiguration;
-
-    /// <summary>
-    /// Gets how many children to create.
-    /// </summary>
-    private int AmountOfChildren { get; } = amountOfChildren;
+    /// <inheritdoc />
+    public void Merge(ISeedCustomisation<TEntity> other)
+    {
+        if (other is SeedChildNavigationPropertyConfiguration<TEntity, TChildNavigation, EntitySeed<TChildNavigation>>
+            otherSeed)
+        {
+            var newCustomisations = otherSeed.SeedConfiguration.Customisations
+                .Where(c => !SeedConfiguration.Customisations.Contains(c));
+            foreach (var customisation in newCustomisations)
+            {
+                SeedConfiguration.Customisations.Add(customisation);
+            }
+        }
+    }
 
     /// <inheritdoc />
     public void Apply(TEntity entity, ISeedableRepository repository, int index, TEntity? previous)

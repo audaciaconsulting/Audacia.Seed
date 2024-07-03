@@ -66,4 +66,9 @@ public class SeedPropertyConfiguration<TEntity, TProperty>(Expression<Func<TEnti
         var lambda = Expression.Lambda<Func<TEntity, bool>>(comparison, Getter.Parameters);
         return lambda;
     }
+
+    /// <inheritdoc />
+    public void Merge(ISeedCustomisation<TEntity> other)
+    {
+    }
 }

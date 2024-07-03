@@ -10,7 +10,7 @@ namespace Audacia.Seed.Properties;
 
 /// <summary>
 /// Seed a navigation property (via a <see cref="IEntitySeed"/>) on a provided entity with many seeds.
-/// Similar to <see cref="SeedDifferentNavigationPropertyConfiguration{TEntity,TNavigation,TSeed}"/>, but some children might share the same parent.
+/// Similar to <see cref="SeedDifferentNavigationPropertyConfiguration{TEntity,TNavigation}"/>, but some children might share the same parent.
 /// </summary>
 /// <typeparam name="TEntity">The type with the property to populate.</typeparam>
 /// <typeparam name="TNavigation">The type of the destination property.</typeparam>
@@ -100,5 +100,10 @@ public class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation>
         {
             throw new DataSeedingException($"We are building {entitySeed.Options.AmountToCreate} entities of type {typeof(TEntity).Name}, but {SeedConfigurations.Count} were provided.");
         }
+    }
+
+    /// <inheritdoc />
+    public void Merge(ISeedCustomisation<TEntity> other)
+    {
     }
 }

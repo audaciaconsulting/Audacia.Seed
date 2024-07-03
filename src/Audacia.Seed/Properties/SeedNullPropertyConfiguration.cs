@@ -82,4 +82,9 @@ public class SeedNullPropertyConfiguration<TEntity, TProperty>(Expression<Func<T
     {
         return Getter.GetPropertyInfo().GetHashCode();
     }
+
+    /// <inheritdoc />
+    public void Merge(ISeedCustomisation<TEntity> other)
+    {
+    }
 }

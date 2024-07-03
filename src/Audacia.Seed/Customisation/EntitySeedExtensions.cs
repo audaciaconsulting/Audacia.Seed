@@ -276,7 +276,7 @@ public static class EntitySeedExtensions
         }
         else
         {
-            entitySeed.AddCustomisation(new SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation, TSeed>(
+            entitySeed.AddCustomisation(new SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
                 getter,
                 seedConfiguration));
         }
@@ -570,7 +570,7 @@ public static class EntitySeedExtensions
         LambdaExpression left,
         IEntitySeed seed) where TEntity : class
     {
-        var typeInfo = typeof(SeedNavigationPropertyConfiguration<,>).MakeGenericType(
+        var typeInfo = typeof(SeedDifferentNavigationPropertyConfiguration<,>).MakeGenericType(
             typeof(TEntity),
             left.Body.Type);
         object[] newArgs = [left, seed];

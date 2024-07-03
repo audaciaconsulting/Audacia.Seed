@@ -44,7 +44,7 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     /// <summary>
     /// Gets a lambda to the property to populate.
     /// </summary>
-    private Expression<Func<TEntity, TNavigation?>> Getter { get; } = getter;
+    internal Expression<Func<TEntity, TNavigation?>> Getter { get; } = getter;
 
     /// <summary>
     /// Gets a list of seed configurations to use, in order in which they will be used.
@@ -77,7 +77,8 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     {
         TNavigation? value = null;
         if ((navigationSeed.Options.InsertionBehavior == SeedingInsertionBehaviour.MustFindExisting ||
-            navigationSeed.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew && !navigationSeed.HasCustomisations)
+             navigationSeed.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew &&
+             !navigationSeed.HasCustomisations)
             && navigationSeed is EntitySeed<TNavigation> navigationSeedAsEntitySeed)
         {
             value = repository.FindLocal(navigationSeedAsEntitySeed.ToPredicate(index));
@@ -115,11 +116,11 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     /// <returns>Whether this object equals the <paramref name="obj"/>.</returns>
     public override bool Equals(object? obj)
     {
-        if (obj is SeedNavigationPropertyConfiguration<TEntity, TNavigation> other)
+        if (obj is SeedNavigationPropertyConfiguration<TEntity, TNavigation> navigationCustomisation)
         {
             // Protect against doing the same WithDifferent twice
-            return Getter.GetPropertyInfo() == other.Getter.GetPropertyInfo()
-                && SeedConfiguration == other.SeedConfiguration;
+            return Getter.GetPropertyInfo() == navigationCustomisation.Getter.GetPropertyInfo()
+                   && SeedConfiguration == navigationCustomisation.SeedConfiguration;
         }
 
         return false;
@@ -132,5 +133,23 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     public override int GetHashCode()
     {
         return Getter.GetPropertyInfo().GetHashCode() ^ SeedConfiguration.GetHashCode();
+    }
+
+    /// <inheritdoc />
+    public void Merge(ISeedCustomisation<TEntity> other)
+    {
+        if (SeedConfiguration is EntitySeed<TEntity> entitySeed
+            && other is SeedNavigationPropertyConfiguration<TEntity, TNavigation>
+            {
+                SeedConfiguration: EntitySeed<TEntity> otherSeed
+            })
+        {
+            var newCustomisations = otherSeed.Customisations
+                .Where(c => !otherSeed.Customisations.Contains(c));
+            foreach (var customisation in newCustomisations)
+            {
+                entitySeed.Customisations.Add(customisation);
+            }
+        }
     }
 }
