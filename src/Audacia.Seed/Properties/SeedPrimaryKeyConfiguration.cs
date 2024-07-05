@@ -45,4 +45,9 @@ public class SeedPrimaryKeyConfiguration<TEntity, TKey>(TKey[] primaryKeyValue) 
             throw new DataSeedingException($"We are building {entitySeed.Options.AmountToCreate} entities of type {typeof(TEntity).Name}, but {_primaryKeyValue.Length} were provided.");
         }
     }
+
+    /// <inheritdoc />
+    public void Merge(ISeedCustomisation<TEntity> other)
+    {
+    }
 }

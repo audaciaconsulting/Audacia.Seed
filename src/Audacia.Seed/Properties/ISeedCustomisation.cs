@@ -53,4 +53,10 @@ public interface ISeedCustomisation<TEntity>
     /// <param name="getter">An expression lambda to the property being customised.</param>
     /// <returns>A seed configuration if the getter represents the same member as this. Otherwise null.</returns>
     IEntitySeed? FindSeedForGetter(LambdaExpression getter);
+
+    /// <summary>
+    /// Merge this customisation with another.
+    /// </summary>
+    /// <param name="other">The other customisation to merge in.</param>
+    void Merge(ISeedCustomisation<TEntity> other);
 }

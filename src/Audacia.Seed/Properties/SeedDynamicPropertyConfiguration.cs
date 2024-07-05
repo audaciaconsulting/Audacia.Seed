@@ -76,4 +76,9 @@ public class SeedDynamicPropertyConfiguration<TEntity, TProperty>(
             throw new DataSeedingException($"We are building {entitySeed.Options.AmountToCreate} entities of type {typeof(TEntity).Name}, but {AmountOfValuesToSet} were provided.");
         }
     }
+
+    /// <inheritdoc />
+    public void Merge(ISeedCustomisation<TEntity> other)
+    {
+    }
 }

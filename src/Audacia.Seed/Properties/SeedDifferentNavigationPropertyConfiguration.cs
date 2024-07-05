@@ -13,14 +13,12 @@ namespace Audacia.Seed.Properties;
 /// </summary>
 /// <typeparam name="TEntity">The type with the property to populate.</typeparam>
 /// <typeparam name="TNavigation">The type of the destination property.</typeparam>
-/// <typeparam name="TSeed">An <see cref="IEntitySeed"/> for the navigation property.</typeparam>
-public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation, TSeed>(
+public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
     Expression<Func<TEntity, TNavigation?>> getter,
-    TSeed seedConfiguration)
+    EntitySeed<TNavigation> seedConfiguration)
     : ISeedCustomisation<TEntity>
     where TEntity : class
     where TNavigation : class
-    where TSeed : EntitySeed<TNavigation>
 {
     /// <inheritdoc/>
     public int Order => 0;
@@ -40,19 +38,18 @@ public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation, 
             return null;
         }
 
-        var seedToReturn = SeedConfiguration as EntitySeed<TNavigation>;
-        return seedToReturn;
+        return SeedConfiguration;
     }
 
     /// <summary>
     /// Gets a lambda to the property to populate.
     /// </summary>
-    private Expression<Func<TEntity, TNavigation?>> Getter { get; } = getter;
+    internal Expression<Func<TEntity, TNavigation?>> Getter { get; } = getter;
 
     /// <summary>
     /// Gets the seed configuration to use.
     /// </summary>
-    private TSeed SeedConfiguration { get; } = seedConfiguration;
+    private EntitySeed<TNavigation> SeedConfiguration { get; } = seedConfiguration;
 
     /// <inheritdoc />
     public void Apply(TEntity entity, ISeedableRepository repository, int index, TEntity? previous)
@@ -115,10 +112,10 @@ public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation, 
     /// <returns>Whether this object equals the <paramref name="obj"/>.</returns>
     public override bool Equals(object? obj)
     {
-        if (obj is SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation, TSeed> other)
+        if (obj is SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation> differentCustomisation)
         {
             // Protect against doing the same WithDifferent twice
-            return Getter.GetPropertyInfo() == other.Getter.GetPropertyInfo();
+            return Getter.GetPropertyInfo() == differentCustomisation.Getter.GetPropertyInfo();
         }
 
         return false;
@@ -131,5 +128,20 @@ public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation, 
     public override int GetHashCode()
     {
         return Getter.GetPropertyInfo().GetHashCode();
+    }
+
+    /// <inheritdoc />
+    public void Merge(ISeedCustomisation<TEntity> other)
+    {
+        if (other is SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>
+            otherSeed)
+        {
+            var newCustomisations = otherSeed.SeedConfiguration.Customisations
+                .Where(c => !SeedConfiguration.Customisations.Contains(c));
+            foreach (var customisation in newCustomisations)
+            {
+                SeedConfiguration.Customisations.Add(customisation);
+            }
+        }
     }
 }

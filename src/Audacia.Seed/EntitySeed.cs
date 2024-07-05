@@ -264,7 +264,15 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     /// <param name="customisation">The customisation to add.</param>
     public void AddCustomisation(ISeedCustomisation<TEntity> customisation)
     {
-        Customisations.Add(customisation);
+        var matchingCustomisation = Customisations.Find(c => c.Equals(customisation));
+        if (matchingCustomisation != null)
+        {
+            matchingCustomisation.Merge(customisation);
+        }
+        else
+        {
+            Customisations.Add(customisation);
+        }
     }
 
     /// <summary>

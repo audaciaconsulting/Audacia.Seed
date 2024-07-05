@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Audacia.Seed.Customisation;
 using Audacia.Seed.EntityFrameworkCore.Extensions;
 using Audacia.Seed.Exceptions;
@@ -1130,6 +1131,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
+    [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
+        Justification = "We are testing a complicated data setup & need to perform many asserts as a result.")]
     public void MultipleWithDifferentSpecified_IsNotOverwritten()
     {
         var entitySeed = new BookingSeed()
@@ -1148,12 +1151,22 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var ownerIds = bookingAfterSave.ConvertAll(b => b.Facility.OwnerId).Distinct().ToList();
         var poolIds = bookingAfterSave.ConvertAll(b => b.Facility.PoolId).Distinct().ToList();
         var membershipGroupIds = bookingAfterSave.ConvertAll(b => b.Member.MembershipGroupId).Distinct().ToList();
+        var members = _context.Set<Member>().ToList();
+        var membershipGroups = _context.Set<MembershipGroup>().ToList();
+        var facilities = _context.Set<Facility>().ToList();
+        var owners = _context.Set<Employee>().Where(e => e.FacilitiesOwned.Any()).ToList();
+        var pools = _context.Set<Pool>().ToList();
 
         using (new AssertionScope())
         {
             ownerIds.Should().HaveCount(bookingsToCreate);
             poolIds.Should().HaveCount(bookingsToCreate);
             membershipGroupIds.Should().HaveCount(bookingsToCreate);
+            members.Should().HaveCount(bookingsToCreate);
+            membershipGroups.Should().HaveCount(bookingsToCreate);
+            facilities.Should().HaveCount(bookingsToCreate);
+            owners.Should().HaveCount(bookingsToCreate);
+            pools.Should().HaveCount(bookingsToCreate);
         }
     }
 
@@ -1297,6 +1310,31 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
+    public void SpecifyingExplicitPropertyForGrandparentInOrder_DoesNotSeedMoreDataThanItShould()
+    {
+        var bookingSeed = new EntitySeed<Booking>()
+            .WithDifferent(b => b.Member.MembershipGroup)
+            .With(b => b.Member.MembershipGroup.Name, "Group 1", "Group 2");
+        const int amountToCreate = 2;
+        _context.SeedMany(amountToCreate, bookingSeed);
+
+        using (new AssertionScope())
+        {
+            var members = _context.Set<Member>().ToList();
+            members.Should().HaveCount(
+                amountToCreate,
+                "we should overwrite the default seed doing a WithDifferent explicitly");
+            var groups = _context.Set<MembershipGroup>().ToList();
+            groups.Should().HaveCount(
+                amountToCreate,
+                "we should overwrite the default seed doing a WithDifferent explicitly");
+            var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
+            bookingsAfterSave.Select(b => b.Member.MembershipGroup.Name).Should()
+                .BeEquivalentTo(["Group 1", "Group 2"]);
+        }
+    }
+
+    [Fact]
     public void SeedingChildrenWithDifferentBaseClassInheritors_CanChildrenOfDifferentTypes()
     {
         IEntitySeed<Asset>[] seeds =
@@ -1317,6 +1355,49 @@ public sealed class EntitySeedExtensionTests : IDisposable
             savedAssets.OfType<EmployeeAsset>().Should().HaveCount(1);
             savedAssets.OfType<PoolAsset>().Should().HaveCount(1);
             savedAssets.OfType<RoomAsset>().Should().HaveCount(1);
+        }
+    }
+
+    [Fact]
+    public void MultipleWithCallsPartiallyMatchTheGetter_CorrectAmountOfDataIsSeeded()
+    {
+        // These .WithDifferent calls contain pa
+        _context.SeedMany(2, new BookingSeed()
+            .With(b => b.Member.FirstName, "John", "Jane")
+            .With(b => b.Member.MembershipGroup.Name, "Group 1", "Group 2"));
+
+        var bookings = _context.Set<Booking>().ToList();
+        var members = _context.Set<Member>().ToList();
+        var membershipGroups = _context.Set<MembershipGroup>().ToList();
+        using (new AssertionScope())
+        {
+            bookings.Should().HaveCount(2);
+            members.Should().HaveCount(2);
+            membershipGroups.Should().HaveCount(2);
+
+            members.All(m => m.Bookings.Count == 1).Should().BeTrue();
+            membershipGroups.All(m => m.Members.Count == 1).Should().BeTrue();
+        }
+    }
+
+    [Fact]
+    public void MultipleWithDifferentCallsPartiallyMatchTheGetter_CorrectAmountOfDataIsSeeded()
+    {
+        _context.SeedMany(2, new BookingSeed()
+            .WithDifferent(b => b.Member)
+            .WithDifferent(b => b.Member.MembershipGroup));
+
+        var bookings = _context.Set<Booking>().ToList();
+        var members = _context.Set<Member>().ToList();
+        var membershipGroups = _context.Set<MembershipGroup>().ToList();
+        using (new AssertionScope())
+        {
+            bookings.Should().HaveCount(2);
+            members.Should().HaveCount(2);
+            membershipGroups.Should().HaveCount(2);
+
+            members.All(m => m.Bookings.Count == 1).Should().BeTrue();
+            membershipGroups.All(m => m.Members.Count == 1).Should().BeTrue();
         }
     }
 

@@ -101,4 +101,9 @@ public class SeedExistingNavigationPropertyConfiguration<TEntity, TNavigation>(
 
         return prerequisite.PropertyInfo == Getter.GetPropertyInfo();
     }
+
+    /// <inheritdoc />
+    public void Merge(ISeedCustomisation<TEntity> other)
+    {
+    }
 }
