@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Audacia.Seed.Attributes;
 using Audacia.Seed.Exceptions;
+using Audacia.Seed.Helpers;
 
 namespace Audacia.Seed.Extensions;
 
@@ -25,6 +26,12 @@ internal static class AssemblyExtensions
     {
         ArgumentNullException.ThrowIfNull(assembly);
 
+        if (TypeCaches.SeedClassTypes.ContainsKey(typeof(TEntity)))
+        {
+            var seedClassType = TypeCaches.SeedClassTypes[typeof(TEntity)];
+            return (EntitySeed<TEntity>)Activator.CreateInstance(seedClassType)!;
+        }
+
         var seedAssemblies = assembly.GetCustomAttributes<SeedAssemblyAttribute>()
             .Select(seedAssemblyAttribute => Assembly.Load(seedAssemblyAttribute.Name) ?? throw new DataSeedingException($"Unable to load assembly {seedAssemblyAttribute.Name}. Ensure it is referenced in the project."))
             .ToList();
@@ -38,6 +45,9 @@ internal static class AssemblyExtensions
             .Select(Activator.CreateInstance)
             .Cast<EntitySeed<TEntity>>()
             .FirstOrDefault() ?? new EntitySeed<TEntity>();
+
+        var seedConfigurationType = seedConfiguration.GetType();
+        TypeCaches.SeedClassTypes.AddOrUpdate(typeof(TEntity), seedConfigurationType, (_, _) => seedConfigurationType);
 
         return seedConfiguration;
     }
