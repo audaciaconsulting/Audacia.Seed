@@ -46,14 +46,28 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     /// <returns>A list of prerequisites that will be seeded before this.</returns>
     public virtual IEnumerable<ISeedPrerequisite> Prerequisites()
     {
-        var modelInformation = Repository!.GetEntityModelInformation<TEntity>();
-        List<ISeedPrerequisite> prerequisites = [];
-        if (!modelInformation.RequiredNavigationProperties.Any())
+        if (TypeCaches.Prerequisites.ContainsKey(typeof(TEntity)))
         {
-            return prerequisites;
+            return TypeCaches.Prerequisites[typeof(TEntity)];
         }
 
+        var modelInformation = Repository!.GetEntityModelInformation<TEntity>();
+        if (!modelInformation.RequiredNavigationProperties.Any())
+        {
+            return [];
+        }
+
+        var prerequisites = GetSeedPrerequisites(modelInformation);
+
+        TypeCaches.Prerequisites.AddOrUpdate(typeof(TEntity), prerequisites, (_, existing) => existing.Union(prerequisites));
+
+        return prerequisites;
+    }
+
+    private static List<ISeedPrerequisite> GetSeedPrerequisites(IEntityModelInformation modelInformation)
+    {
         var assembly = EntryPointAssembly.Load();
+        List<ISeedPrerequisite> prerequisites = [];
         foreach (var requiredNavigationProperty in modelInformation.RequiredNavigationProperties)
         {
             var seedPrerequisite = GetSeedPrerequisite(assembly, requiredNavigationProperty, modelInformation);

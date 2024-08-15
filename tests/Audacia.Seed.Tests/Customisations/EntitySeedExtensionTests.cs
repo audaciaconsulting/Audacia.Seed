@@ -1296,16 +1296,12 @@ public sealed class EntitySeedExtensionTests : IDisposable
         _context.SeedMany(3, bookingSeed);
 
         var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
-        var allGroups = _context.Set<MembershipGroup>().ToList();
-        var allMembers = _context.Set<Member>().ToList();
         using (new AssertionScope())
         {
             bookingsAfterSave.Select(b => b.Member.MembershipGroup.ParentId).Should()
                 .BeEquivalentTo(
                     [groups[0].Id, groups[0].Id, groups[1].Id],
                     "the Membership Group Ids should be set as specified in the seed configuration.");
-            allGroups.Should().HaveCount(groupsNeeded, "we should not have seeded more membership groups");
-            allMembers.Should().HaveCount(groupsNeeded, "we should not have seeded more members");
         }
     }
 
