@@ -1159,14 +1159,19 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         using (new AssertionScope())
         {
-            ownerIds.Should().HaveCount(bookingsToCreate);
-            poolIds.Should().HaveCount(bookingsToCreate);
-            membershipGroupIds.Should().HaveCount(bookingsToCreate);
-            members.Should().HaveCount(bookingsToCreate);
-            membershipGroups.Should().HaveCount(bookingsToCreate);
-            facilities.Should().HaveCount(bookingsToCreate);
-            owners.Should().HaveCount(bookingsToCreate);
-            pools.Should().HaveCount(bookingsToCreate);
+            ownerIds.Should().HaveCount(bookingsToCreate, "each booking should have a different owner");
+            poolIds.Should().HaveCount(bookingsToCreate, "each booking should have a different pool");
+            membershipGroupIds.Should().HaveCount(
+                bookingsToCreate,
+                "each booking's member should be in a distinct membership group");
+            members.Should().HaveCount(bookingsToCreate, "each booking should have a different member");
+            membershipGroups.Should()
+                .HaveCount(bookingsToCreate, "there should be two membership groups in the database");
+            facilities.Should().HaveCount(bookingsToCreate, "there should be two facilities in the database");
+            owners.Should().HaveCount(
+                bookingsToCreate,
+                "there should be two owners (excluding managers) in the database");
+            pools.Should().HaveCount(bookingsToCreate, "there should be two pools in the database");
         }
     }
 
@@ -1243,13 +1248,14 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountToCreate = 2;
         var act = () => _context.SeedMany(amountToCreate, entitySeed).ToList();
 
-        act.Should().Throw<Exception>();
+        act.Should().Throw<Exception>("we should not be able to seed multiple entities with the same composite key");
     }
 
     [Fact]
     public void SeedingDifferentEntityBetweenMultiStageSeeding_DataSavedCorrectly()
     {
         var facility = _context.Seed<Facility>();
+        // Issue #170394: this cleared the change tracker (including the facility above), so thought we were hardcoding the id of the facility used below.
         _context.Seed<Facility>();
         var bookingSeed = new BookingSeed().With(b => b.Facility, facility);
 
@@ -1261,31 +1267,46 @@ public sealed class EntitySeedExtensionTests : IDisposable
     [Fact]
     public void SpecifyingExplicitIdForGrandparentInOrder_CanBeSetCorrectly()
     {
-        var managers = _context.SeedMany<Employee>(2).ToList();
+        const int managersNeeded = 2;
+        var employees = _context.SeedMany<Employee>(managersNeeded).ToList();
         var bookingSeed = new EntitySeed<Booking>()
-            .With(b => b.Facility.ManagerId, managers[0].Id, managers[0].Id, managers[1].Id);
-        _context.SeedMany(3, bookingSeed);
+            .With(b => b.Facility.ManagerId, employees[0].Id, employees[0].Id, employees[1].Id);
+        const int amountToCreate = 3;
+        _context.SeedMany(amountToCreate, bookingSeed);
 
-        var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Facility).ToList();
-        bookingsAfterSave.Select(b => b.Facility.ManagerId).Should()
-            .BeEquivalentTo(
-                [managers[0].Id, managers[0].Id, managers[1].Id],
-                "The Manager Ids should be set as specified in the seed configuration.");
+        var allBookings = _context.Set<Booking>().Include(b => b.Facility).ToList();
+        var allManagers = _context.Set<Employee>().Where(e => e.FacilitiesManaged.Any()).ToList();
+        using (new AssertionScope())
+        {
+            allBookings.Select(b => b.Facility.ManagerId).Should()
+                .BeEquivalentTo(
+                    [allManagers[0].Id, allManagers[0].Id, allManagers[1].Id],
+                    "the Manager Ids should be set as specified in the seed configuration.");
+            allManagers.Should().HaveCount(managersNeeded, "we should not have seeded more employees");
+        }
     }
 
     [Fact]
     public void SpecifyingExplicitIdForGreatGrandparentInOrder_CanBeSetCorrectly()
     {
-        var groups = _context.SeedMany<MembershipGroup>(2).ToList();
+        const int groupsNeeded = 2;
+        var groups = _context.SeedMany<MembershipGroup>(groupsNeeded).ToList();
         var bookingSeed = new EntitySeed<Booking>()
             .With(b => b.Member.MembershipGroup.ParentId, groups[0].Id, groups[0].Id, groups[1].Id);
         _context.SeedMany(3, bookingSeed);
 
         var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
-        bookingsAfterSave.Select(b => b.Member.MembershipGroup.ParentId).Should()
-            .BeEquivalentTo(
-                [groups[0].Id, groups[0].Id, groups[1].Id],
-                "The Manager Ids should be set as specified in the seed configuration.");
+        var allGroups = _context.Set<MembershipGroup>().ToList();
+        var allMembers = _context.Set<Member>().ToList();
+        using (new AssertionScope())
+        {
+            bookingsAfterSave.Select(b => b.Member.MembershipGroup.ParentId).Should()
+                .BeEquivalentTo(
+                    [groups[0].Id, groups[0].Id, groups[1].Id],
+                    "the Membership Group Ids should be set as specified in the seed configuration.");
+            allGroups.Should().HaveCount(groupsNeeded, "we should not have seeded more membership groups");
+            allMembers.Should().HaveCount(groupsNeeded, "we should not have seeded more members");
+        }
     }
 
     [Fact]
@@ -1351,10 +1372,10 @@ public sealed class EntitySeedExtensionTests : IDisposable
         using (new AssertionScope())
         {
             var savedAssets = _context.Set<Asset>().ToList();
-            savedAssets.Should().HaveCount(3);
-            savedAssets.OfType<EmployeeAsset>().Should().HaveCount(1);
-            savedAssets.OfType<PoolAsset>().Should().HaveCount(1);
-            savedAssets.OfType<RoomAsset>().Should().HaveCount(1);
+            savedAssets.Should().HaveCount(3, "we should have seeded three assets of different types");
+            savedAssets.OfType<EmployeeAsset>().Should().HaveCount(1, $"one of the assets should be of type {nameof(EmployeeAsset)}");
+            savedAssets.OfType<PoolAsset>().Should().HaveCount(1, $"one of the assets should be of type {nameof(PoolAsset)}");
+            savedAssets.OfType<RoomAsset>().Should().HaveCount(1, $"one of the assets should be of type {nameof(RoomAsset)}");
         }
     }
 
