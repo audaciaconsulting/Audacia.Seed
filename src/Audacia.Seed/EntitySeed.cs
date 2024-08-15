@@ -46,11 +46,6 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     /// <returns>A list of prerequisites that will be seeded before this.</returns>
     public virtual IEnumerable<ISeedPrerequisite> Prerequisites()
     {
-        if (TypeCaches.Prerequisites.ContainsKey(typeof(TEntity)))
-        {
-            return TypeCaches.Prerequisites[typeof(TEntity)];
-        }
-
         var modelInformation = Repository!.GetEntityModelInformation<TEntity>();
         if (!modelInformation.RequiredNavigationProperties.Any())
         {
@@ -58,8 +53,6 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         }
 
         var prerequisites = GetSeedPrerequisites(modelInformation);
-
-        TypeCaches.Prerequisites.AddOrUpdate(typeof(TEntity), prerequisites, (_, existing) => existing.Union(prerequisites));
 
         return prerequisites;
     }
@@ -101,7 +94,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         // Override the default behaviour to re-use existing entities if the navigation property is a primary key.
         if (modelInformation.PrimaryKey?.Any(p => p == requiredNavigationProperty.ForeignKeyProperty) == true)
         {
-            seedPrerequisite.GetSeed().Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
+            seedPrerequisite.Seed.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
         }
 
         return seedPrerequisite;
@@ -352,7 +345,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         foreach (var seedPrerequisite in Prerequisites()
                      .Where(sp => Customisations.All(c => !c.EqualsPrerequisite(sp))))
         {
-            var seed = seedPrerequisite.GetSeed();
+            var seed = seedPrerequisite.Seed;
             seed.GetType().GetProperty(nameof(Repository))?.SetValue(seed, Repository);
             var buildMethod = seed.GetType().GetMethod(nameof(Build), BindingFlags.Instance | BindingFlags.Public);
             var navigationProperty = buildMethod?.Invoke(seed, null)!;

@@ -8,10 +8,10 @@ namespace Audacia.Seed;
 public interface ISeedPrerequisite
 {
     /// <summary>
-    /// Get the seed for this prerequisite.
+    /// Gets a seed for this prerequisite.
     /// </summary>
     /// <returns>A seed for the prerequisite.</returns>
-    IEntitySeed GetSeed();
+    IEntitySeed Seed { get; }
 
     /// <summary>
     /// Gets the type of the prerequisite being seeded.

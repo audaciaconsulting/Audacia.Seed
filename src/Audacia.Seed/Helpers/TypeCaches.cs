@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Audacia.Seed.Models;
 
 namespace Audacia.Seed.Helpers;
 
@@ -8,9 +9,9 @@ namespace Audacia.Seed.Helpers;
 internal static class TypeCaches
 {
     /// <summary>
-    /// Gets a cache of seed types and their prerequisites.
+    /// Gets a cache of seed types and their data model information.
     /// </summary>
-    internal static ConcurrentDictionary<Type, IEnumerable<ISeedPrerequisite>> Prerequisites { get; } = new();
+    internal static ConcurrentDictionary<Type, IEntityModelInformation> ModelInformation { get; } = new();
 
     /// <summary>
     /// Gets a cache of seed types and the type of their corresponding entity seed.

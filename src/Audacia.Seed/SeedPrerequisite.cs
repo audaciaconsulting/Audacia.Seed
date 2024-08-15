@@ -11,19 +11,17 @@ namespace Audacia.Seed;
 /// </summary>
 /// <typeparam name="TEntity">The type that this prerequisite is for.</typeparam>
 /// <typeparam name="TNavigation">The type of the property that is a prerequisite e.g navigation property.</typeparam>
-public class SeedPrerequisite<TEntity, TNavigation>(
-    Expression<Func<TEntity, TNavigation>> getter,
-    EntitySeed<TNavigation>? seed)
-    : ISeedPrerequisite
+public class SeedPrerequisite<TEntity, TNavigation> : ISeedPrerequisite
     where TEntity : class
     where TNavigation : class
 {
     /// <summary>
     /// Gets a getter for the navigation property.
     /// </summary>
-    public Expression<Func<TEntity, TNavigation>> Getter { get; } = getter;
+    public Expression<Func<TEntity, TNavigation>> Getter { get; }
 
-    private readonly EntitySeed<TNavigation>? _seed = seed;
+    /// <inheritdoc />
+    public IEntitySeed Seed { get; }
 
     /// <inheritdoc />
     public Type EntityType => typeof(TNavigation);
@@ -39,10 +37,15 @@ public class SeedPrerequisite<TEntity, TNavigation>(
     {
     }
 
-    /// <inheritdoc />
-    public IEntitySeed GetSeed()
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SeedPrerequisite{TEntity, TNavigation}"/> class.
+    /// </summary>
+    /// <param name="getter">A getter to the navigation property.</param>
+    /// <param name="seed">A seed class for the navigation property.</param>
+    public SeedPrerequisite(Expression<Func<TEntity, TNavigation>> getter, EntitySeed<TNavigation>? seed)
     {
-        return _seed
+        Getter = getter;
+        Seed = seed
                ?? EntryPointAssembly.Load().FindSeed(typeof(TNavigation))
                ?? throw new DataSeedingException(
                    $"Unable to find an appropriate seed for the entity {typeof(TEntity).Name} and getter {Getter}.");

@@ -3,9 +3,11 @@ using System.Linq.Expressions;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.EntityFrameworkCore.Models;
 using Audacia.Seed.Exceptions;
+using Audacia.Seed.Helpers;
 using Audacia.Seed.Models;
 using Audacia.Seed.Properties;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Audacia.Seed.EntityFrameworkCore.Repositories;
 
@@ -92,31 +94,17 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <inheritdoc cref="ISeedableRepository.GetEntityModelInformation{TEntity}"/>
     public IEntityModelInformation GetEntityModelInformation<TEntity>() where TEntity : class
     {
+        if (TypeCaches.ModelInformation.ContainsKey(typeof(TEntity)))
+        {
+            return TypeCaches.ModelInformation[typeof(TEntity)];
+        }
+
         var entityType = _context.Model.FindEntityType(typeof(TEntity)) ??
                          throw new InvalidOperationException(
                              $"Entity type {typeof(TEntity).Name} not found in the model.");
-        // This is the lowest-level base type
-        var baseType = entityType.GetAllBaseTypes().FirstOrDefault(bt => bt.BaseType == null) ?? entityType;
-        var foreignKeys = entityType.GetProperties().Where(p => p.IsForeignKey());
+        var requiredNavigations = GetRequiredNavigations(entityType);
 
-        var requiredNavigations = entityType.GetNavigations()
-            .Where(n =>
-            {
-                var typeTheNavigationBelongsTo = n.ForeignKey.DeclaringEntityType;
-                var navigationBaseType = typeTheNavigationBelongsTo.GetAllBaseTypes()
-                    .FirstOrDefault(bt => bt.BaseType == null) ?? typeTheNavigationBelongsTo;
-                return n.ForeignKey.IsRequired && navigationBaseType == baseType;
-            })
-            .Where(n => n.PropertyInfo != null)
-            .Select(n =>
-            {
-                var matchedForeignKey =
-                    foreignKeys.FirstOrDefault(fk => n.ForeignKey.Properties[0] == fk)?.PropertyInfo;
-                return new NavigationPropertyConfiguration(n.PropertyInfo!, matchedForeignKey);
-            })
-            .ToList();
-
-        return new EntityFrameworkCoreModelInformation
+        var modelInformation = new EntityFrameworkCoreModelInformation
         {
             EntityType = entityType.ClrType,
             RequiredNavigationProperties = requiredNavigations,
@@ -124,6 +112,10 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
                 .Where(n => n.PropertyInfo != null)
                 .Select(n => n.PropertyInfo!).ToList()
         };
+
+        TypeCaches.ModelInformation.AddOrUpdate(typeof(TEntity), modelInformation, (_, _) => modelInformation);
+
+        return modelInformation;
     }
 
     /// <inheritdoc />
@@ -599,5 +591,30 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
             var query = $"SET IDENTITY_INSERT {entityType.GetSchema()}.{entityType.GetTableName()} OFF";
             _context.Database.ExecuteSqlRaw(query);
         }
+    }
+
+    private static List<NavigationPropertyConfiguration> GetRequiredNavigations(IEntityType entityType)
+    {
+        var foreignKeys = entityType.GetProperties().Where(p => p.IsForeignKey());
+        // This is the lowest-level base type
+        var baseType = entityType.GetAllBaseTypes().FirstOrDefault(bt => bt.BaseType == null) ?? entityType;
+
+        var requiredNavigations = entityType.GetNavigations()
+            .Where(n =>
+            {
+                var typeTheNavigationBelongsTo = n.ForeignKey.DeclaringEntityType;
+                var navigationBaseType = typeTheNavigationBelongsTo.GetAllBaseTypes()
+                    .FirstOrDefault(bt => bt.BaseType == null) ?? typeTheNavigationBelongsTo;
+                return n.ForeignKey.IsRequired && navigationBaseType == baseType;
+            })
+            .Where(n => n.PropertyInfo != null)
+            .Select(n =>
+            {
+                var matchedForeignKey =
+                    foreignKeys.FirstOrDefault(fk => n.ForeignKey.Properties[0] == fk)?.PropertyInfo;
+                return new NavigationPropertyConfiguration(n.PropertyInfo!, matchedForeignKey);
+            })
+            .ToList();
+        return requiredNavigations;
     }
 }
