@@ -7,7 +7,10 @@ pool: { vmImage: windows-2022 }
 stages:
 - stage: Build
   displayName: Build
-  jobs: [ { template: src/build/dotnet/jobs/nuget-package.job.yaml@templates } ]
+  jobs: 
+  - template: src/build/dotnet/jobs/nuget-package.job.yaml@templates
+    inputs:
+      - projects: '/src/**/*.csproj'
 
 - stage: Release
   displayName: Release
