@@ -9,7 +9,7 @@ stages:
   displayName: Build
   jobs: 
   - template: src/build/dotnet/jobs/nuget-package.job.yaml@templates
-    inputs:
+    parameters:
       - projects: '/src/**/*.csproj'
 
 - stage: Release
