@@ -40,7 +40,7 @@ internal static class AssemblyExtensions
             seedAssemblies = [assembly];
         }
 
-        var seedConfiguration = seedAssemblies.SelectMany(a => a.GetTypes())
+        var seedConfiguration = seedAssemblies.SelectMany(a => a.GetExportedTypes())
             .Where(t => t.IsSubclassOf(typeof(EntitySeed<TEntity>)))
             .Select(Activator.CreateInstance)
             .Cast<EntitySeed<TEntity>>()
@@ -73,7 +73,7 @@ internal static class AssemblyExtensions
             seedAssemblies = [assembly];
         }
 
-        var seedConfiguration = seedAssemblies.SelectMany(a => a.GetTypes())
+        var seedConfiguration = seedAssemblies.SelectMany(a => a.GetExportedTypes())
             .Where(t => t.IsSubclassOf(typeof(EntitySeed<>).MakeGenericType(entityType)))
             .Select(Activator.CreateInstance)
             .Cast<IEntitySeed>()
