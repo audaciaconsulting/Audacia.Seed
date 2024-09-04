@@ -560,7 +560,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
 
         foreach (var entity in entities)
         {
-            seed.Repository!.Add(entity);
+            Add(entity);
 
             // Reload the entity so that the state is `Unchanged` rather than `Detached` and we can subsequently use this entity for setting up other relationships.
             _afterSaveJobs.Add(() => _context.Entry(entity).Reload());
