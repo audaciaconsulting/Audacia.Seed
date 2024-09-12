@@ -1,17 +1,15 @@
 # Audacia.Seed
 
 ## Overview
-`Audacia.Seed` is an open-source library for seeding test data into a repository. It has support for the following ORMs:
+`Audacia.Seed` is an open-source library for generating test data. It can be used to build objects in memory, as well as seeding test data into a repository. It has support for the following ORMs:
 
 - Entity Framework Core (`Audacia.Seed.EntityFrameworkCore`)
 - Entity Framework (`Audacia.Seed.EntityFramework`)
 
 The aim of this library is to reduce the overhead of setting up data for testing. It provides a fluent API for seeding data, and supports customisation of the data being seeded. 
-This library has taken inspiration from libraries such as [Bogus](https://github.com/bchavez/Bogus) and [AutoFixture](https://github.com/AutoFixture/AutoFixture), with the following key differences.
-- **Conservative seeding**: children will share a parent by default. Parents that are deemed to be optional will not be seeded unless otherwise specified.
-- **ORM-centric approach**: All data seeding actions are into a provided `ISeedableRepository`, rather than generating POCOs on the fly.
+This library has taken inspiration from libraries such as [Bogus](https://github.com/bchavez/Bogus) and [AutoFixture](https://github.com/AutoFixture/AutoFixture), with the key difference of "Conservative seeding". That is, children will share a parent by default. Parents that are deemed to be optional will not be seeded unless otherwise specified.
 
-This library is recommended for seeding complex data scenarios, and not appropriate for generating test data that isn't immediately saved.
+This library is recommended for seeding complex data scenarios.
 
 ### The problem
 
@@ -78,7 +76,14 @@ When seeding without a class, the library will call the first constructor it fin
 - if it is a `string`, a random `Guid` will be used.
 - otherwise, the default value for the type will be used.
 
+### Seeding method for each provider
+The following table shows how each provider behaves when seeding data: 
 
+| Provider | Model configuration | Reflection         |
+| --- |---------------|--------------------|
+| EF Core | ✔️            |  |
+| EF 6 |               | ️✔️️               |
+| In-memory |               | ️️️✔️              |
 
 ## Custom `EntitySeed<TEntity>`s
 Creating a child class of `EntitySeed<TEntity>` class allows you define a valid default `TEntity` to be seeded looks like.
@@ -110,6 +115,21 @@ Both the `Prerequisites` and `GetDefault` methods are optional. If you don't nee
 `Prerequisites` should be overridden if any mandatory properties don't follow the naming convention outlined above, or the navigation properties need to look a certain way by default. For example, a `Booking` must have a `Member` with a specific `MembershipLevel`.
 
 `GetDefault` should be overridden if creating a `new TEntity()`, and immediately saving throws errors that aren't related to foreign keys (e.g a required `string` field). For example, a `Coupon` must have a non-zero `discount`.
+
+## In-memory seeding with the `EntityBuilder`
+Test data that is generated does not need to be saved to a database. The `EntityBuilder` class can be used to generate test data in-memory. This is useful for unit tests that don't require a database, for example when testing extension methods.
+
+```csharp
+var target = new EntityBuilder().Build<Booking>();
+```
+Alternatively, you can provide a seed configuration to the `EntityBuilder`:
+```csharp
+var target = new EntityBuilder().Build(new BookingSeed());
+```
+As well as the ability to build many:
+```csharp
+var targets = new EntityBuilder().BuildMany<Booking>(5);
+```
 
 ## Customisation
 At a high level:
