@@ -30,15 +30,20 @@ public static class TypeExtensions
                 : p.Name)
             .Where(p => p.Count() == 2);
 
-        foreach (var foreignKeyGroup in foreignKeyGroups)
+        return ForeignKeyGroupsIterator();
+
+        IEnumerable<PropertyInfo> ForeignKeyGroupsIterator()
         {
-            var foreignKeyProperties = foreignKeyGroup.ToArray();
-            var foreignKeyProperty = foreignKeyProperties.First(p => p.Name.EndsWith(foreignKeySuffix));
-            var navigationProperty = foreignKeyProperties.First(p => !p.Name.EndsWith(foreignKeySuffix));
-            var isRequiredNavigation = Nullable.GetUnderlyingType(foreignKeyProperty.PropertyType) == null;
-            if (isRequiredNavigation && navigationProperty.PropertyType.IsClass)
+            foreach (var foreignKeyGroup in foreignKeyGroups)
             {
-                yield return navigationProperty;
+                var foreignKeyProperties = foreignKeyGroup.ToArray();
+                var foreignKeyProperty = foreignKeyProperties.First(p => p.Name.EndsWith(foreignKeySuffix));
+                var navigationProperty = foreignKeyProperties.First(p => !p.Name.EndsWith(foreignKeySuffix));
+                var isRequiredNavigation = Nullable.GetUnderlyingType(foreignKeyProperty.PropertyType) == null;
+                if (isRequiredNavigation && navigationProperty.PropertyType.IsClass)
+                {
+                    yield return navigationProperty;
+                }
             }
         }
     }

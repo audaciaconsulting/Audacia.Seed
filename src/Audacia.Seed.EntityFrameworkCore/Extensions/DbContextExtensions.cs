@@ -36,7 +36,7 @@ public static class DbContextExtensions
     /// <typeparam name="T1">The type of the first entity to seed.</typeparam>
     /// <typeparam name="T2">The type of the second entity to seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
-    [SuppressMessage("Naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     public static (T1 T1, T2 T2) Seed<T1, T2>(
         this DbContext context)
@@ -60,7 +60,7 @@ public static class DbContextExtensions
     /// <typeparam name="T2">The type of the second entity to seed.</typeparam>
     /// <typeparam name="T3">The type of the third entity to seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
-    [SuppressMessage("Naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     public static (T1 T1, T2 T2, T3 T3) Seed<T1, T2, T3>(
         this DbContext context)
@@ -87,7 +87,7 @@ public static class DbContextExtensions
     /// <typeparam name="T3">The type of the third entity to seed.</typeparam>
     /// <typeparam name="T4">The type of the fourth entity to seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
-    [SuppressMessage("Naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     public static (T1 T1, T2 T2, T3 T3, T4 T4) Seed<T1, T2, T3, T4>(
         this DbContext context)
@@ -117,7 +117,7 @@ public static class DbContextExtensions
     /// <typeparam name="T4">The type of the fourth entity to seed.</typeparam>
     /// <typeparam name="T5">The type of the fifth entity to seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
-    [SuppressMessage("Naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     public static (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5) Seed<T1, T2, T3, T4, T5>(
         this DbContext context)
@@ -150,7 +150,7 @@ public static class DbContextExtensions
     /// <typeparam name="T5">The type of the fifth entity to seed.</typeparam>
     /// <typeparam name="T6">The type of the sixth entity to seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
-    [SuppressMessage("Naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     public static (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5, T6 T6) Seed<T1, T2, T3, T4, T5, T6>(
         this DbContext context)
@@ -186,7 +186,7 @@ public static class DbContextExtensions
     /// <typeparam name="T6">The type of the sixth entity to seed.</typeparam>
     /// <typeparam name="T7">The type of the seventh entity to seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
-    [SuppressMessage("Naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     public static (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5, T6 T6, T7 T7) Seed<T1, T2, T3, T4, T5, T6, T7>(
         this DbContext context)
@@ -225,7 +225,7 @@ public static class DbContextExtensions
     /// <typeparam name="T7">The type of the seventh entity to seed.</typeparam>
     /// <typeparam name="T8">The type of the eighth entity to seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
-    [SuppressMessage("Naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     public static (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5, T6 T6, T7 T7, T8 T8) Seed<T1, T2, T3, T4, T5, T6, T7, T8>(
         this DbContext context)
@@ -262,7 +262,7 @@ public static class DbContextExtensions
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("Naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
@@ -291,7 +291,7 @@ public static class DbContextExtensions
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("Naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
@@ -325,7 +325,7 @@ public static class DbContextExtensions
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
@@ -364,7 +364,7 @@ public static class DbContextExtensions
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
@@ -410,7 +410,7 @@ public static class DbContextExtensions
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
@@ -461,7 +461,7 @@ public static class DbContextExtensions
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
@@ -517,7 +517,7 @@ public static class DbContextExtensions
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
@@ -578,7 +578,7 @@ public static class DbContextExtensions
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]

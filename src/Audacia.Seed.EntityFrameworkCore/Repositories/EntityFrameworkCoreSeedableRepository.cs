@@ -163,7 +163,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
@@ -201,7 +201,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
@@ -244,7 +244,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
@@ -293,7 +293,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
@@ -347,7 +347,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
@@ -405,7 +405,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
@@ -468,7 +468,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <returns>The saved entities in the order they were provided.</returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("naming-conventions", "AV1704: Don't include numbers in variables, parameters and type members",
+    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]

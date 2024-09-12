@@ -29,4 +29,3 @@ dotnet_diagnostic.CA1707.severity = none
 
 # [NAMING] Asynchronous method name should end with 'Async' ** Suppress as we don't want to suffix test methods ***
 dotnet_diagnostic.RCS1046.severity = none
-
