@@ -8,10 +8,11 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Title>Audacia.Seed.EntityFrameworkCore</Title>
         <Authors>Audacia</Authors>
-        <Version>2.0.0</Version>
+        <Version>10.28.0</Version>
         <Description>Entity Framework Core integration for Audacia.Seed.</Description>
         <Copyright>Copyright © Audacia 2024</Copyright>
         <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
