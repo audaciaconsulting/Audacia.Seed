@@ -22,11 +22,11 @@ public class FacilitySeed : EntitySeed<Facility>
 
     public EntitySeed<Facility> ForRoom()
     {
-        return this.WithPrerequisite(f => f.Room);
+        return this.WithNew(f => f.Room);
     }
 
     public EntitySeed<Facility> ForPool()
     {
-        return this.WithPrerequisite(f => f.Pool);
+        return this.WithNew(f => f.Pool);
     }
 }

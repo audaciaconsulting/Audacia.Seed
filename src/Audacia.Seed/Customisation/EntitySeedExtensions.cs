@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Audacia.Core.Extensions;
 using Audacia.Seed.Contracts;
@@ -35,7 +36,8 @@ public static class EntitySeedExtensions
 
         if (getter.Body is not MemberExpression)
         {
-            throw new DataSeedingException($"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
+            throw new DataSeedingException(
+                $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
         }
 
         entitySeed.AddCustomisation(new SeedPropertyConfiguration<TEntity, TProperty>(getter, value));
@@ -70,7 +72,8 @@ public static class EntitySeedExtensions
 
         if (getter.Body is not MemberExpression)
         {
-            throw new DataSeedingException($"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
+            throw new DataSeedingException(
+                $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
         }
 
         // Check the getter passed in is setting a nested property or not
@@ -83,10 +86,11 @@ public static class EntitySeedExtensions
             entitySeed.WithDifferentReflection(left, typeof(TEntity), left.Body.Type);
         }
 
-        var customisation = new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, (index, _) => values[index])
-        {
-            AmountOfValuesToSet = values.Length
-        };
+        var customisation =
+            new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, (index, _) => values[index])
+            {
+                AmountOfValuesToSet = values.Length
+            };
 
         entitySeed.AddCustomisation(customisation);
 
@@ -115,7 +119,8 @@ public static class EntitySeedExtensions
 
         if (getter.Body is not MemberExpression)
         {
-            throw new DataSeedingException($"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
+            throw new DataSeedingException(
+                $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
         }
 
         entitySeed.AddCustomisation(new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, valueSetter));
@@ -146,10 +151,12 @@ public static class EntitySeedExtensions
 
         if (getter.Body is not MemberExpression)
         {
-            throw new DataSeedingException($"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
+            throw new DataSeedingException(
+                $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
         }
 
-        entitySeed.AddCustomisation(new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, valueSetterWithEntity));
+        entitySeed.AddCustomisation(
+            new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, valueSetterWithEntity));
         return entitySeed;
     }
 
@@ -177,10 +184,12 @@ public static class EntitySeedExtensions
 
         if (getter.Body is not MemberExpression)
         {
-            throw new DataSeedingException($"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
+            throw new DataSeedingException(
+                $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
         }
 
-        entitySeed.AddCustomisation(new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, valueSetterWithEntity));
+        entitySeed.AddCustomisation(
+            new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, valueSetterWithEntity));
         return entitySeed;
     }
 
@@ -203,7 +212,8 @@ public static class EntitySeedExtensions
 
         if (getter.Body is not MemberExpression)
         {
-            throw new DataSeedingException($"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
+            throw new DataSeedingException(
+                $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
         }
 
         entitySeed.AddCustomisation(new SeedNullPropertyConfiguration<TEntity, TProperty>(getter));
@@ -215,7 +225,7 @@ public static class EntitySeedExtensions
     /// <br/>
     /// To be used if building > 1 entity.
     /// <br/>
-    /// Usage note: if you want to control how the entities are different, use the WithPrerequisite method, explicitly providing the configurations.
+    /// Usage note: if you want to control how the entities are different, use the WithNew method, explicitly providing the configurations.
     /// </summary>
     /// <param name="entitySeed">The seed class.</param>
     /// <param name="getter">A lambda to the property to set.</param>
@@ -262,7 +272,8 @@ public static class EntitySeedExtensions
 
         if (getter.Body is not MemberExpression)
         {
-            throw new DataSeedingException($"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
+            throw new DataSeedingException(
+                $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
         }
 
         seedConfiguration.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
@@ -294,7 +305,9 @@ public static class EntitySeedExtensions
     /// <typeparam name="TEntity">The type of the entity being seeded.</typeparam>
     /// <typeparam name="TNavigation">The type of the navigation property to set.</typeparam>
     /// <returns>This object containing this additional customisation.</returns>
-    public static EntitySeed<TEntity> WithPrerequisite<TEntity, TNavigation>(
+    [SuppressMessage("Naming", "CA1711: Identifiers should not have incorrect suffix",
+        Justification = "This is deliberately the opposite of `WithExisting`, so `New` is meaningful here.")]
+    public static EntitySeed<TEntity> WithNew<TEntity, TNavigation>(
         this EntitySeed<TEntity> entitySeed,
         Expression<Func<TEntity, TNavigation?>> getter)
         where TEntity : class
@@ -302,7 +315,7 @@ public static class EntitySeedExtensions
     {
         var assembly = EntryPointAssembly.Load();
         var seedConfiguration = assembly.FindSeed<TNavigation>();
-        return entitySeed.WithPrerequisite(getter, seedConfiguration);
+        return entitySeed.WithNew(getter, seedConfiguration);
     }
 
     /// <summary>
@@ -318,7 +331,9 @@ public static class EntitySeedExtensions
     /// <returns>This object containing this additional customisation.</returns>
     /// <exception cref="ArgumentException">If no seed configurations are provided.</exception>
     /// <exception cref="DataSeedingException">If the provided expression does not access data on a <typeparamref name="TEntity"/>.</exception>
-    public static EntitySeed<TEntity> WithPrerequisite<TEntity, TNavigation>(
+    [SuppressMessage("Naming", "CA1711: Identifiers should not have incorrect suffix",
+        Justification = "This is deliberately the opposite of `WithExisting`, so `New` is meaningful here.")]
+    public static EntitySeed<TEntity> WithNew<TEntity, TNavigation>(
         this EntitySeed<TEntity> entitySeed,
         Expression<Func<TEntity, TNavigation?>> getter,
         params IEntitySeed<TNavigation>[] seedConfigurations)
@@ -331,7 +346,8 @@ public static class EntitySeedExtensions
 
         if (getter.Body is not MemberExpression)
         {
-            throw new DataSeedingException($"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
+            throw new DataSeedingException(
+                $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
         }
 
         if (seedConfigurations.Length == 0)
@@ -420,7 +436,8 @@ public static class EntitySeedExtensions
 
         if (getter.Body is not MemberExpression)
         {
-            throw new DataSeedingException($"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
+            throw new DataSeedingException(
+                $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
         }
 
         entitySeed.AddCustomisation(new SeedChildNavigationPropertyConfiguration<TEntity, TChildNavigation, TSeed>(
@@ -469,7 +486,8 @@ public static class EntitySeedExtensions
 
         if (getter.Body is not MemberExpression)
         {
-            throw new DataSeedingException($"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
+            throw new DataSeedingException(
+                $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
         }
 
         entitySeed.AddCustomisation(
@@ -485,7 +503,9 @@ public static class EntitySeedExtensions
     /// <typeparam name="TEntity">The type of the entity being seeded.</typeparam>
     /// <typeparam name="TKey">The type of the primary key to set.</typeparam>
     /// <returns>This object containing this additional customisation.</returns>
-    public static EntitySeed<TEntity> WithPrimaryKey<TEntity, TKey>(this EntitySeed<TEntity> entitySeed, params TKey[] primaryKeyValues)
+    public static EntitySeed<TEntity> WithPrimaryKey<TEntity, TKey>(
+        this EntitySeed<TEntity> entitySeed,
+        params TKey[] primaryKeyValues)
         where TEntity : class
     {
         ArgumentNullException.ThrowIfNull(entitySeed);
@@ -556,7 +576,8 @@ public static class EntitySeedExtensions
         where TEntity : class
     {
         // Augment the seed in the existing customisation if we've already added a WithDifferent for this property.
-        var existingSeed = entitySeed.Customisations.Select(c => c.FindSeedForGetter(left)).FirstOrDefault(s => s != null);
+        var existingSeed = entitySeed.Customisations.Select(c => c.FindSeedForGetter(left))
+            .FirstOrDefault(s => s != null);
         var seed = existingSeed ?? EntryPointAssembly.Load().FindSeed(left.Body.Type);
 
         seed.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;

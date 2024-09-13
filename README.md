@@ -148,10 +148,10 @@ new BookingSeed().WithExisting(b => b.Member);
 new BookingSeed().WithDifferent(b => b.Member);
 
 // When you want to specify an optional navigation property.
-new BookingSeed().WithPrerequisite(b => b.Coupon);
+new BookingSeed().WithNew(b => b.Coupon);
 
 // When you want to override the default behaviour for a mandatory navigation property.
-new BookingSeed().WithPrerequisite(b => b.Member, new MemberSeed().With(m => m.FirstName, "Member Name"));
+new BookingSeed().WithNew(b => b.Member, new MemberSeed().With(m => m.FirstName, "Member Name"));
 
 //  When you're seeding from the parent level, but want to ensure the children are set up.
 new MemberSeed().WithChildren(m => m.Bookings);
@@ -231,22 +231,22 @@ new BookingSeed().Without(b => b.Name);
 ```
 
 
-### `WithPrerequisite` (single entity)
+### `WithNew` (single entity)
 Specify that an navigation optional property should be non-null, or override the default behaviour for a mandatory navigation property.
 #### Set a navigation property without a seed:
 ```csharp
-new BookingSeed().WithPrerequisite(b => b.Coupon);
+new BookingSeed().WithNew(b => b.Coupon);
 ```
 In this scenario, we will look for inheritors of `EntitySeed<Coupon>`, falling back on the default behaviour if none are found (see [Seeding without a class](#seeding-without-a-class)).
 
 #### Set a navigation property with a seed
 ```csharp
-new BookingSeed().WithPrerequisite(b => b.Coupon, new CouponSeed().With(...));
+new BookingSeed().WithNew(b => b.Coupon, new CouponSeed().With(...));
 ```
 
 #### Seed a grandparent entity
 ```csharp
-new BookingSeed().WithPrerequisite(b => b.Facility.Building);
+new BookingSeed().WithNew(b => b.Facility.Building);
 ```
 
 > [!NOTE]
@@ -255,17 +255,17 @@ new BookingSeed().WithPrerequisite(b => b.Facility.Building);
 If any parent in the property chain is optional, you will get a null reference exception. You can work around this as follows:
 ```csharp
 new BookingSeed()
-    .WithPrerequisite(b => b.Parent.OptionalParent)// This is necessary to ensure `OptionalParent` is not null before seeding further properties on it.
-    .WithPrerequisite(b => b.Parent.OptionalParent.Parent);
+    .WithNew(b => b.Parent.OptionalParent)// This is necessary to ensure `OptionalParent` is not null before seeding further properties on it.
+    .WithNew(b => b.Parent.OptionalParent.Parent);
 ```
 
-### `WithPrerequisite` (multiple entities)
+### `WithNew` (multiple entities)
 
 #### Set a navigation property to the provided seeds in order
 ```csharp
 List<MemberSeed> memberSeeds = [ new MemberSeed(), new MemberSeed() ];
 
-new BookingSeed().WithPrerequisite(
+new BookingSeed().WithNew(
     b => b.Coupon,
     // First 3 bookings are for the first member
     memberSeeds[0], 
@@ -281,7 +281,7 @@ new BookingSeed().WithPrerequisite(
 
 #### Set a navigation property to the same value for all entities:
 ```csharp
-new BookingSeed().WithPrerequisite(
+new BookingSeed().WithNew(
     // All bookings get the same member with the provided first name.
     b => b.Member, 
     new MemberSeed().With(m => m.FirstName, "Member Name"));
@@ -394,7 +394,7 @@ var bookings = _context.SeedMany(bookingsToSeed, seed).ToList();
 ```csharp
 var facilitySeeds = new[] { new FacilitySeed(), new FacilitySeed() };
 var seed = new BookingSeed()
-    .WithPrerequisite(b => b.Facility, facilitySeeds[0], facilitySeeds[0], facilitySeeds[1]);
+    .WithNew(b => b.Facility, facilitySeeds[0], facilitySeeds[0], facilitySeeds[1]);
 
 const int bookingsToSeed = 3;
 _context.SeedMany(bookingsToSeed, seed);
@@ -441,8 +441,8 @@ var employeeSeeds = new[]
 };
 var seed = new FacilitySeed()
     .With(f => f.Name, "A", "B", "C")
-    .WithPrerequisite(f => f.Owner, employeeSeeds[1], employeeSeeds[2], employeeSeeds[2])
-    .WithPrerequisite(f => f.Manager, employeeSeeds[0], employeeSeeds[0], employeeSeeds[1]);
+    .WithNew(f => f.Owner, employeeSeeds[1], employeeSeeds[2], employeeSeeds[2])
+    .WithNew(f => f.Manager, employeeSeeds[0], employeeSeeds[0], employeeSeeds[1]);
 
 const int amountToCreate = 3;
 _context.SeedMany(amountToCreate, seed);

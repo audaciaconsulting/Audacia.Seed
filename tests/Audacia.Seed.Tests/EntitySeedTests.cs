@@ -139,7 +139,7 @@ public sealed class EntitySeedTests : IDisposable
     public void WithPrerequisite_GetterDoesNotAccessMemberOnEntity_ExceptionThrown()
     {
         var act = () => new EntitySeed<Booking>()
-            .WithPrerequisite(_ => new Region());
+            .WithNew(_ => new Region());
 
         act.Should().ThrowExactly<DataSeedingException>("we should throw an exception if the getter does not access a property on the entity");
     }

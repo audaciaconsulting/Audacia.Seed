@@ -314,7 +314,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public async Task WithPrerequisite_SpecifiesNewSeedForNavigationProperty_OverridesDefaultSeededData()
     {
         const string expectedName = "Squash court 2";
-        var seedConfiguration = new BookingSeed().WithPrerequisite(
+        var seedConfiguration = new BookingSeed().WithNew(
             m => m.Facility,
             new FacilitySeed()
                 .With(f => f.Name, expectedName));
@@ -331,7 +331,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public async Task WithPrerequisite_NewSeedForOptionalNavigation_OptionalPropertyIsSet()
     {
         var seedConfiguration = new FacilitySeed()
-            .WithPrerequisite(m => m.Room);
+            .WithNew(m => m.Room);
 
         _context.Seed(seedConfiguration);
 
@@ -344,21 +344,21 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public async Task WithPrerequisite_SeedClassExistsInProject_UsesSeedClass()
     {
         var seed = new FacilitySeed()
-            .WithPrerequisite(f => f.Room);
+            .WithNew(f => f.Room);
 
         var seededEntity = _context.Seed(seed);
 
         var room = await _context.Set<Room>().SingleAsync(b => b.Id == seededEntity.RoomId);
         room.Name.Should()
             .NotBeNullOrWhiteSpace(
-                $"we should use the {nameof(RoomSeed)} if it is not provided for the {nameof(EntitySeedExtensions.WithPrerequisite)} method");
+                $"we should use the {nameof(RoomSeed)} if it is not provided for the {nameof(EntitySeedExtensions.WithNew)} method");
     }
 
     [Fact]
     public void WithPrerequisite_SeedClassDoesNotExistInProjectForParent_CanBeSeeded()
     {
         var seed = new RoomSeed()
-            .WithPrerequisite(f => f.Region)
+            .WithNew(f => f.Region)
             .With(b => b.Name, "Test facility");
 
         var seededEntity = _context.Seed(seed);
@@ -373,7 +373,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         var expectedFirstName = Guid.NewGuid().ToString();
         var seed = new BookingSeed()
-            .WithPrerequisite(b => b.Member, new MemberSeed().With(m => m.FirstName, expectedFirstName));
+            .WithNew(b => b.Member, new MemberSeed().With(m => m.FirstName, expectedFirstName));
 
         _context.Seed(seed);
 
@@ -393,7 +393,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public async Task WithPrerequisite_OverridesPrerequisite_ChildrenShareTheSameParent()
     {
         var seed = new BookingSeed()
-            .WithPrerequisite(b => b.Member, new MemberSeed());
+            .WithNew(b => b.Member, new MemberSeed());
 
         const int amountToCreate = 2;
         _context.SeedMany(amountToCreate, seed);
@@ -433,7 +433,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         var expectedFirstName = Guid.NewGuid().ToString();
         var seed = new BookingSeed()
-            .WithPrerequisite(b => b.Member, new MemberSeed().With(m => m.FirstName, expectedFirstName));
+            .WithNew(b => b.Member, new MemberSeed().With(m => m.FirstName, expectedFirstName));
 
         const int amountToCreate = 5;
         _context.SeedMany(amountToCreate, seed);
@@ -458,8 +458,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var expectedManagerName = Guid.NewGuid().ToString();
         var seed = new FacilitySeed()
             // Overriding the owner & member should create two entities
-            .WithPrerequisite(b => b.Owner, new EmployeeSeed().With(m => m.FirstName, expectedOwnerName))
-            .WithPrerequisite(b => b.Manager, new EmployeeSeed().With(m => m.FirstName, expectedManagerName));
+            .WithNew(b => b.Owner, new EmployeeSeed().With(m => m.FirstName, expectedOwnerName))
+            .WithNew(b => b.Manager, new EmployeeSeed().With(m => m.FirstName, expectedManagerName));
 
         _context.Seed(seed);
 
@@ -486,7 +486,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         const int amountToCreate = 3;
         var seedConfiguration = new FacilitySeed()
-            .WithPrerequisite(
+            .WithNew(
                 f => f.Room,
                 new RoomSeed().With(b => b.Name, "Room 1"),
                 new RoomSeed().With(b => b.Name, "Room 2"),
@@ -506,8 +506,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         var seed = new EntitySeed<Facility>()
             .With(b => b.Name, "Test facility") // This is just so it can be saved.
-            .WithPrerequisite(b => b.Room)
-            .WithPrerequisite(b => b.TypeEntity);
+            .WithNew(b => b.Room)
+            .WithNew(b => b.TypeEntity);
 
         var seededEntity = _context.Seed(seed);
 
@@ -520,7 +520,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public void WithPrerequisite_SeedClassDoesNotExistInProject_UsesDefaultSeed()
     {
         var seed = new EntitySeed<Room>()
-            .WithPrerequisite(f => f.Region)
+            .WithNew(f => f.Region)
             .With(b => b.Name, "Test facility");
 
         var seededEntity = _context.Seed(seed);
@@ -534,7 +534,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public void WithPrerequisite_Grandparent_CanBeSeeded()
     {
         var seed = new EntitySeed<Booking>()
-            .WithPrerequisite(f => f.Facility.Room);
+            .WithNew(f => f.Facility.Room);
 
         var seededEntity = _context.Seed(seed);
 
@@ -549,7 +549,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         RoomSeed[] prerequisites = [new RoomSeed(), new RoomSeed(), new RoomSeed()];
         var seedConfiguration = new FacilitySeed()
-            .WithPrerequisite(scs => scs.Room, prerequisites);
+            .WithNew(scs => scs.Room, prerequisites);
 
         // Seed one more than the name we provided.
         var amountToCreate = prerequisites.Length + 1;
@@ -565,7 +565,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         RoomSeed[] prerequisites = [new RoomSeed(), new RoomSeed(), new RoomSeed()];
         var seedConfiguration = new FacilitySeed()
-            .WithPrerequisite(scs => scs.Room, prerequisites);
+            .WithNew(scs => scs.Room, prerequisites);
 
         // Seed one less than the name we provided.
         var amountToCreate = prerequisites.Length - 1;
@@ -978,7 +978,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         var facilitySeeds = new[] { new FacilitySeed(), new FacilitySeed() };
         var seed = new BookingSeed()
-            .WithPrerequisite(b => b.Facility, facilitySeeds[0], facilitySeeds[0], facilitySeeds[1]);
+            .WithNew(b => b.Facility, facilitySeeds[0], facilitySeeds[0], facilitySeeds[1]);
 
         const int bookingsToSeed = 3;
         _context.SeedMany(bookingsToSeed, seed);
@@ -1022,8 +1022,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var seedEmployeeB = new EmployeeSeed().With(e => e.FirstName, "B");
         var seed = new FacilitySeed()
             .With(f => f.Name, "A", "B")
-            .WithPrerequisite(b => b.Owner, seedEmployeeB, seedEmployeeA)
-            .WithPrerequisite(b => b.Manager, seedEmployeeA, seedEmployeeB);
+            .WithNew(b => b.Owner, seedEmployeeB, seedEmployeeA)
+            .WithNew(b => b.Manager, seedEmployeeA, seedEmployeeB);
 
         const int amountToCreate = 2;
         _context.SeedMany(amountToCreate, seed);
@@ -1054,8 +1054,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var seedEmployeeC = new EmployeeSeed().With(e => e.FirstName, "C");
         var seed = new FacilitySeed()
             .With(f => f.Name, "A", "B", "C")
-            .WithPrerequisite(b => b.Owner, seedEmployeeB, seedEmployeeC, seedEmployeeC)
-            .WithPrerequisite(b => b.Manager, seedEmployeeA, seedEmployeeA, seedEmployeeB);
+            .WithNew(b => b.Owner, seedEmployeeB, seedEmployeeC, seedEmployeeC)
+            .WithNew(b => b.Manager, seedEmployeeA, seedEmployeeA, seedEmployeeB);
 
         const int amountToCreate = 3;
         _context.SeedMany(amountToCreate, seed);
@@ -1106,11 +1106,11 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         var poolFacilitySeed = new FacilitySeed().ForPool();
         var poolBookingSeed = new BookingSeed()
-            .WithPrerequisite(b => b.Facility, poolFacilitySeed)
+            .WithNew(b => b.Facility, poolFacilitySeed)
             .With(b => b.Facility.Pool!.Name, "Pool 1");
         var roomFacilitySeed = new FacilitySeed().ForRoom();
         var roomBookingSeed = new BookingSeed()
-            .WithPrerequisite(b => b.Facility, roomFacilitySeed)
+            .WithNew(b => b.Facility, roomFacilitySeed)
             .With(b => b.Facility.Room!.Name, "Room 1");
 
         _context.Seed(poolBookingSeed, roomBookingSeed);
@@ -1362,7 +1362,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         ];
 
         var seed = new EntitySeed<CompanyAsset>()
-            .WithPrerequisite(ca => ca.Asset, seeds);
+            .WithNew(ca => ca.Asset, seeds);
         _context.SeedMany(3, seed);
 
         using (new AssertionScope())
