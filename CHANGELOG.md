@@ -29,5 +29,5 @@
 - Added stylecop static analysis
 
 ### Changed
-- Updated EF6 project format
+- Updated EF6 project format 
 - Simplified build pipeline
