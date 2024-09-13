@@ -130,6 +130,9 @@ As well as the ability to build many:
 ```csharp
 var bookings = new EntityBuilder().BuildMany<Booking>(5);
 ```
+> [!WARNING]
+> Unlike EF Core / EF6, the reverse of navigation properties are not set when seeding in-memory. 
+> This means that if you populate a parent on a child, the collection of children on the parent will not necessarily be changed. 
 
 ## Customisation
 At a high level:
