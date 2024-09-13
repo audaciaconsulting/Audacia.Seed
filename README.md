@@ -120,15 +120,15 @@ Both the `Prerequisites` and `GetDefault` methods are optional. If you don't nee
 Test data that is generated does not need to be saved to a database. The `EntityBuilder` class can be used to generate test data in-memory. This is useful for unit tests that don't require a database, for example when testing extension methods.
 
 ```csharp
-var target = new EntityBuilder().Build<Booking>();
+var booking = new EntityBuilder().Build<Booking>();
 ```
 Alternatively, you can provide a seed configuration to the `EntityBuilder`:
 ```csharp
-var target = new EntityBuilder().Build(new BookingSeed());
+var booking = new EntityBuilder().Build(new BookingSeed());
 ```
 As well as the ability to build many:
 ```csharp
-var targets = new EntityBuilder().BuildMany<Booking>(5);
+var bookings = new EntityBuilder().BuildMany<Booking>(5);
 ```
 
 ## Customisation
@@ -248,8 +248,16 @@ new BookingSeed().WithPrerequisite(b => b.Coupon, new CouponSeed().With(...));
 ```csharp
 new BookingSeed().WithPrerequisite(b => b.Facility.Building);
 ```
+
 > [!NOTE]
 > This isn't necessary if these relationships are mandatory.
+
+If any parent in the property chain is optional, you will get a null reference exception. You can work around this as follows:
+```csharp
+new BookingSeed()
+    .WithPrerequisite(b => b.Parent.OptionalParent)// This is necessary to ensure `OptionalParent` is not null before seeding further properties on it.
+    .WithPrerequisite(b => b.Parent.OptionalParent.Parent);
+```
 
 ### `WithPrerequisite` (multiple entities)
 
