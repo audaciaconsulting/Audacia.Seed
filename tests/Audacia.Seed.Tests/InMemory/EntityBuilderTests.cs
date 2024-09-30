@@ -22,6 +22,15 @@ public class EntityBuilderTests
     }
 
     [Fact]
+    public void Build_NoSeedProvided_DoesNotBuildOptionalRelationships()
+    {
+        var booking = new EntityBuilder()
+            .Build<Booking>();
+
+        booking.Coupon.Should().BeNull();
+    }
+
+    [Fact]
     public void Build_SeedProvided_BuildsRequiredRelationshipsCorrectly()
     {
         var booking = new EntityBuilder()

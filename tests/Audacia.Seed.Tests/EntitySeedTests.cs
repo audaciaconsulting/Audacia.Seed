@@ -39,38 +39,6 @@ public sealed class EntitySeedTests : IDisposable
     }
 
     [Fact]
-    public void Prerequisites_EntityHasRequiredParents_PrerequisitesContainParents()
-    {
-        var seed = new EntitySeed<Booking>();
-        seed.Repository = new EntityFrameworkCoreSeedableRepository(_context);
-
-        var prerequisites = seed.Prerequisites().ToList();
-
-        using (new AssertionScope())
-        {
-            prerequisites.Should().Contain(
-                p => p.EntityType == typeof(Member),
-                $"we should have a prerequisite for the required {nameof(Member)}");
-            prerequisites.Should().Contain(
-                p => p.EntityType == typeof(Facility),
-                $"we should have a prerequisite for the required {nameof(Facility)}");
-        }
-    }
-
-    [Fact]
-    public void Prerequisites_EntityHasOptionalParents_PrerequisitesDoesNotContainParent()
-    {
-        var seed = new EntitySeed<Facility>();
-        seed.Repository = new EntityFrameworkCoreSeedableRepository(_context);
-
-        var prerequisites = seed.Prerequisites().ToList();
-
-        prerequisites.Should().NotContain(
-            p => p.PropertyInfo.Name == nameof(Facility.Room) && p.EntityType == typeof(Room),
-            "we should not have a prerequisite for optional parents");
-    }
-
-    [Fact]
     public void Prerequisites_EntityHasParentsOfTheSameType_PrerequisitesContainBothParent()
     {
         var seed = new EntitySeed<Facility>();
