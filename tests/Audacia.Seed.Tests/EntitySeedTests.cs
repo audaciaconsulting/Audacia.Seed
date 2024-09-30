@@ -39,7 +39,7 @@ public sealed class EntitySeedTests : IDisposable
     }
 
     [Fact]
-    public void Prerequisites_EntityHasParentsOfTheSameType_PrerequisitesContainBothParent()
+    public void Prerequisites_EntityHasRequiredParentsOfTheSameType_PrerequisitesContainBothParents()
     {
         var seed = new EntitySeed<Facility>();
         seed.Repository = new EntityFrameworkCoreSeedableRepository(_context);
@@ -71,7 +71,6 @@ public sealed class EntitySeedTests : IDisposable
     public async Task EntityHasRequiredParent_CanBeSeededWithoutDedicatedClass()
     {
         var seed = new EntitySeed<Booking>()
-            .With(b => b.Facility.Name, "Test facility")
             .With(b => b.Member.FirstName, "Test first name")
             .With(b => b.Member.LastName, "Test last name");
 
@@ -104,7 +103,7 @@ public sealed class EntitySeedTests : IDisposable
     }
 
     [Fact]
-    public void WithPrerequisite_GetterDoesNotAccessMemberOnEntity_ExceptionThrown()
+    public void WithNew_GetterDoesNotAccessMemberOnEntity_ExceptionThrown()
     {
         var act = () => new EntitySeed<Booking>()
             .WithNew(_ => new Region());

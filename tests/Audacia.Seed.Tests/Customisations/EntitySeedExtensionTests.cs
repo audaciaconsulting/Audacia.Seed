@@ -311,7 +311,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public async Task WithPrerequisite_SpecifiesNewSeedForNavigationProperty_OverridesDefaultSeededData()
+    public async Task WithNew_SpecifiesNewSeedForNavigationProperty_OverridesDefaultSeededData()
     {
         const string expectedName = "Squash court 2";
         var seedConfiguration = new BookingSeed().WithNew(
@@ -328,7 +328,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public async Task WithPrerequisite_NewSeedForOptionalNavigation_OptionalPropertyIsSet()
+    public async Task WithNew_NewSeedForOptionalNavigation_OptionalPropertyIsSet()
     {
         var seedConfiguration = new FacilitySeed()
             .WithNew(m => m.Room);
@@ -341,7 +341,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public async Task WithPrerequisite_SeedClassExistsInProject_UsesSeedClass()
+    public async Task WithNew_SeedClassExistsInProject_UsesSeedClass()
     {
         var seed = new FacilitySeed()
             .WithNew(f => f.Room);
@@ -355,7 +355,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void WithPrerequisite_SeedClassDoesNotExistInProjectForParent_CanBeSeeded()
+    public void WithNew_SeedClassDoesNotExistInProjectForParent_CanBeSeeded()
     {
         var seed = new RoomSeed()
             .WithNew(f => f.Region)
@@ -369,7 +369,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public async Task WithPrerequisite_OverridesPrerequisite_OnlyOneAddedToTheDatabase()
+    public async Task WithNew_OverridesPrerequisite_OnlyOneAddedToTheDatabase()
     {
         var expectedFirstName = Guid.NewGuid().ToString();
         var seed = new BookingSeed()
@@ -390,7 +390,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public async Task WithPrerequisite_OverridesPrerequisite_ChildrenShareTheSameParent()
+    public async Task WithNew_OverridesPrerequisite_ChildrenShareTheSameParent()
     {
         var seed = new BookingSeed()
             .WithNew(b => b.Member, new MemberSeed());
@@ -411,7 +411,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public async Task WithPrerequisite_DefaultSeed_ChildrenShareTheSameParent()
+    public async Task WithNew_DefaultSeed_ChildrenShareTheSameParent()
     {
         const int amountToCreate = 2;
         _context.SeedMany<Booking>(amountToCreate);
@@ -429,7 +429,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public async Task WithPrerequisite_OverridesPrerequisiteWithCustomisations_ChildrenShareTheSameParent()
+    public async Task WithNew_OverridesPrerequisiteWithCustomisations_ChildrenShareTheSameParent()
     {
         var expectedFirstName = Guid.NewGuid().ToString();
         var seed = new BookingSeed()
@@ -452,7 +452,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
     [Fact]
     public async Task
-        WithPrerequisite_OverridesPrerequisiteWhenThereAreMultiplePropertiesOfTheSameType_CorrectNumberOfEntitiesSeeded()
+        WithNew_OverridesPrerequisiteWhenThereAreMultiplePropertiesOfTheSameType_CorrectNumberOfEntitiesSeeded()
     {
         var expectedOwnerName = Guid.NewGuid().ToString();
         var expectedManagerName = Guid.NewGuid().ToString();
@@ -482,7 +482,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public async Task WithPrerequisite_MultiplePrerequisitesProvided_EachChildHasItsOwnParent()
+    public async Task WithNew_MultiplePrerequisitesProvided_EachChildHasItsOwnParent()
     {
         const int amountToCreate = 3;
         var seedConfiguration = new FacilitySeed()
@@ -502,7 +502,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public async Task WithPrerequisite_SeedClassDoesExistsInProject_UsesSeedClass()
+    public async Task WithNew_SeedClassDoesExistsInProject_UsesSeedClass()
     {
         var seed = new EntitySeed<Facility>()
             .With(b => b.Name, "Test facility") // This is just so it can be saved.
@@ -517,7 +517,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void WithPrerequisite_SeedClassDoesNotExistInProject_UsesDefaultSeed()
+    public void WithNew_SeedClassDoesNotExistInProject_UsesDefaultSeed()
     {
         var seed = new EntitySeed<Room>()
             .WithNew(f => f.Region)
@@ -531,7 +531,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void WithPrerequisite_Grandparent_CanBeSeeded()
+    public void WithNew_Grandparent_CanBeSeeded()
     {
         var seed = new EntitySeed<Booking>()
             .WithNew(f => f.Facility.Room);
@@ -545,7 +545,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void WithPrerequisite_LessValuesProvidedThanWeWantToSeed_ThrowsException()
+    public void WithNew_LessValuesProvidedThanWeWantToSeed_ThrowsException()
     {
         RoomSeed[] prerequisites = [new RoomSeed(), new RoomSeed(), new RoomSeed()];
         var seedConfiguration = new FacilitySeed()
@@ -561,7 +561,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void WithPrerequisite_MoreValuesProvidedThanWeWantToSeed_ThrowsException()
+    public void WithNew_MoreValuesProvidedThanWeWantToSeed_ThrowsException()
     {
         RoomSeed[] prerequisites = [new RoomSeed(), new RoomSeed(), new RoomSeed()];
         var seedConfiguration = new FacilitySeed()
