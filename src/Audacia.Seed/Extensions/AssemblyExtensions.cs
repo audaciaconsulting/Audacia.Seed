@@ -33,7 +33,8 @@ internal static class AssemblyExtensions
         }
 
         var seedAssemblies = assembly.GetCustomAttributes<SeedAssemblyAttribute>()
-            .Select(seedAssemblyAttribute => Assembly.Load(seedAssemblyAttribute.Name) ?? throw new DataSeedingException($"Unable to load assembly {seedAssemblyAttribute.Name}. Ensure it is referenced in the project."))
+            .Select(seedAssemblyAttribute => Assembly.Load(seedAssemblyAttribute.Name)
+                                             ?? throw new DataSeedingException($"Unable to load assembly {seedAssemblyAttribute.Name}. Ensure it is referenced in the project."))
             .ToList();
         if (!seedAssemblies.Any())
         {
@@ -66,7 +67,8 @@ internal static class AssemblyExtensions
         ArgumentNullException.ThrowIfNull(assembly);
 
         var seedAssemblies = assembly.GetCustomAttributes<SeedAssemblyAttribute>()
-            .Select(seedAssemblyAttribute => Assembly.Load(seedAssemblyAttribute.Name) ?? throw new DataSeedingException($"Unable to load assembly {seedAssemblyAttribute.Name}. Ensure it is referenced in the project."))
+            .Select(seedAssemblyAttribute => Assembly.Load(seedAssemblyAttribute.Name)
+                                             ?? throw new DataSeedingException($"Unable to load assembly {seedAssemblyAttribute.Name}. Ensure it is referenced in the project."))
             .ToList();
         if (!seedAssemblies.Any())
         {

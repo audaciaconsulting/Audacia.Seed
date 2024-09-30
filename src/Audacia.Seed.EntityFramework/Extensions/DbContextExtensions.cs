@@ -792,7 +792,7 @@ public static class DbContextExtensions
 
         foreach (var seed in seeds)
         {
-            if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.MustFindExisting)
+            if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
             {
                 seed.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
             }

@@ -99,7 +99,7 @@ public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
     {
         ArgumentNullException.ThrowIfNull(entitySeed);
 
-        if (entitySeed.Options is { AmountToCreate: 1, InsertionBehavior: SeedingInsertionBehaviour.TryFindExisting })
+        if (entitySeed.Options is { AmountToCreate: 1, InsertionBehavior: SeedingInsertionBehaviour.TryFindNew })
         {
             throw new DataSeedingException($"`{nameof(EntitySeedExtensions.WithDifferent)} was specified, but we're only building 1 {typeof(TEntity).Name}.");
         }

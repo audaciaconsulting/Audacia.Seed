@@ -255,7 +255,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void With_LessValuesProvidedThanWeWantToSeed_ThrowsException()
+    public void With_FewerValuesProvidedThanWeWantToSeed_ThrowsException()
     {
         string[] names = ["Facility 1", "Facility 2"];
         var seedConfiguration = new FacilitySeed()
@@ -267,7 +267,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         act.Should()
             .ThrowExactly<DataSeedingException>(
-                "we should show a developer-friendly message for this as we cannot give a build error for it");
+                "we should show a developer-friendly message for this as we cannot give a build error for it")
+            .WithMessage($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {names.Length} were provided.");
     }
 
     [Fact]
@@ -283,7 +284,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         act.Should()
             .ThrowExactly<DataSeedingException>(
-                "we should show a developer-friendly message for this as we cannot give a build error for it");
+                "we should show a developer-friendly message for this as we cannot give a build error for it")
+            .WithMessage($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {names.Length} were provided.");
     }
 
     [Fact]
@@ -547,7 +549,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void WithNew_LessValuesProvidedThanWeWantToSeed_ThrowsException()
+    public void WithNew_FewerValuesProvidedThanWeWantToSeed_ThrowsException()
     {
         RoomSeed[] prerequisites = [new RoomSeed(), new RoomSeed(), new RoomSeed()];
         var seedConfiguration = new FacilitySeed()
@@ -559,7 +561,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         act.Should()
             .ThrowExactly<DataSeedingException>(
-                "we should show a developer-friendly message for this as we cannot give a build error for it");
+                "we should show a developer-friendly message for this as we cannot give a build error for it")
+            .WithMessage($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {prerequisites.Length} were provided.");
     }
 
     [Fact]
@@ -575,7 +578,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         act.Should()
             .ThrowExactly<DataSeedingException>(
-                "we should show a developer-friendly message for this as we cannot give a build error for it");
+                "we should show a developer-friendly message for this as we cannot give a build error for it")
+            .WithMessage($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {prerequisites.Length} were provided.");
     }
 
     [Fact]

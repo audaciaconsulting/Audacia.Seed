@@ -54,7 +54,7 @@ internal class InMemorySeedableRepository : ISeedableRepository
     /// <inheritdoc />
     public void SetPrimaryKey<TEntity, TKey>(TEntity entity, TKey primaryKeyValue) where TEntity : class
     {
-        throw new NotSupportedException("Getting the primary key for an in-memory entity is not supported");
+        throw new NotSupportedException("Setting the primary key for an in-memory entity is not supported");
     }
 
     /// <inheritdoc cref="ISeedableRepository.PrepareToSet{TEntity}"/>

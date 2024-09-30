@@ -107,7 +107,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     public void PrepareToSeed(ISeedableRepository repository)
     {
         Repository = repository;
-        if (Options.InsertionBehavior != SeedingInsertionBehaviour.MustFindExisting)
+        if (Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
         {
             Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
         }
@@ -122,11 +122,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
 
         if (Options.AmountToCreate > 1)
         {
-            var entities = BuildMany(Options.AmountToCreate);
-            foreach (var entity in entities)
-            {
-                Repository.Add(entity);
-            }
+            _ = BuildMany(Options.AmountToCreate);
         }
         else
         {
@@ -219,11 +215,11 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     internal IEnumerable<TEntity> BuildMany(int amountToCreate)
     {
         Options.AmountToCreate = amountToCreate;
-        if (Options.InsertionBehavior != SeedingInsertionBehaviour.MustFindExisting)
+        if (Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
         {
             Options.InsertionBehavior = amountToCreate > 1
                 ? SeedingInsertionBehaviour.AddNew
-                : SeedingInsertionBehaviour.TryFindExisting;
+                : SeedingInsertionBehaviour.TryFindNew;
         }
 
         TEntity? previous = null;
@@ -299,9 +295,9 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         var predicate = this.ToPredicate(index);
         var entity = Options.InsertionBehavior switch
         {
-            SeedingInsertionBehaviour.MustFindExisting => Repository.FindLocal(predicate)
+            SeedingInsertionBehaviour.TryFindExisting => Repository.FindLocal(predicate)
                                                           ?? Repository.DbSet<TEntity>().FirstOrDefault(predicate),
-            SeedingInsertionBehaviour.TryFindExisting => Repository.FindLocal(predicate),
+            SeedingInsertionBehaviour.TryFindNew => Repository.FindLocal(predicate),
             _ => null
         };
 
@@ -326,17 +322,8 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         var uniqueCustomisations = Customisations.OrderBy(c => c.Order).Distinct().ToList();
         foreach (var customisation in uniqueCustomisations)
         {
-            try
-            {
-                customisation.Validate(this);
-                customisation.Apply(entity, Repository!, index, previous);
-            }
-            catch (NullReferenceException nullReferenceException)
-            {
-                throw new DataSeedingException(
-                    $"An error occured populating the {customisation.GetType().GetFormattedName()} for {typeof(TEntity).Name}.",
-                    nullReferenceException);
-            }
+            customisation.Validate(this);
+            customisation.Apply(entity, Repository!, index, previous);
         }
     }
 
@@ -351,7 +338,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
             var navigationProperty = buildMethod?.Invoke(seed, null)!;
             seedPrerequisite.PropertyInfo.SetValue(entity, navigationProperty);
 
-            if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.MustFindExisting)
+            if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
             {
                 var addMethod = Repository!
                     .GetType()

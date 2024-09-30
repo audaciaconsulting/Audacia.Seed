@@ -1,5 +1,3 @@
-using Audacia.Seed.Exceptions;
-
 namespace Audacia.Seed.Options;
 
 /// <summary>
@@ -8,9 +6,9 @@ namespace Audacia.Seed.Options;
 public enum SeedingInsertionBehaviour
 {
     /// <summary>
-    /// The default behaviour, which is to find an existing entity if possible, or create a new one if not.
+    /// The default behaviour, which is to find an entity in the repository that has not yet been saved, or create a new one if not.
     /// </summary>
-    TryFindExisting = 0,
+    TryFindNew = 0,
 
     /// <summary>
     /// We will always add a new entity to the database.
@@ -18,9 +16,9 @@ public enum SeedingInsertionBehaviour
     AddNew = 100,
 
     /// <summary>
-    /// Find an existing entity, or throw a <see cref="DataSeedingException"/> if we cannot find one.
+    /// Like <see cref="TryFindNew"/>, but will also check if it can match up with an already saved entity.
     /// <br/>
     /// Use this if your seed has hardcoded IDs to prevent duplicates.
     /// </summary>
-    MustFindExisting = 200,
+    TryFindExisting = 200,
 }

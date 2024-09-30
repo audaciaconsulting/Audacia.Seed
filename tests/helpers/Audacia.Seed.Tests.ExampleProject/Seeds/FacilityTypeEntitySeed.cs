@@ -12,7 +12,7 @@ public class FacilityTypeEntitySeed : EntitySeed<FacilityTypeEntity>
 
     public FacilityTypeEntitySeed()
     {
-        Options.InsertionBehavior = SeedingInsertionBehaviour.MustFindExisting;
+        Options.InsertionBehavior = SeedingInsertionBehaviour.TryFindExisting;
     }
 
     public override Expression<Func<FacilityTypeEntity, bool>> Predicate(int index)

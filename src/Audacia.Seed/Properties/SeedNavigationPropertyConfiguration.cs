@@ -58,7 +58,7 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
         SeedConfiguration.Repository ??= repository;
 
         var value = (previous != null
-                     && SeedConfiguration.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindExisting
+                     && SeedConfiguration.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindNew
                         ? Getter.Compile().Invoke(previous)
                         : null)
                     ?? GetValueToSet(repository, index, previous, SeedConfiguration);
@@ -76,7 +76,7 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
         IEntitySeed<TNavigation> navigationSeed)
     {
         TNavigation? value = null;
-        if ((navigationSeed.Options.InsertionBehavior == SeedingInsertionBehaviour.MustFindExisting ||
+        if ((navigationSeed.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindExisting ||
              navigationSeed.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew &&
              !navigationSeed.HasCustomisations)
             && navigationSeed is EntitySeed<TNavigation> navigationSeedAsEntitySeed)
