@@ -251,7 +251,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var savedEntities = await _context.Set<Facility>().ToListAsync();
         savedEntities.DistinctBy(c => c.Name).Should().HaveCount(
             expectedNames.Length,
-            $"we should set the properties in order as specified in the {nameof(expectedNames)} array");
+            $"we should set the properties in the same order as they appear in the {nameof(expectedNames)} array");
     }
 
     [Fact]
