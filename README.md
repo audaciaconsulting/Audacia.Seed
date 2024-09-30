@@ -302,7 +302,7 @@ new BookingSeed().WithDifferent(b => b.Member.MembershipGroup);
 ```
 
 ### `WithExisting`
-Use `WithExisting` to seed an entity that already exists in the database. Use this when you've already seeded other entities, or you're testing against a readily-seeded database.
+Use `WithExisting` to seed an entity using data that already exists in the database. Use this when your database already has data in it.
 
 #### Set a navigation property to an existing entity from the database
 ```csharp
