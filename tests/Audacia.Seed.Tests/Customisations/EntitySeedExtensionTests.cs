@@ -119,7 +119,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var act = () => _context.Seed(seedConfiguration);
 
         act.Should().ThrowExactly<DataSeedingException>(
-            "we should show a more useful error message if we catch a null reference exception when applying customisations");
+            "we should show a more useful error message if we catch a null reference exception when applying customisations")
+            // Make sure the exception message is helpful to the developer.
+            .WithMessage($"*{nameof(Coupon)}*{nameof(Coupon.Name)}*nullable property*");
     }
 
     [Fact]
