@@ -74,7 +74,8 @@ public class ExpressionExtensionsTests
 
         var act = () => target.JoinMemberAccessChain();
 
-        // Not a handled exception as it's not a mistake a developer can make, but an internal error. I just want to assert that can't handle it.
+        // This isn't a handled exception as it's not a mistake a developer can make, but an internal error.
+        // I just want to assert that the code throws an exception in this scenario.
         act.Should().Throw<ArgumentException>();
     }
 }
