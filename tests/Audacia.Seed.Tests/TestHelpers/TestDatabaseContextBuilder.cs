@@ -13,8 +13,7 @@ public static class TestDatabaseContextBuilder
     public static TestDatabaseContext CreateContext(string connectionString)
     {
         var builder = new DbContextOptionsBuilder<TestDatabaseContext>()
-            .UseSqlServer(connectionString)
-            .EnableSensitiveDataLogging();
+            .UseSqlServer(connectionString);
         return new(builder.Options);
     }
 }
