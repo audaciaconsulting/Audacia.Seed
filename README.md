@@ -258,8 +258,8 @@ new BookingSeed().WithNew(b => b.Facility.Building);
 If any parent in the property chain is optional, you will get a null reference exception. You can work around this as follows:
 ```csharp
 new BookingSeed()
-    .WithNew(b => b.Parent.OptionalParent)// This is necessary to ensure `OptionalParent` is not null before seeding further properties on it.
-    .WithNew(b => b.Parent.OptionalParent.Parent);
+    .WithNew(b => b.OptionalParent)// This is necessary to ensure `OptionalParent` is not null before seeding further properties on it.
+    .WithNew(b => b.OptionalParent.Parent);
 ```
 
 ### `WithNew` (multiple entities)
