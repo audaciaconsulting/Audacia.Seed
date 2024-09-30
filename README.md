@@ -110,7 +110,7 @@ public class MyEntitySeed : EntitySeed<MyEntity>
 ```
 
 ### When to override `Prerequisites` / `GetDfault`
-Both the `Prerequisites` and `GetDefault` methods are optional. If you don't need to explicitly state what this behaviour will be, the library will behave [as above](#seeding-without-a-class).
+Both the `Prerequisites` and `GetDefault` methods are optional. If you don't need to explicitly state what this behaviour will be, the library will behave [as above](#reflection-based-seeding).
 
 `Prerequisites` should be overridden if any mandatory properties don't follow the naming convention outlined above, or the navigation properties need to look a certain way by default. For example, a `Booking` must have a `Member` with a specific `MembershipLevel`.
 
@@ -240,7 +240,7 @@ Specify that an navigation optional property should be non-null, or override the
 ```csharp
 new BookingSeed().WithNew(b => b.Coupon);
 ```
-In this scenario, we will look for inheritors of `EntitySeed<Coupon>`, falling back on the default behaviour if none are found (see [Seeding without a class](#seeding-without-a-class)).
+In this scenario, we will look for inheritors of `EntitySeed<Coupon>`, falling back on the default behaviour if none are found (see [Reflection-based seeding](#reflection-based-seeding)).
 
 #### Set a navigation property with a seed
 ```csharp
