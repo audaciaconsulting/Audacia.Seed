@@ -13,7 +13,7 @@ public class TestDatabaseContextFixture
     }
 
     /// <summary>
-    /// e.g "Server=(localdb)\mssqllocaldb;Database=DatabaseFixture-Gleadell.Ultra.Bll.Tests;Trusted_Connection=True"
+    /// e.g "Server=(localdb)\mssqllocaldb;Database=DatabaseFixture-Audacia.Seed.Tests;Trusted_Connection=True"
     /// </summary>
     internal const string DefaultConnectionString = @"Server=(localdb)\mssqllocaldb;Database=Audacia.Seed.Tests;Trusted_Connection=True";
 
