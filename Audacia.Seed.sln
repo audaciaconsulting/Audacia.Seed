@@ -16,8 +16,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "helpers", "helpers", "{F08C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audacia.Seed.Tests.ExampleProject", "tests\helpers\Audacia.Seed.Tests.ExampleProject\Audacia.Seed.Tests.ExampleProject.csproj", "{A25B90D1-6AA5-4071-8C75-C2B84093AB3A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audacia.Seed.Testing.Helpers", "tests\helpers\Audacia.Seed.Testing.Helpers\Audacia.Seed.Testing.Helpers.csproj", "{E23AB094-7E4E-48DB-84DE-476E7C86ECA1}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,10 +42,6 @@ Global
 		{A25B90D1-6AA5-4071-8C75-C2B84093AB3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A25B90D1-6AA5-4071-8C75-C2B84093AB3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A25B90D1-6AA5-4071-8C75-C2B84093AB3A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E23AB094-7E4E-48DB-84DE-476E7C86ECA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E23AB094-7E4E-48DB-84DE-476E7C86ECA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E23AB094-7E4E-48DB-84DE-476E7C86ECA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E23AB094-7E4E-48DB-84DE-476E7C86ECA1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{316E2E31-C83B-47F5-BE39-DEECF0AA3899} = {EFDBC9CE-1221-4429-8EC2-291EBF2F9EC2}
@@ -56,6 +50,5 @@ Global
 		{E3DC7701-D78F-4AEA-8C06-82444D66A80F} = {077D6AAF-8CB3-4C0C-B4D7-AE1463B3458E}
 		{F08CA66E-172E-4687-8F83-FAA09A182463} = {077D6AAF-8CB3-4C0C-B4D7-AE1463B3458E}
 		{A25B90D1-6AA5-4071-8C75-C2B84093AB3A} = {F08CA66E-172E-4687-8F83-FAA09A182463}
-		{E23AB094-7E4E-48DB-84DE-476E7C86ECA1} = {F08CA66E-172E-4687-8F83-FAA09A182463}
 	EndGlobalSection
 EndGlobal

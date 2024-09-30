@@ -1,3 +1,3 @@
 using Audacia.Seed.Attributes;
 
-[assembly: SeedAssembly("Audacia.Seed.Testing.Helpers")]
+[assembly: SeedAssembly("Audacia.Seed.Tests.ExampleProject")]

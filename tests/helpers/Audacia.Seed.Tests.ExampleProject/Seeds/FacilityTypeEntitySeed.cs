@@ -4,7 +4,7 @@ using Audacia.Seed.Options;
 using Audacia.Seed.Tests.ExampleProject.Entities;
 using Audacia.Seed.Tests.ExampleProject.Entities.Enums;
 
-namespace Audacia.Seed.Testing.Helpers.Seeds;
+namespace Audacia.Seed.Tests.ExampleProject.Seeds;
 
 public class FacilityTypeEntitySeed : EntitySeed<FacilityTypeEntity>
 {

@@ -1,7 +1,7 @@
 using Audacia.Seed.Customisation;
 using Audacia.Seed.Tests.ExampleProject.Entities;
 
-namespace Audacia.Seed.Testing.Helpers.Seeds;
+namespace Audacia.Seed.Tests.ExampleProject.Seeds;
 
 public class FacilitySeed : EntitySeed<Facility>
 {

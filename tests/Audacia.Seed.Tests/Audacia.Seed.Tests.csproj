@@ -15,7 +15,6 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\Audacia.Seed.EntityFrameworkCore\Audacia.Seed.EntityFrameworkCore.csproj" />
       <ProjectReference Include="..\..\src\Audacia.Seed.EntityFramework\Audacia.Seed.EntityFramework.csproj" />
-      <ProjectReference Include="..\helpers\Audacia.Seed.Testing.Helpers\Audacia.Seed.Testing.Helpers.csproj" />
       <ProjectReference Include="..\helpers\Audacia.Seed.Tests.ExampleProject\Audacia.Seed.Tests.ExampleProject.csproj" />
     </ItemGroup>
 

@@ -1,9 +1,9 @@
 using Audacia.Seed.Customisation;
 using Audacia.Seed.EntityFrameworkCore.Extensions;
-using Audacia.Seed.Testing.Helpers.Seeds;
 using Audacia.Seed.Tests.ExampleProject.Entities;
 using Audacia.Seed.Tests.ExampleProject.Entities.Enums;
 using Audacia.Seed.Tests.ExampleProject.EntityFrameworkCore;
+using Audacia.Seed.Tests.ExampleProject.Seeds;
 using Audacia.Seed.Tests.TestHelpers;
 using FluentAssertions;
 using FluentAssertions.Execution;

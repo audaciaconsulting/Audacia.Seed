@@ -1,7 +1,7 @@
 using Audacia.Seed.Customisation;
 using Audacia.Seed.InMemory;
-using Audacia.Seed.Testing.Helpers.Seeds;
 using Audacia.Seed.Tests.ExampleProject.Entities;
+using Audacia.Seed.Tests.ExampleProject.Seeds;
 using FluentAssertions;
 using Xunit;
 
