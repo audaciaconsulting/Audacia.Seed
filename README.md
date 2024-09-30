@@ -86,24 +86,24 @@ The following table shows how each provider behaves when seeding data:
 | In-memory |               | ️️️✔️              |
 
 ## Custom `EntitySeed<TEntity>`s
-Creating a child class of `EntitySeed<TEntity>` class allows you define a valid default `TEntity` to be seeded looks like.
+Creating a child class of `EntitySeed<TEntity>` class allows you to define a valid default `TEntity` to be seeded looks like.
 It should seed _exactly_ the information required for an instance of `TEntity` to be considered valid. For example, it may be that you have two optional navigation properties, but your domain ensures exactly one is populated. This is a good use-case for a custom class as the default behaviour will be to seed neither of these navigation properties.
 
 You can create a class that inherits from `EntitySeed<TEntity>` to represent a single valid instance of `TEntity` as below: 
 ```csharp
-public class BookingSeed : EntitySeed<Booking>
+public class MyEntitySeed : EntitySeed<MyEntity>
 {
     public override IEnumerable<ISeedPrerequisite> Prerequisites() =>
     [
-        new SeedPrerequisite<Booking, Facility>(f => f.Facility),
-        new SeedPrerequisite<Booking, Member>(f => f.Member)
+        // This and `OptionalParentTwo` are optional FKs, but exactly one must be set for this entity to be valid.
+        new SeedPrerequisite<MyEntity, MyParent>(f => f.OptionalParentOne)
     ];
 
-    protected override Booking GetDefault(int index, Booking? previous)
+    protected override MyEntity GetDefault(int index, MyEntity? previous)
     {
-        return new Booking
+        return new Facility
         {
-            Notes = Guid.NewGuid().ToString()
+            Name = Guid.NewGuid().ToString()
         };
     }
 }
