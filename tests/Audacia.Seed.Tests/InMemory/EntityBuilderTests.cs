@@ -71,11 +71,11 @@ public class EntityBuilderTests
         var builder = new EntityBuilder();
         var facilityName = Guid.NewGuid().ToString();
         var facility = builder.Build(new FacilitySeed().With(f => f.Name, facilityName));
-        var secondBooking = builder.Build(new BookingSeed()
+        var booking = builder.Build(new BookingSeed()
             .WithExisting(b => b.Facility, f => f.Name == facilityName));
 
-        secondBooking.Facility.Name.Should().Be(facilityName);
-        secondBooking.Facility.Should().Be(facility);
+        booking.Facility.Name.Should().Be(facilityName);
+        booking.Facility.Should().Be(facility);
     }
 
     [Fact]
