@@ -51,11 +51,11 @@ public class ExpressionExtensionsTests
     [Fact]
     public void JoinMemberAccessChain_TypicalDataStructure_ReturnsSingleExpressionCombiningEachLambda()
     {
-        Expression<Func<Booking, Facility>> expectedFirst = x => x.Facility;
-        Expression<Func<Facility, Room>> expectedSecond = x => x.Room!;
-        Expression<Func<Room, Region>> expectedThird = x => x.Region;
+        Expression<Func<Booking, Facility>> first = x => x.Facility;
+        Expression<Func<Facility, Room>> second = x => x.Room!;
+        Expression<Func<Room, Region>> third = x => x.Region;
 
-        IEnumerable<LambdaExpression> target = [expectedFirst, expectedSecond, expectedThird];
+        IEnumerable<LambdaExpression> target = [first, second, third];
 
         var result = target.JoinMemberAccessChain();
 
@@ -66,11 +66,11 @@ public class ExpressionExtensionsTests
     [Fact]
     public void JoinMemberAccessChain_LambdaParameterDoesNotMatchPredecessorBody_ExceptionThrown()
     {
-        Expression<Func<Booking, Facility>> expectedFirst = x => x.Facility;
+        Expression<Func<Booking, Facility>> first = x => x.Facility;
         Expression<Func<Booking, Member>> incompatibleLambda = x => x.Member;
-        Expression<Func<Room, Region>> expectedThird = x => x.Region;
+        Expression<Func<Room, Region>> third = x => x.Region;
 
-        IEnumerable<LambdaExpression> target = [expectedFirst, incompatibleLambda, expectedThird];
+        IEnumerable<LambdaExpression> target = [first, incompatibleLambda, third];
 
         var act = () => target.JoinMemberAccessChain();
 
