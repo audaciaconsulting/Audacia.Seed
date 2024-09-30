@@ -9,7 +9,7 @@ namespace Audacia.Seed.EntityFramework.Extensions;
 public static class ExceptionExtensions
 {
     /// <summary>
-    /// Strip out meaningful information from the provided exception.
+    /// Extract meaningful information from the provided exception.
     /// </summary>
     /// <param name="exception">The exception containing the information.</param>
     /// <returns>A more developer-friendly message from the exception.</returns>
