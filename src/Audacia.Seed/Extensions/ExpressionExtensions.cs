@@ -67,7 +67,7 @@ internal static class ExpressionExtensions
         if (expression == null) throw new ArgumentNullException(nameof(expression));
         return expression.Body switch
         {
-            null => throw new ArgumentNullException(nameof(expression)),
+            null => throw new ArgumentException($"The {nameof(expression.Body)} of the provided {nameof(expression)} is null"),
             UnaryExpression { Operand: MemberExpression me } => (PropertyInfo)me.Member,
             MemberExpression me => (PropertyInfo)me.Member,
             _ => throw new ArgumentException($"The expression doesn't indicate a valid property. [ {expression} ]")
