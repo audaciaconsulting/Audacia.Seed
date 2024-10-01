@@ -67,7 +67,7 @@ The library uses EF Core's [`IModel` interface](https://learn.microsoft.com/en-u
 
 #### `Prerequisites` 
 When seeding without a class, we figure out the `Prerequisites` as follows:
-1. The library finds all fields that it thinks are navigation properties. This is based on the property being a `class`, and the existance of another property with the name `{PropertyName}Id`.
+1. The library finds all fields that it thinks are navigation properties. This is based on the property being a `class`, and the existence of another property with the name `{PropertyName}Id`.
 2. A navigation property is considered as mandatory if its corresponding foreign key is not nullable.
 3. For each mandatory navigation property, we try to find a `EntitySeed<TNavigation>` class for it. If none is found, we'll repeat this process for `TNavigation`.
 

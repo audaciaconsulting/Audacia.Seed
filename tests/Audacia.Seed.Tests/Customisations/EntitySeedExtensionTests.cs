@@ -397,7 +397,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public async Task WithNew_OverridesPrerequisite_ChildrenShareTheSameParent()
     {
         var seed = new BookingSeed()
-            .WithNew(b => b.Member, new MemberSeed());
+            .WithNew(b => b.Member, new MemberSeed().With(m => m.FirstName, "First name"));
 
         const int amountToCreate = 2;
         _context.SeedMany(amountToCreate, seed);
@@ -733,9 +733,6 @@ public sealed class EntitySeedExtensionTests : IDisposable
                 facilitiesForBooking.Select(f => f.Name).Should().BeEquivalentTo(
                     facilityNames,
                     "each child should have the correct name");
-                facilitiesForBooking.Select(f => f.Name).Should().BeEquivalentTo(
-                    facilityNames,
-                    "each child should have the correct name");
             }
         }
     }
@@ -825,6 +822,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
             "we should be able to set different values for each parent");
     }
 
+    // It's easy to unintentionally change (i.e break) the behaviour depending on the amount being created, so test a few values to make sure this hasn't happened.
     [Theory]
     [InlineData(2)]
     [InlineData(3)]
@@ -858,6 +856,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         }
     }
 
+    // It's easy to unintentionally change (i.e break) the behaviour depending on the amount being created, so test a few values to make sure this hasn't happened.
     [Theory]
     [InlineData(2)]
     [InlineData(3)]
@@ -1016,7 +1015,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         bookings.Select(b => b.FacilityId).Distinct().Should()
             .HaveCount(amountToCreate, "the bookings should be for different facilities");
         bookings.Select(b => b.Facility.RoomId).Distinct().Should()
-            .HaveCount(amountToCreate, "the facilities should be in differnt rooms");
+            .HaveCount(amountToCreate, "the facilities should be in different rooms");
     }
 
     [Fact]
@@ -1101,7 +1100,6 @@ public sealed class EntitySeedExtensionTests : IDisposable
             members.Should().HaveCount(amountOfMembers, "we should have seeded two members");
             foreach (var bookingsForMember in bookings.GroupBy(b => b.MemberId))
             {
-                bookingsForMember.Should().HaveCount(bookingsPerMember, "each member should have 2 bookings");
                 bookingsForMember.Should().HaveCount(bookingsPerMember, "each member should have 2 bookings");
             }
         }
@@ -1260,7 +1258,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public void SeedingDifferentEntityBetweenMultiStageSeeding_DataSavedCorrectly()
     {
         var facility = _context.Seed<Facility>();
-        // Issue #170394: this cleared the change tracker (including the facility above), so thought we were hardcoding the id of the facility used below.
+        // This is a bugfix. Previously, this cleared the change tracker (including the facility above), so thought we were hardcoding the id of the facility used below.
         _context.Seed<Facility>();
         var bookingSeed = new BookingSeed().With(b => b.Facility, facility);
 
@@ -1311,7 +1309,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void SpecifyingExplicitPropertyForParentInOrder_DoesNotSeedMoreDataThanItShould()
+    public void SpecifyingExplicitPropertyForParentInOrder_ParentPropertiesArePopulatedWithProvidedValues()
     {
         var bookingSeed = new EntitySeed<Booking>()
             .WithDifferent(b => b.Member)
@@ -1381,9 +1379,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void MultipleWithCallsPartiallyMatchTheGetter_CorrectAmountOfDataIsSeeded()
+    public void MultipleWithCallsPartiallyMatchTheGetter_NumberOfParentsSeededReflectsTheNumberOfPropertiesProvided()
     {
-        // These .WithDifferent calls contain pa
+        // These .With calls contain some parents in commons (i.e Member), but diverge afterwards.
         _context.SeedMany(2, new BookingSeed()
             .With(b => b.Member.FirstName, "John", "Jane")
             .With(b => b.Member.MembershipGroup.Name, "Group 1", "Group 2"));
@@ -1403,7 +1401,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void MultipleWithDifferentCallsPartiallyMatchTheGetter_CorrectAmountOfDataIsSeeded()
+    public void MultipleWithDifferentCallsPartiallyMatchTheGetter_NumberOfParentsSeededReflectsTheNumberOfPropertiesProvided()
     {
         _context.SeedMany(2, new BookingSeed()
             .WithDifferent(b => b.Member)
