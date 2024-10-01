@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Audacia.Seed.Constants;
 using Audacia.Seed.Contracts;
 
 namespace Audacia.Seed.Properties;
@@ -45,7 +46,7 @@ public interface ISeedCustomisation<TEntity>
     /// The lower the number, the higher the priority.
     /// Defaults to 100 so that we can insert customisations at the start or end of the pipeline.
     /// </summary>
-    int Order => 100;
+    int Order => SeedingConstants.DefaultCustomisationOrder;
 
     /// <summary>
     /// Based on the provided <paramref name="getter"/>, return a <see cref="EntitySeed{TNavigation}"/>.

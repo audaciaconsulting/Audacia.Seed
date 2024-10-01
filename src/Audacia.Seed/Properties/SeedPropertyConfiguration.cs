@@ -15,7 +15,7 @@ public class SeedPropertyConfiguration<TEntity, TProperty>(Expression<Func<TEnti
     where TEntity : class
 {
     /// <inheritdoc/>
-    public int Order => int.MaxValue;
+    public int Order => 200;
 
     /// <inheritdoc/>
     public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
