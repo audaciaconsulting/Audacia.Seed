@@ -57,7 +57,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         // Check we can specify arbitrary properties on a parent entity.
         var expectedFirstName = Guid.NewGuid().ToString();
         var seedConfiguration = new BookingSeed()
-            .With(m => m.Member.FirstName, expectedFirstName);
+            .With(b => b.Member.FirstName, expectedFirstName);
 
         _context.Seed(seedConfiguration);
 
@@ -71,7 +71,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         var membershipGroup = _context.Seed(new MembershipGroupSeed());
         var expectedFirstName = Guid.NewGuid().ToString();
-        var seedConfiguration = new BookingSeed().With(m => m.Member, new Member
+        var seedConfiguration = new BookingSeed().With(b => b.Member, new Member
         {
             FirstName = expectedFirstName,
             LastName = Guid.NewGuid().ToString(),
@@ -90,7 +90,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         var membershipGroup = _context.Seed(new MembershipGroupSeed());
         var expectedFirstName = Guid.NewGuid().ToString();
-        var seedConfiguration = new BookingSeed().With(m => m.Member, new Member
+        var seedConfiguration = new BookingSeed().With(b => b.Member, new Member
         {
             FirstName = expectedFirstName,
             LastName = Guid.NewGuid().ToString(),
@@ -165,7 +165,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         var roomName = Guid.NewGuid().ToString();
         var seedConfiguration = new FacilitySeed()
-            .With(m => m.Room, new Room { Name = roomName, Region = new() });
+            .With(f => f.Room, new Room { Name = roomName, Region = new() });
 
         _context.Seed(seedConfiguration);
 
@@ -183,7 +183,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int expectedCount = 10;
         var expectedName = Guid.NewGuid().ToString();
         var seedConfiguration = new FacilitySeed()
-            .With(m => m.Name, expectedName);
+            .With(f => f.Name, expectedName);
 
         _context.SeedMany(expectedCount, seedConfiguration);
 
@@ -198,7 +198,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         const int expectedCount = 5;
         var seedConfiguration = new CouponSeed()
-            .With(m => m.Discount, index => index * 10m);
+            .With(c => c.Discount, index => index * 10m);
 
         _context.SeedMany(expectedCount, seedConfiguration);
 
@@ -214,7 +214,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         const int expectedCount = 5;
         var seedConfiguration = new CouponSeed()
-            .With(m => m.Discount, (_, previous) => previous?.Discount * 2 ?? 0.1m);
+            .With(c => c.Discount, (_, previous) => previous?.Discount * 2 ?? 0.1m);
 
         _context.SeedMany(expectedCount, seedConfiguration);
 
@@ -229,7 +229,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public async Task With_DelegateProvidedForPropertySetter_EachEntityHasUniqueValue()
     {
         var seedConfiguration = new FacilitySeed()
-            .With(scs => scs.Name, () => Guid.NewGuid().ToString());
+            .With(f => f.Name, () => Guid.NewGuid().ToString());
 
         const int amountToCreate = 5;
         _context.SeedMany(amountToCreate, seedConfiguration);
@@ -244,7 +244,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         string[] expectedNames = ["Facility 1", "Facility 2"];
         var seedConfiguration = new FacilitySeed()
-            .With(scs => scs.Name, expectedNames);
+            .With(f => f.Name, expectedNames);
 
         _context.SeedMany(expectedNames.Length, seedConfiguration);
 
@@ -259,7 +259,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         string[] names = ["Facility 1", "Facility 2"];
         var seedConfiguration = new FacilitySeed()
-            .With(scs => scs.Name, names);
+            .With(f => f.Name, names);
 
         // Seed one more than the name we provided.
         var amountToCreate = names.Length + 1;
@@ -276,7 +276,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         string[] names = ["Facility 1", "Facility 2", "Facility 3"];
         var seedConfiguration = new FacilitySeed()
-            .With(scs => scs.Name, names);
+            .With(f => f.Name, names);
 
         // Seed one less than the name we provided.
         var amountToCreate = names.Length - 1;
@@ -293,7 +293,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         var existingMembershipGroup = _context.Seed<MembershipGroup>();
         var seedConfiguration = new BookingSeed()
-            .With(f => f.Member.MembershipGroup, existingMembershipGroup);
+            .With(b => b.Member.MembershipGroup, existingMembershipGroup);
 
         _context.Seed(seedConfiguration);
 
@@ -306,7 +306,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         var existingMembershipGroup = _context.Seed<MembershipGroup>();
         var seedConfiguration = new BookingSeed()
-            .With(f => f.Member.MembershipGroupId, existingMembershipGroup.Id);
+            .With(b => b.Member.MembershipGroupId, existingMembershipGroup.Id);
 
         _context.Seed(seedConfiguration);
 
@@ -319,7 +319,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         const string expectedName = "Squash court 2";
         var seedConfiguration = new BookingSeed().WithNew(
-            m => m.Facility,
+            b => b.Facility,
             new FacilitySeed()
                 .With(f => f.Name, expectedName));
 
@@ -335,7 +335,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public async Task WithNew_NewSeedForOptionalNavigation_OptionalPropertyIsSet()
     {
         var seedConfiguration = new FacilitySeed()
-            .WithNew(m => m.Room);
+            .WithNew(f => f.Room);
 
         _context.Seed(seedConfiguration);
 
@@ -362,8 +362,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public void WithNew_SeedClassDoesNotExistInProjectForParent_CanBeSeeded()
     {
         var seed = new RoomSeed()
-            .WithNew(f => f.Region)
-            .With(b => b.Name, "Test facility");
+            .WithNew(r => r.Region)
+            .With(r => r.Name, "Test Room");
 
         var seededEntity = _context.Seed(seed);
 
@@ -462,8 +462,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var expectedManagerName = Guid.NewGuid().ToString();
         var seed = new FacilitySeed()
             // Overriding the owner & member should create two entities
-            .WithNew(b => b.Owner, new EmployeeSeed().With(m => m.FirstName, expectedOwnerName))
-            .WithNew(b => b.Manager, new EmployeeSeed().With(m => m.FirstName, expectedManagerName));
+            .WithNew(f => f.Owner, new EmployeeSeed().With(m => m.FirstName, expectedOwnerName))
+            .WithNew(f => f.Manager, new EmployeeSeed().With(m => m.FirstName, expectedManagerName));
 
         _context.Seed(seed);
 
@@ -492,9 +492,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var seedConfiguration = new FacilitySeed()
             .WithNew(
                 f => f.Room,
-                new RoomSeed().With(b => b.Name, "Room 1"),
-                new RoomSeed().With(b => b.Name, "Room 2"),
-                new RoomSeed().With(b => b.Name, "Room 3"));
+                new RoomSeed().With(r => r.Name, "Room 1"),
+                new RoomSeed().With(r => r.Name, "Room 2"),
+                new RoomSeed().With(r => r.Name, "Room 3"));
 
         _context.SeedMany(amountToCreate, seedConfiguration);
 
@@ -509,9 +509,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public async Task WithNew_SeedClassDoesExistsInProject_UsesSeedClass()
     {
         var seed = new EntitySeed<Facility>()
-            .With(b => b.Name, "Test facility") // This is just so it can be saved.
-            .WithNew(b => b.Room)
-            .WithNew(b => b.TypeEntity);
+            .With(f => f.Name, "Test facility") // This is just so it can be saved.
+            .WithNew(f => f.Room)
+            .WithNew(f => f.TypeEntity);
 
         var seededEntity = _context.Seed(seed);
 
@@ -524,8 +524,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public void WithNew_SeedClassDoesNotExistInProject_UsesDefaultSeed()
     {
         var seed = new EntitySeed<Room>()
-            .WithNew(f => f.Region)
-            .With(b => b.Name, "Test facility");
+            .WithNew(r => r.Region)
+            .With(r => r.Name, "Test room");
 
         var seededEntity = _context.Seed(seed);
 
@@ -538,7 +538,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public void WithNew_Grandparent_CanBeSeeded()
     {
         var seed = new EntitySeed<Booking>()
-            .WithNew(f => f.Facility.Room);
+            .WithNew(b => b.Facility.Room);
 
         var seededEntity = _context.Seed(seed);
 
@@ -553,7 +553,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         RoomSeed[] prerequisites = [new RoomSeed(), new RoomSeed(), new RoomSeed()];
         var seedConfiguration = new FacilitySeed()
-            .WithNew(scs => scs.Room, prerequisites);
+            .WithNew(f => f.Room, prerequisites);
 
         // Seed one more than the name we provided.
         var amountToCreate = prerequisites.Length + 1;
@@ -570,7 +570,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         RoomSeed[] prerequisites = [new RoomSeed(), new RoomSeed(), new RoomSeed()];
         var seedConfiguration = new FacilitySeed()
-            .WithNew(scs => scs.Room, prerequisites);
+            .WithNew(f => f.Room, prerequisites);
 
         // Seed one less than the name we provided.
         var amountToCreate = prerequisites.Length - 1;
@@ -587,7 +587,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         const int numberOfChildren = 5;
         var seedConfiguration = new MemberSeed()
-            .WithChildren(b => b.Bookings, numberOfChildren);
+            .WithChildren(m => m.Bookings, numberOfChildren);
 
         var member = _context.Seed(seedConfiguration);
 
@@ -610,7 +610,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int numberOfChildren = 2;
         var seedConfiguration = new RoomSeed()
             .WithChildren(
-                b => b.Facilities,
+                r => r.Facilities,
                 numberOfChildren,
                 new FacilitySeed().With(f => f.Name, "Facility 1", "Facility 2"));
 
@@ -629,12 +629,12 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public async Task WithExisting_ForOptionalNavigation_PopulatedInTheDatabase()
     {
         var roomName = Guid.NewGuid().ToString();
-        _context.Seed(new RoomSeed().With(b => b.Name, roomName));
+        _context.Seed(new RoomSeed().With(r => r.Name, roomName));
         var seedConfiguration = new FacilitySeed().WithExisting(f => f.Room);
 
         _context.Seed(seedConfiguration);
 
-        var savedEntity = await _context.Set<Facility>().Include(b => b.Room).FirstAsync();
+        var savedEntity = await _context.Set<Facility>().Include(f => f.Room).FirstAsync();
         savedEntity.Room?.Name.Should()
             .Be(roomName, "it should select an existing Room from the database");
     }
@@ -645,9 +645,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int numberOfChildren = 3;
         var seedConfiguration = new RoomSeed()
             .WithChildren(
-                b => b.Facilities,
+                r => r.Facilities,
                 numberOfChildren,
-                new FacilitySeed().With(f => f.Name, "Facility 1", "Facility 2", "Facility 3"));
+                new FacilitySeed().With(f => f.Name, "Room 1", "Room 2", "Room 3"));
 
         const int amountToSeed = 2;
         _context.SeedMany(amountToSeed, seedConfiguration);
@@ -667,9 +667,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int numberOfChildren = 3;
         var seedConfiguration = new FacilitySeed()
             .WithChildren(
-                b => b.Bookings,
+                f => f.Bookings,
                 numberOfChildren,
-                new BookingSeed().With(f => f.Notes, "Booking 1", "Booking 2", "Booking 3"));
+                new BookingSeed().With(b => b.Notes, "Booking 1", "Booking 2", "Booking 3"));
 
         const int amountToSeed = 2;
         _context.SeedMany(amountToSeed, seedConfiguration);
@@ -688,7 +688,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         const int numberOfChildren = 5;
         var seedConfiguration = new RoomSeed()
-            .WithChildren(b => b.Facilities, numberOfChildren);
+            .WithChildren(r => r.Facilities, numberOfChildren);
 
         const int amountToSeed = 3;
         _context.SeedMany(amountToSeed, seedConfiguration);
@@ -716,7 +716,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var childSeed = new FacilitySeed()
             .With(f => f.Name, facilityNames);
         var seed = new RoomSeed()
-            .WithChildren(b => b.Facilities, facilityNames.Length, childSeed);
+            .WithChildren(r => r.Facilities, facilityNames.Length, childSeed);
 
         const int roomsToSeed = 2;
         _context.SeedMany(roomsToSeed, seed);
@@ -745,13 +745,13 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         const int amountToCreate = 3;
         const string expectedRoomName = "Room 3";
-        var roomSeed = new RoomSeed().With(b => b.Name, "Room 1", "Room 2", expectedRoomName);
+        var roomSeed = new RoomSeed().With(r => r.Name, "Room 1", "Room 2", expectedRoomName);
         _context.SeedMany(amountToCreate, roomSeed);
-        var seedConfiguration = new FacilitySeed().WithExisting(f => f.Room, b => b.Name == expectedRoomName);
+        var seedConfiguration = new FacilitySeed().WithExisting(f => f.Room, r => r.Name == expectedRoomName);
 
         _context.Seed(seedConfiguration);
 
-        var savedEntity = await _context.Set<Facility>().Include(b => b.Room).FirstAsync();
+        var savedEntity = await _context.Set<Facility>().Include(f => f.Room).FirstAsync();
         savedEntity.Room?.Name.Should()
             .Be(expectedRoomName, "it should select the correct Room from the database");
     }
@@ -765,7 +765,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.Seed(seedConfiguration);
 
-        var savedEntity = await _context.Set<Facility>().Include(b => b.Room).FirstAsync();
+        var savedEntity = await _context.Set<Facility>().Include(f => f.Room).FirstAsync();
         savedEntity.Room!.Name.Should().Be(roomName, "it should select the Room from the database");
     }
 
@@ -773,7 +773,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public async Task WithExisting_OverridesPrerequisite_OnlyOneAddedToTheDatabase()
     {
         var expectedMemberName = Guid.NewGuid().ToString();
-        _context.Seed(new MemberSeed().With(b => b.FirstName, expectedMemberName));
+        _context.Seed(new MemberSeed().With(m => m.FirstName, expectedMemberName));
         var seed = new BookingSeed().WithExisting(b => b.Member);
 
         _context.Seed(seed);
@@ -812,8 +812,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         const int amountToCreate = 3;
         var seedConfiguration = new FacilitySeed()
-            .WithDifferent(b => b.Room)
-            .With(b => b.Room!.Name, "First name", "Second name", "Third name");
+            .WithDifferent(f => f.Room)
+            .With(f => f.Room!.Name, "First name", "Second name", "Third name");
 
         _context.SeedMany(amountToCreate, seedConfiguration);
 
@@ -891,7 +891,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     public async Task Without_ForOptionalProperty_PropertyIsSetToNull()
     {
         var seedConfiguration = new BookingSeed()
-            .Without(opts => opts.Notes);
+            .Without(b => b.Notes);
 
         _context.Seed(seedConfiguration);
 
@@ -1122,7 +1122,6 @@ public sealed class EntitySeedExtensionTests : IDisposable
         _context.Seed(poolBookingSeed, roomBookingSeed);
 
         var bookings = await _context.Set<Booking>()
-            .Include(b => b.Facility)
             .Include(b => b.Facility)
             .ToListAsync();
         const int expectedCount = 2;
