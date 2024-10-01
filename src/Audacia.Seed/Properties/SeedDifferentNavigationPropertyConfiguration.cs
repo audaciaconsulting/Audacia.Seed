@@ -21,7 +21,7 @@ public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
     where TNavigation : class
 {
     /// <inheritdoc/>
-    public int Order => 0;
+    public int Order => 50;
 
     /// <inheritdoc/>
     public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
@@ -99,6 +99,8 @@ public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
     {
         ArgumentNullException.ThrowIfNull(entitySeed);
 
+        // Protect against using `WithDifferent` when you're only creating one entity.
+        // As `TryFindNew` is the default, this is what the seed options would look like in this scenario.
         if (entitySeed.Options is { AmountToCreate: 1, InsertionBehavior: SeedingInsertionBehaviour.TryFindNew })
         {
             throw new DataSeedingException($"`{nameof(EntitySeedExtensions.WithDifferent)} was specified, but we're only building 1 {typeof(TEntity).Name}.");

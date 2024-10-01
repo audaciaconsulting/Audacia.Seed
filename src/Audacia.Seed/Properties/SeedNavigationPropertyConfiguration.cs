@@ -20,7 +20,7 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     where TNavigation : class
 {
     /// <inheritdoc/>
-    public int Order => 0;
+    public int Order => 50;
 
     /// <inheritdoc/>
     public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
