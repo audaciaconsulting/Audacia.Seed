@@ -37,8 +37,9 @@ public class EntityBuilder
         where T1 : class
         where T2 : class
     {
-        var seed1 = EntryPointAssembly.Load().FindSeed<T1>();
-        var seed2 = EntryPointAssembly.Load().FindSeed<T2>();
+        var assembly = EntryPointAssembly.Load();
+        var seed1 = assembly.FindSeed<T1>();
+        var seed2 = assembly.FindSeed<T2>();
 
         return Build(
             seed1, seed2);
@@ -58,9 +59,10 @@ public class EntityBuilder
         where T2 : class
         where T3 : class
     {
-        var seed1 = EntryPointAssembly.Load().FindSeed<T1>();
-        var seed2 = EntryPointAssembly.Load().FindSeed<T2>();
-        var seed3 = EntryPointAssembly.Load().FindSeed<T3>();
+        var assembly = EntryPointAssembly.Load();
+        var seed1 = assembly.FindSeed<T1>();
+        var seed2 = assembly.FindSeed<T2>();
+        var seed3 = assembly.FindSeed<T3>();
 
         return Build(
             seed1, seed2, seed3);
@@ -82,10 +84,11 @@ public class EntityBuilder
         where T3 : class
         where T4 : class
     {
-        var seed1 = EntryPointAssembly.Load().FindSeed<T1>();
-        var seed2 = EntryPointAssembly.Load().FindSeed<T2>();
-        var seed3 = EntryPointAssembly.Load().FindSeed<T3>();
-        var seed4 = EntryPointAssembly.Load().FindSeed<T4>();
+        var assembly = EntryPointAssembly.Load();
+        var seed1 = assembly.FindSeed<T1>();
+        var seed2 = assembly.FindSeed<T2>();
+        var seed3 = assembly.FindSeed<T3>();
+        var seed4 = assembly.FindSeed<T4>();
 
         return Build(
             seed1, seed2, seed3, seed4);
@@ -109,11 +112,12 @@ public class EntityBuilder
         where T4 : class
         where T5 : class
     {
-        var seed1 = EntryPointAssembly.Load().FindSeed<T1>();
-        var seed2 = EntryPointAssembly.Load().FindSeed<T2>();
-        var seed3 = EntryPointAssembly.Load().FindSeed<T3>();
-        var seed4 = EntryPointAssembly.Load().FindSeed<T4>();
-        var seed5 = EntryPointAssembly.Load().FindSeed<T5>();
+        var assembly = EntryPointAssembly.Load();
+        var seed1 = assembly.FindSeed<T1>();
+        var seed2 = assembly.FindSeed<T2>();
+        var seed3 = assembly.FindSeed<T3>();
+        var seed4 = assembly.FindSeed<T4>();
+        var seed5 = assembly.FindSeed<T5>();
 
         return Build(
             seed1, seed2, seed3, seed4, seed5);
@@ -139,12 +143,13 @@ public class EntityBuilder
         where T5 : class
         where T6 : class
     {
-        var seed1 = EntryPointAssembly.Load().FindSeed<T1>();
-        var seed2 = EntryPointAssembly.Load().FindSeed<T2>();
-        var seed3 = EntryPointAssembly.Load().FindSeed<T3>();
-        var seed4 = EntryPointAssembly.Load().FindSeed<T4>();
-        var seed5 = EntryPointAssembly.Load().FindSeed<T5>();
-        var seed6 = EntryPointAssembly.Load().FindSeed<T6>();
+        var assembly = EntryPointAssembly.Load();
+        var seed1 = assembly.FindSeed<T1>();
+        var seed2 = assembly.FindSeed<T2>();
+        var seed3 = assembly.FindSeed<T3>();
+        var seed4 = assembly.FindSeed<T4>();
+        var seed5 = assembly.FindSeed<T5>();
+        var seed6 = assembly.FindSeed<T6>();
 
         return Build(seed1, seed2, seed3, seed4, seed5, seed6);
     }
@@ -171,13 +176,14 @@ public class EntityBuilder
         where T6 : class
         where T7 : class
     {
-        var seed1 = EntryPointAssembly.Load().FindSeed<T1>();
-        var seed2 = EntryPointAssembly.Load().FindSeed<T2>();
-        var seed3 = EntryPointAssembly.Load().FindSeed<T3>();
-        var seed4 = EntryPointAssembly.Load().FindSeed<T4>();
-        var seed5 = EntryPointAssembly.Load().FindSeed<T5>();
-        var seed6 = EntryPointAssembly.Load().FindSeed<T6>();
-        var seed7 = EntryPointAssembly.Load().FindSeed<T7>();
+        var assembly = EntryPointAssembly.Load();
+        var seed1 = assembly.FindSeed<T1>();
+        var seed2 = assembly.FindSeed<T2>();
+        var seed3 = assembly.FindSeed<T3>();
+        var seed4 = assembly.FindSeed<T4>();
+        var seed5 = assembly.FindSeed<T5>();
+        var seed6 = assembly.FindSeed<T6>();
+        var seed7 = assembly.FindSeed<T7>();
 
         return Build(
             seed1, seed2, seed3, seed4, seed5, seed6, seed7);
@@ -207,14 +213,15 @@ public class EntityBuilder
         where T7 : class
         where T8 : class
     {
-        var seed1 = EntryPointAssembly.Load().FindSeed<T1>();
-        var seed2 = EntryPointAssembly.Load().FindSeed<T2>();
-        var seed3 = EntryPointAssembly.Load().FindSeed<T3>();
-        var seed4 = EntryPointAssembly.Load().FindSeed<T4>();
-        var seed5 = EntryPointAssembly.Load().FindSeed<T5>();
-        var seed6 = EntryPointAssembly.Load().FindSeed<T6>();
-        var seed7 = EntryPointAssembly.Load().FindSeed<T7>();
-        var seed8 = EntryPointAssembly.Load().FindSeed<T8>();
+        var assembly = EntryPointAssembly.Load();
+        var seed1 = assembly.FindSeed<T1>();
+        var seed2 = assembly.FindSeed<T2>();
+        var seed3 = assembly.FindSeed<T3>();
+        var seed4 = assembly.FindSeed<T4>();
+        var seed5 = assembly.FindSeed<T5>();
+        var seed6 = assembly.FindSeed<T6>();
+        var seed7 = assembly.FindSeed<T7>();
+        var seed8 = assembly.FindSeed<T8>();
 
         return Build(
             seed1, seed2, seed3, seed4, seed5, seed6, seed7, seed8);

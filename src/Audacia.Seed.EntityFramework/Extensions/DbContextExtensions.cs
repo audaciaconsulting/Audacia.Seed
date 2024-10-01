@@ -255,7 +255,6 @@ public static class DbContextExtensions
     /// <param name="context">The database context to insert into.</param>
     /// <param name="seed">The seed configuration that creates the entity.</param>
     /// <returns>An entity that exists in the database, with a generated ID.</returns>
-    /// <exception cref="DataSeedingException">Thrown if the number of entities added is not exactly 1.</exception>
     [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
     public static TEntity Seed<TEntity>(
