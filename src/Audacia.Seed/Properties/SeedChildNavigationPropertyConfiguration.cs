@@ -27,7 +27,7 @@ public class
     private Expression<Func<TEntity, IEnumerable<TChildNavigation>>> Getter { get; } = getter;
 
     /// <summary>
-    /// Gets a list of seed configurations to use, in order in which they will be used.
+    /// Gets the seed configuration to use to create the children.
     /// </summary>
     private TSeed SeedConfiguration { get; } = seedConfiguration;
 
