@@ -13,7 +13,7 @@ public interface ISeedCustomisation<TEntity>
     /// <summary>
     /// Apply the customisation on the entity.
     /// </summary>
-    /// <param name="entity">The entity to populate the property on. Not necessarily the owner of the property e.g if the provided expression is f => f.Foo.Bar.</param>
+    /// <param name="entity">The entity to apply the customisation to.</param>
     /// <param name="repository">For looking up existing information persisted in the repository, if necessary.</param>
     /// <param name="index">The index of this specific entity being created. Use this to vary how properties are set based on how many entities are already seeded.</param>
     /// <param name="previous">The previous entity that was created - does not exist in the database. Use this to vary how properties are set based what the previous entity looks like.</param>
