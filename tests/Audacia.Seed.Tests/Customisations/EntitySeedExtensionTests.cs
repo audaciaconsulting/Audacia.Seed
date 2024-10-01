@@ -656,7 +656,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         using (new AssertionScope())
         {
             childrenSeeded.Select(c => c.Name).Should().BeEquivalentTo(
-                new[] { "Facility 1", "Facility 2", "Facility 3", "Facility 1", "Facility 2", "Facility 3" },
+                new[] { "Room 1", "Room 2", "Room 3", "Room 1", "Room 2", "Room 3" },
                 "we should be able to customise the child seed that each optional parent receives a copy of");
         }
     }
