@@ -1,54 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>CS1591</NoWarn>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Title>Audacia.Seed.EntityFrameworkCore</Title>
+        <Authors>Audacia</Authors>
+        <Version>2.0.0</Version>
+        <Description>Entity Framework Core integration for Audacia.Seed.</Description>
+        <Copyright>Copyright © Audacia 2024</Copyright>
+        <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Title>Audacia.Seed.EntityFrameworkCore</Title>
-    <Authors>Audacia</Authors>
-    <Version>1.1.0</Version>
-    <Description>Entity Framework Core integration for Audacia.Seed</Description>
-    <Copyright>Copyright © Audacia 2019</Copyright>
-    <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
-    <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	<Nullable>enable</Nullable>
-	<LangVersion>8.0</LangVersion>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <DocumentationFile>bin\Release\Audacia.Seed.EntityFrameworkCore.xml</DocumentationFile>
-  </PropertyGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Audacia.Seed\Audacia.Seed.csproj" />
+    </ItemGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DocumentationFile>bin\Debug\Audacia.Seed.EntityFrameworkCore.xml</DocumentationFile>
-  </PropertyGroup>
+    <ItemGroup>
+        <None Include="..\..\audacia-logo-circle-blue.png" Pack="true" PackagePath="\" />
+    </ItemGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn />
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn />
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="..\..\audacia-logo-circle-blue.png" Pack="true" PackagePath="\" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="Audacia.CodeAnalysis" Version="1.5.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.22" />
-  </ItemGroup>
-	
-  <ItemGroup>
-	<ProjectReference Include="..\Audacia.Seed\Audacia.Seed.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Audacia.CodeAnalysis" Version="1.10.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.0" />
+    </ItemGroup>
 
 </Project>

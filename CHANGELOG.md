@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.0 - 2024-09-24
+### Added
+- Complete rewrite of the project based on existing need, and lack of uptake on the current project.
+- Support for EF Core, EF6, and in-memory seeding 
+
+### Changed
+- All existing functionality removed:
+   - `web.confg` based configuration not supported.
+   - `Autofixture` reference removed.
+
 ## 1.1.0 - 2023-10-05
 ### Added
 - No new functionality added
