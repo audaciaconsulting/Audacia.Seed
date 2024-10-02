@@ -101,7 +101,7 @@ public class MyEntitySeed : EntitySeed<MyEntity>
 
     protected override MyEntity GetDefault(int index, MyEntity? previous)
     {
-        return new Facility
+        return new MyEntity
         {
             Name = Guid.NewGuid().ToString()
         };
