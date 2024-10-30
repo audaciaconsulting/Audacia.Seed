@@ -111,6 +111,34 @@ public sealed class EntitySeedTests : IDisposable
         act.Should().ThrowExactly<DataSeedingException>("we should throw an exception if the getter does not access a property on the entity");
     }
 
+    [Fact]
+    public void PerformSeeding_SeedingManyEntities_ManyEntitiesSavedToDatabase()
+    {
+        var entitySeed = new EntitySeed<Booking>();
+        const int amountToCreate = 2;
+        entitySeed.Options.AmountToCreate = amountToCreate;
+
+        entitySeed.PerformSeeding(new EntityFrameworkCoreSeedableRepository(_context));
+        _context.SaveChanges();
+
+        var anyBookingsSeeded = _context.Set<Booking>().Count();
+        anyBookingsSeeded.Should().Be(amountToCreate);
+    }
+
+    [Fact]
+    public void PerformSeeding_SeedingOneEntity_OneEntitySavedToDatabase()
+    {
+        var entitySeed = new EntitySeed<Booking>();
+        const int amountToCreate = 1;
+        entitySeed.Options.AmountToCreate = amountToCreate;
+
+        entitySeed.PerformSeeding(new EntityFrameworkCoreSeedableRepository(_context));
+        _context.SaveChanges();
+
+        var anyBookingsSeeded = _context.Set<Booking>().Count();
+        anyBookingsSeeded.Should().Be(amountToCreate);
+    }
+
     public void Dispose()
     {
         _context.Dispose();
