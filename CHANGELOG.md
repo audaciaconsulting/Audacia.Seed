@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1 - 2024-10-30
+### Fixed
+- Bug Fix: entities not saved when seeding many using the `IEntitySeed.PerformSeeding` method (#182830).
+
 ## 2.0.0 - 2024-09-24
 ### Added
 - Complete rewrite of the project based on existing need, and lack of uptake on the current project.
