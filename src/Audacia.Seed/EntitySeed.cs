@@ -122,7 +122,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
 
         if (Options.AmountToCreate > 1)
         {
-            _ = BuildMany(Options.AmountToCreate);
+            _ = BuildMany(Options.AmountToCreate).ToList();
         }
         else
         {
