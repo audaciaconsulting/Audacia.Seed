@@ -39,7 +39,17 @@ public static class EntitySeedExtensions
                 $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
         }
 
-        entitySeed.AddCustomisation(new SeedPropertyConfiguration<TEntity, TProperty>(getter, value));
+        // Check the getter passed in is setting a nested property or not
+        // E.g x => x.Parent.GrandParentId is nested, but x => x.ParentId is not.
+        if (getter.Body is MemberExpression m && m.Expression?.Type != typeof(TEntity))
+        {
+            WithRecursive(entitySeed, getter, value);
+        }
+        else
+        {
+            entitySeed.AddCustomisation(new SeedPropertyConfiguration<TEntity, TProperty>(getter, value));
+        }
+
         return entitySeed;
     }
 
@@ -568,8 +578,8 @@ public static class EntitySeedExtensions
         var sourceType = left.Body.Type;
         parentSeed.WithReflection(right, sourceType, values);
 
-        // Add a WithDifferent for the EntitySeed<Parent> with getter x => x.GrandParent
-        AddWithDifferentForParent(entitySeed, left, parentSeed);
+        // Add a WithNew for the EntitySeed<Parent> with getter x => x.GrandParent
+        AddWithNewForParent(entitySeed, left, parentSeed);
     }
 
     private static void WithDifferentReflection(
@@ -591,18 +601,18 @@ public static class EntitySeedExtensions
         Type sourceType,
         params TProperty[] values)
     {
-        var withDifferent = typeof(EntitySeedExtensions).GetMethods()
+        var withMethod = typeof(EntitySeedExtensions).GetMethods()
             .Single(method =>
             {
                 var parameters = method.GetParameters();
                 return method.Name == nameof(With)
                        && parameters.Length == 3
-                       // We want to re-use the params TProperty[] method
+                       // We want to re-use the params TProperty[] method if there is > 1 value provided.
                        && parameters.Last().ParameterType.IsArray;
             })
             .MakeGenericMethod(sourceType, typeof(TProperty));
         object[] args = [seed, getter, values];
-        withDifferent.Invoke(null, args);
+        withMethod.Invoke(null, args);
     }
 
     private static IEntitySeed GetOrCreateParentSeed<TEntity>(
@@ -616,12 +626,28 @@ public static class EntitySeedExtensions
             .FirstOrDefault(s => s != null);
         var seed = existingSeed ?? EntryPointAssembly.Load().FindSeed(left.Body.Type);
 
+        // todo needed?
+        seed.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
         seed.Options.AmountToCreate = amountToCreate;
 
         return seed;
     }
 
     private static void AddWithDifferentForParent<TEntity>(
+        EntitySeed<TEntity> entitySeed,
+        LambdaExpression left,
+        IEntitySeed seed) where TEntity : class
+    {
+        var typeInfo = typeof(SeedDifferentNavigationPropertyConfiguration<,>).MakeGenericType(
+            typeof(TEntity),
+            left.Body.Type);
+        object[] newArgs = [left, seed];
+        var customisation = Activator.CreateInstance(typeInfo, newArgs);
+        entitySeed.GetType().GetMethod(nameof(EntitySeed<TEntity>.AddCustomisation))!
+            .Invoke(entitySeed, [customisation]);
+    }
+
+    private static void AddWithNewForParent<TEntity>(
         EntitySeed<TEntity> entitySeed,
         LambdaExpression left,
         IEntitySeed seed) where TEntity : class

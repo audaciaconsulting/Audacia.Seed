@@ -37,22 +37,16 @@ internal static class ExpressionExtensions
     {
         ArgumentNullException.ThrowIfNull(expression);
         object? obj = root;
-        try
+        if (expression.Body is MemberExpression memberExpression)
         {
-            if (expression.Body is MemberExpression memberExpression)
-            {
-                var lambda = Expression.Lambda(memberExpression.Expression!, expression.Parameters[0]);
+            var lambda = Expression.Lambda(memberExpression.Expression!, expression.Parameters[0]);
 
-                obj = lambda.Compile().DynamicInvoke(root);
-            }
-        }
-        catch (NullReferenceException)
-        {
-            // Do nothing. We'd rather show a more useful error (below).
+            // Safe to invoke the lambda if we know it's a member expression
+            return lambda.Compile().DynamicInvoke(root)!;
         }
 
-        return obj ?? throw new DataSeedingException(
-            $"Unable to get the property owner of the provided expression {expression}. This may be because the property is being accessed via a nullable property.");
+        throw new DataSeedingException(
+            $"The provided {nameof(expression)} ({expression}) does not access a property on {typeof(TSource).Name}.");
     }
 
     /// <summary>
@@ -67,7 +61,8 @@ internal static class ExpressionExtensions
         if (expression == null) throw new ArgumentNullException(nameof(expression));
         return expression.Body switch
         {
-            null => throw new ArgumentException($"The {nameof(expression.Body)} of the provided {nameof(expression)} is null"),
+            null => throw new ArgumentException(
+                $"The {nameof(expression.Body)} of the provided {nameof(expression)} is null"),
             UnaryExpression { Operand: MemberExpression me } => (PropertyInfo)me.Member,
             MemberExpression me => (PropertyInfo)me.Member,
             _ => throw new ArgumentException($"The expression doesn't indicate a valid property. [ {expression} ]")

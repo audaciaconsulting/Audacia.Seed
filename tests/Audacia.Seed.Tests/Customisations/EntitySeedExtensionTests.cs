@@ -111,17 +111,15 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void With_ForPropertyOnOptionalNavigation_ThrowsException()
+    public void With_ForPropertyOnOptionalNavigation_SetsUpOptionalNavigationsAutomatically()
     {
+        var couponName = Guid.NewGuid().ToString();
         var seedConfiguration = new BookingSeed()
-            .With(b => b.Coupon!.Name, "I should null ref");
+            .With(b => b.Coupon!.Name, couponName);
 
-        var act = () => _context.Seed(seedConfiguration);
+        _context.Seed(seedConfiguration);
 
-        act.Should().ThrowExactly<DataSeedingException>(
-            "we should show a more useful error message if we catch a null reference exception when applying customisations")
-            // Make sure the exception message is helpful to the developer.
-            .WithMessage($"*{nameof(Coupon)}*{nameof(Coupon.Name)}*nullable property*");
+        _context.Set<Coupon>().Any(c => c.Name == couponName).Should().BeTrue("We should be able to seed a coupon");
     }
 
     [Fact]
