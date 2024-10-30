@@ -660,7 +660,7 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed);
 
         var repository = new EntityFrameworkCoreSeedableRepository(context);
-        var entities = repository.SeedMany(amountToCreate, seed);
+        var entities = repository.SeedMany(amountToCreate, seed).ToList();
         repository.Save();
         return entities;
     }

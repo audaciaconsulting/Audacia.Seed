@@ -289,7 +289,20 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void With_NavigationPropertyAlreadySeeded_DoesNotSeedExtraEntitiesWhenSettingNavigationProperty()
+    public void With_AlreadySeededGrandparentForeignKeyPropertyIsSet_DoesNotSeedExtraEntitiesWhenSettingForeignKey()
+    {
+        var existingMembershipGroup = _context.Seed<MembershipGroup>();
+        var seedConfiguration = new BookingSeed()
+            .With(b => b.Member.MembershipGroupId, existingMembershipGroup.Id);
+
+        _context.Seed(seedConfiguration);
+
+        var membershipGroups = _context.Set<MembershipGroup>().ToList();
+        membershipGroups.Should().HaveCount(1, "we should not seed an extra membership group");
+    }
+
+    [Fact]
+    public void With_AlreadySeededGrandparentNavigationPropertyIsSet_DoesNotSeedExtraEntitiesWhenSettingNavigationProperty()
     {
         var existingMembershipGroup = _context.Seed<MembershipGroup>();
         var seedConfiguration = new BookingSeed()
@@ -302,16 +315,68 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void With_NavigationPropertyAlreadySeeded_DoesNotSeedExtraEntitiesWhenSettingForeignKey()
+    public void With_AlreadySeededGrandparentForeignKeyPropertiesAreSet_DoesNotSeedExtraEntitiesWhenSettingForeignKey()
     {
-        var existingMembershipGroup = _context.Seed<MembershipGroup>();
+        var existingMembershipGroups = _context.SeedMany<MembershipGroup>(2).ToList();
         var seedConfiguration = new BookingSeed()
-            .With(b => b.Member.MembershipGroupId, existingMembershipGroup.Id);
+            .With(b => b.Member.MembershipGroupId, existingMembershipGroups[0].Id, existingMembershipGroups[1].Id);
+
+        _context.SeedMany(2, seedConfiguration);
+
+        var membershipGroups = _context.Set<MembershipGroup>().ToList();
+        membershipGroups.Should().HaveCount(2, "we should not seed an extra membership group");
+    }
+
+    [Fact]
+    public void With_AlreadySeededGrandparentNavigationPropertiesAreSet_DoesNotSeedExtraEntitiesWhenSettingNavigationProperty()
+    {
+        var existingMembershipGroups = _context.SeedMany<MembershipGroup>(2).ToList();
+        var seedConfiguration = new BookingSeed()
+            .With(b => b.Member.MembershipGroup, existingMembershipGroups[0], existingMembershipGroups[1]);
+
+        _context.SeedMany(2, seedConfiguration);
+
+        var membershipGroups = _context.Set<MembershipGroup>().ToList();
+        membershipGroups.Should().HaveCount(2, "we should not seed an extra membership group");
+    }
+
+    [Fact]
+    public void With_AlreadySeededParentNavigationPropertyIsSet_DoesNotSeedExtraEntitiesWhenSettingNavigationProperty()
+    {
+        var existingMember = _context.Seed<Member>();
+        var seedConfiguration = new BookingSeed()
+            .With(b => b.Member, existingMember);
 
         _context.Seed(seedConfiguration);
 
         var membershipGroups = _context.Set<MembershipGroup>().ToList();
-        membershipGroups.Should().HaveCount(1, "we should not seed an extra membership group");
+        membershipGroups.Should().HaveCount(1, "we should not seed an extra member");
+    }
+
+    [Fact]
+    public void With_AlreadySeededParentForeignKeyPropertyIsSet_DoesNotSeedExtraEntitiesWhenSettingForeignKey()
+    {
+        var existingMember = _context.Seed<Member>();
+        var seedConfiguration = new BookingSeed()
+            .With(b => b.MemberId, existingMember.Id);
+
+        _context.Seed(seedConfiguration);
+
+        var membershipGroups = _context.Set<MembershipGroup>().ToList();
+        membershipGroups.Should().HaveCount(1, "we should not seed an extra member");
+    }
+
+    [Fact]
+    public void With_AlreadySeededParentNavigationPropertyIsSetWithLambda_DoesNotSeedExtraEntitiesWhenSettingNavigationProperty()
+    {
+        var asset = _context.Seed(new EntitySeed<EmployeeAsset>());
+
+        var entitySeed = new EntitySeed<CompanyAsset>()
+            .With(b => b.Asset, () => asset);
+        _context.Seed(entitySeed);
+
+        var membershipGroups = _context.Set<EmployeeAsset>().ToList();
+        membershipGroups.Should().HaveCount(1, "we should not seed an extra employee asset");
     }
 
     [Fact]
@@ -972,7 +1037,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var bookings = _context.SeedMany(bookingsToSeed, seed).ToList();
 
         bookings.Select(b => b.FacilityId).Distinct().Should().HaveCount(bookingsToSeed);
-        bookings.ConvertAll(b => b.Facility.RoomId).Should()
+        var roomIds = bookings.ConvertAll(b => b.Facility.RoomId);
+        roomIds.Should()
             .BeEquivalentTo(
                 new int?[] { room.Id, null, room.Id },
                 "we should be able to seed different rooms for each facility");

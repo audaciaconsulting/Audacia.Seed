@@ -41,6 +41,8 @@ public class SeedDynamicPropertyConfiguration<TEntity, TProperty>(
     /// <inheritdoc />
     public void Apply(TEntity entity, ISeedableRepository repository, int index, TEntity? previous)
     {
+        ArgumentNullException.ThrowIfNull(repository);
+
         var obj = Getter.GetPropertyOwner(entity);
 
         if (Getter.Body is MemberExpression memberSelectorExpression)
@@ -49,6 +51,7 @@ public class SeedDynamicPropertyConfiguration<TEntity, TProperty>(
             try
             {
                 var value = ValueSetter(index, previous);
+                repository.PrepareToSet(value);
                 property.SetValue(obj, value, null);
             }
             catch (IndexOutOfRangeException exception)
@@ -63,7 +66,10 @@ public class SeedDynamicPropertyConfiguration<TEntity, TProperty>(
     {
         ArgumentNullException.ThrowIfNull(prerequisite);
 
-        return prerequisite.PropertyInfo == Getter.GetPropertyInfo();
+        // If this property is a foreign key, swap it out for the navigation property so we can overwrite prerequisites.
+        var getter = Getter.ToNavigationProperty();
+
+        return prerequisite.PropertyInfo == getter.GetPropertyInfo();
     }
 
     /// <inheritdoc/>

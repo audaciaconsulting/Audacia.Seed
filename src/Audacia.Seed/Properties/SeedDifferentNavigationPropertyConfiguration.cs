@@ -44,7 +44,7 @@ public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
     /// <summary>
     /// Gets a lambda to the property to populate.
     /// </summary>
-    internal Expression<Func<TEntity, TNavigation?>> Getter { get; } = getter;
+    private Expression<Func<TEntity, TNavigation?>> Getter { get; } = getter;
 
     /// <summary>
     /// Gets the seed configuration to use.
@@ -79,7 +79,7 @@ public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
         if (value == null)
         {
             SeedConfiguration.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
-            value = SeedConfiguration.Build();
+            value = SeedConfiguration.GetOrCreateEntity(index, null);
             repository.Add(value);
         }
 
@@ -136,13 +136,12 @@ public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
     public void Merge(ISeedCustomisation<TEntity> other)
     {
         if (other is SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>
-            otherSeed)
+            otherCustomisation)
         {
-            var newCustomisations = otherSeed.SeedConfiguration.Customisations
-                .Where(c => !SeedConfiguration.Customisations.Contains(c));
-            foreach (var customisation in newCustomisations)
+            SeedConfiguration.Options.Merge(otherCustomisation.SeedConfiguration.Options);
+            foreach (var customisation in otherCustomisation.SeedConfiguration.Customisations)
             {
-                SeedConfiguration.Customisations.Add(customisation);
+                SeedConfiguration.AddCustomisation(customisation);
             }
         }
     }

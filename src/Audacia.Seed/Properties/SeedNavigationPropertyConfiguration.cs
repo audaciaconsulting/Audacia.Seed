@@ -144,11 +144,10 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
                 SeedConfiguration: EntitySeed<TEntity> otherSeed
             })
         {
-            var newCustomisations = otherSeed.Customisations
-                .Where(c => !otherSeed.Customisations.Contains(c));
-            foreach (var customisation in newCustomisations)
+            SeedConfiguration.Options.Merge(otherSeed.Options);
+            foreach (var customisation in otherSeed.Customisations)
             {
-                entitySeed.Customisations.Add(customisation);
+                entitySeed.AddCustomisation(customisation);
             }
         }
     }

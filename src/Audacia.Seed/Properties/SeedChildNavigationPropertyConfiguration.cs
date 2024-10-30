@@ -59,13 +59,12 @@ public class
     public void Merge(ISeedCustomisation<TEntity> other)
     {
         if (other is SeedChildNavigationPropertyConfiguration<TEntity, TChildNavigation, EntitySeed<TChildNavigation>>
-            otherSeed)
+            otherCustomisation)
         {
-            var newCustomisations = otherSeed.SeedConfiguration.Customisations
-                .Where(c => !SeedConfiguration.Customisations.Contains(c));
-            foreach (var customisation in newCustomisations)
+            SeedConfiguration.Options.Merge(otherCustomisation.SeedConfiguration.Options);
+            foreach (var customisation in otherCustomisation.SeedConfiguration.Customisations)
             {
-                SeedConfiguration.Customisations.Add(customisation);
+                SeedConfiguration.AddCustomisation(customisation);
             }
         }
     }

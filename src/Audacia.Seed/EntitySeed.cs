@@ -285,7 +285,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     /// <param name="previous">The entity seeded previously. This will not be null if creating many.</param>
     /// <returns>A new or existing entity depending on whether we found an existing appropriate one.</returns>
     /// <exception cref="DataSeedingException">If we don't have a <see cref="Repository"/> set.</exception>
-    private TEntity GetOrCreateEntity(int index, TEntity? previous)
+    internal TEntity GetOrCreateEntity(int index, TEntity? previous)
     {
         if (Repository == null)
         {
@@ -329,7 +329,8 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
 
     private void PopulatePrerequisites(TEntity entity)
     {
-        foreach (var seedPrerequisite in Prerequisites()
+        var seedPrerequisites = Prerequisites().ToList();
+        foreach (var seedPrerequisite in seedPrerequisites
                      .Where(sp => Customisations.All(c => !c.EqualsPrerequisite(sp))))
         {
             var seed = seedPrerequisite.Seed;
