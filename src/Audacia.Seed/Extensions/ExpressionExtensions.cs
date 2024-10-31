@@ -36,9 +36,18 @@ internal static class ExpressionExtensions
         TSource root)
     {
         ArgumentNullException.ThrowIfNull(expression);
-        object? obj = root;
         if (expression.Body is MemberExpression memberExpression)
         {
+            var lambda = Expression.Lambda(memberExpression.Expression!, expression.Parameters[0]);
+
+            // Safe to invoke the lambda if we know it's a member expression
+            return lambda.Compile().DynamicInvoke(root)!;
+        }
+
+        if (expression.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)expression.Body).Operand is MemberExpression)
+        {
+            memberExpression = (MemberExpression)((UnaryExpression)expression.Body).Operand;
+
             var lambda = Expression.Lambda(memberExpression.Expression!, expression.Parameters[0]);
 
             // Safe to invoke the lambda if we know it's a member expression
@@ -88,12 +97,28 @@ internal static class ExpressionExtensions
         var current = expression.Body;
         const string parameterName = "x";
 
-        while (current is MemberExpression memberExpression)
+        while (true)
         {
-            var param = Expression.Parameter(memberExpression.Expression!.Type, parameterName);
-            var memberAccess = Expression.MakeMemberAccess(param, memberExpression.Member);
-            chain.Add(Expression.Lambda(memberAccess, param));
-            current = memberExpression.Expression;
+            if (current is MemberExpression memberExpression)
+            {
+                var param = Expression.Parameter(memberExpression.Expression!.Type, parameterName);
+                var memberAccess = Expression.MakeMemberAccess(param, memberExpression.Member);
+                chain.Add(Expression.Lambda(memberAccess, param));
+                current = memberExpression.Expression;
+            }
+            else if (current.NodeType == ExpressionType.Convert && ((UnaryExpression)current).Operand is MemberExpression)
+            {
+                memberExpression = (MemberExpression)((UnaryExpression)current).Operand;
+                var param = Expression.Parameter(memberExpression.Expression!.Type, parameterName);
+                var memberAccess = Expression.MakeMemberAccess(param, memberExpression.Member);
+                var explicitCast = Expression.Convert(memberAccess, current.Type);
+                chain.Add(Expression.Lambda(explicitCast, param));
+                current = memberExpression.Expression;
+            }
+            else
+            {
+                break;
+            }
         }
 
         chain.Reverse();

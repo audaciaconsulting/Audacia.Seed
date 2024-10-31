@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using System.Reflection;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.Customisation;
 using Audacia.Seed.Extensions;
@@ -47,7 +46,7 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     internal Expression<Func<TEntity, TNavigation?>> Getter { get; } = getter;
 
     /// <summary>
-    /// Gets a list of seed configurations to use, in order in which they will be used.
+    /// Gets the seed configurations to use to populate the getter with.
     /// </summary>
     private IEntitySeed<TNavigation> SeedConfiguration { get; } = seedConfiguration;
 
@@ -65,11 +64,8 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
 
         var obj = Getter.GetPropertyOwner(entity);
 
-        if (Getter.Body is MemberExpression memberSelectorExpression)
-        {
-            var property = (PropertyInfo)memberSelectorExpression.Member;
-            property.SetValue(obj, value, null);
-        }
+        var property = Getter.GetPropertyInfo();
+        property.SetValue(obj, value, null);
     }
 
     private static TNavigation GetValueToSet(ISeedableRepository repository, int index, TEntity? previous,
@@ -121,9 +117,7 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     {
         if (obj is SeedNavigationPropertyConfiguration<TEntity, TNavigation> navigationCustomisation)
         {
-            // Protect against doing the same WithDifferent twice
-            return Getter.GetPropertyInfo() == navigationCustomisation.Getter.GetPropertyInfo()
-                   && SeedConfiguration == navigationCustomisation.SeedConfiguration;
+            return Getter.GetPropertyInfo() == navigationCustomisation.Getter.GetPropertyInfo();
         }
 
         return false;
@@ -135,7 +129,7 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     /// <returns>The hashcode unique to this.</returns>
     public override int GetHashCode()
     {
-        return Getter.GetPropertyInfo().GetHashCode() ^ SeedConfiguration.GetHashCode();
+        return Getter.GetPropertyInfo().GetHashCode();
     }
 
     /// <inheritdoc />

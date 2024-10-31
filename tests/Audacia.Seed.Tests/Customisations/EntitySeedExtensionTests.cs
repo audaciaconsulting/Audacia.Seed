@@ -378,6 +378,29 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
+    public void With_ExplicitlyCastingToCorrectType_CastedEntityIsSeeded()
+    {
+        var seed = new EntitySeed<CompanyAsset>()
+            .WithNew(ca => ca.Asset, new EntitySeed<EmployeeAsset>())
+            .With(ca => ((EmployeeAsset)ca.Asset).Employee.FirstName, "John");
+
+        _context.Seed(seed);
+
+        var companyAsset = _context.Set<CompanyAsset>()
+            .Include(ca => ca.Asset)
+            .ThenInclude(ca => ((EmployeeAsset)ca).Employee)
+            .Single();
+        var singleAssetInTheDatabase = _context.Set<Asset>()
+            .Single();
+        using (new AssertionScope())
+        {
+            companyAsset.Asset.Should().BeOfType<EmployeeAsset>();
+            companyAsset.Asset.Should().Be(singleAssetInTheDatabase);
+            ((EmployeeAsset)companyAsset.Asset).Employee.FirstName.Should().Be("John");
+        }
+    }
+
+    [Fact]
     public async Task WithNew_SpecifiesNewSeedForNavigationProperty_OverridesDefaultSeededData()
     {
         const string expectedName = "Squash court 2";

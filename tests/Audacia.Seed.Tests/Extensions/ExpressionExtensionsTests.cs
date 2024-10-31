@@ -13,7 +13,7 @@ public class ExpressionExtensionsTests
     public void SplitMemberAccessChain_RecursiveDataStructure_ReturnsExpressionForEachMemberAccess()
     {
         Expression<Func<MembershipGroup, MembershipGroup>>
-            expression = x => x.Parent!.Parent!.Parent!.Parent!.Parent!.Parent!;
+            expression = mg => mg.Parent!.Parent!.Parent!.Parent!.Parent!.Parent!;
 
         var result = expression.SplitMemberAccessChain().ToList();
 
@@ -31,7 +31,7 @@ public class ExpressionExtensionsTests
     [Fact]
     public void SplitMemberAccessChain_TypicalDataStructure_ReturnsExpressionForEachMemberAccess()
     {
-        Expression<Func<Booking, Region>> expression = x => x.Facility.Room!.Region;
+        Expression<Func<Booking, Region>> expression = b => b.Facility.Room!.Region;
 
         var result = expression.SplitMemberAccessChain().ToArray();
 
@@ -49,26 +49,44 @@ public class ExpressionExtensionsTests
     }
 
     [Fact]
+    public void SplitMemberAccessChain_ChainContainsExplicitCast_CastingIsPreserved()
+    {
+        Expression<Func<CompanyAsset, Employee>> expression = ca => ((EmployeeAsset)ca.Asset).Employee;
+
+        var result = expression.SplitMemberAccessChain().ToArray();
+
+        const int numberOfMemberAccesses = 2;
+        Expression<Func<CompanyAsset, EmployeeAsset>> expectedFirst = x => (EmployeeAsset)x.Asset;
+        Expression<Func<EmployeeAsset, Employee>> expectedSecond = x => x.Employee;
+        using (new AssertionScope())
+        {
+            result.Should().HaveCount(numberOfMemberAccesses, "we should have an expression for each member access");
+            result[0].Should().BeEquivalentTo(expectedFirst, $"the first item returned should be the {nameof(CompanyAsset)} accessing its {nameof(CompanyAsset.Asset)}, casted to {nameof(EmployeeAsset)}");
+            result[1].Should().BeEquivalentTo(expectedSecond, $"the second item returned should be the {nameof(EmployeeAsset)} accessing its {nameof(EmployeeAsset.Employee)}");
+        }
+    }
+
+    [Fact]
     public void JoinMemberAccessChain_TypicalDataStructure_ReturnsSingleExpressionCombiningEachLambda()
     {
-        Expression<Func<Booking, Facility>> first = x => x.Facility;
-        Expression<Func<Facility, Room>> second = x => x.Room!;
-        Expression<Func<Room, Region>> third = x => x.Region;
+        Expression<Func<Booking, Facility>> first = b => b.Facility;
+        Expression<Func<Facility, Room>> second = f => f.Room!;
+        Expression<Func<Room, Region>> third = r => r.Region;
 
         IEnumerable<LambdaExpression> target = [first, second, third];
 
         var result = target.JoinMemberAccessChain();
 
-        Expression<Func<Booking, Region>> expected = x => x.Facility.Room!.Region;
+        Expression<Func<Booking, Region>> expected = b => b.Facility.Room!.Region;
         result.Should().BeEquivalentTo(expected, "we should join up the lambdas to form a single expression");
     }
 
     [Fact]
     public void JoinMemberAccessChain_LambdaParameterDoesNotMatchPredecessorBody_ExceptionThrown()
     {
-        Expression<Func<Booking, Facility>> first = x => x.Facility;
-        Expression<Func<Booking, Member>> incompatibleLambda = x => x.Member;
-        Expression<Func<Room, Region>> third = x => x.Region;
+        Expression<Func<Booking, Facility>> first = b => b.Facility;
+        Expression<Func<Booking, Member>> incompatibleLambda = b => b.Member;
+        Expression<Func<Room, Region>> third = r => r.Region;
 
         IEnumerable<LambdaExpression> target = [first, incompatibleLambda, third];
 
