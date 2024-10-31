@@ -59,15 +59,15 @@ public class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation>
     private TNavigation GetValueToSet(ISeedableRepository repository, int index, TEntity? previous,
         IEntitySeed<TNavigation> seedConfiguration)
     {
-        Expression<Func<TNavigation, bool>> defaultPredicate = _ => true;
-        var predicate = seedConfiguration is EntitySeed<TNavigation> seedConfigurationAsEntitySeed
+        var seedConfigurationAsEntitySeed = seedConfiguration as EntitySeed<TNavigation>;
+        var predicate = seedConfigurationAsEntitySeed != null
             ? seedConfigurationAsEntitySeed.ToPredicate(index)
-            : defaultPredicate;
+            : _ => true;
         var value = repository.FindLocal(predicate);
         if (index > 0
             && !ReferenceEquals(SeedConfigurations[index], SeedConfigurations[index - 1])
             // Force a new creation if we've explicitly provided an extra seed, even if it's identical
-            && predicate.ToString() == defaultPredicate.ToString())
+            && predicate.ToString() == ((Expression<Func<TNavigation, bool>>)(_ => true)).ToString())
         {
             // Force a new creation
             value = null;
@@ -76,7 +76,9 @@ public class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation>
         if (value == null)
         {
             seedConfiguration.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
-            value = seedConfiguration.Build();
+            value = seedConfigurationAsEntitySeed != null
+                ? seedConfigurationAsEntitySeed.GetOrCreateEntity(index, null)
+                : seedConfiguration.Build();
             repository.Add(value);
         }
 

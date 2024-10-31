@@ -75,18 +75,21 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     private static TNavigation GetValueToSet(ISeedableRepository repository, int index, TEntity? previous,
         IEntitySeed<TNavigation> navigationSeed)
     {
+        var navigationSeedAsEntitySeed = navigationSeed as EntitySeed<TNavigation>;
         TNavigation? value = null;
         if ((navigationSeed.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindExisting ||
              navigationSeed.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew &&
              !navigationSeed.HasCustomisations)
-            && navigationSeed is EntitySeed<TNavigation> navigationSeedAsEntitySeed)
+            && navigationSeedAsEntitySeed != null)
         {
             value = repository.FindLocal(navigationSeedAsEntitySeed.ToPredicate(index));
         }
 
         if (value == null)
         {
-            value = navigationSeed.Build();
+            value = navigationSeedAsEntitySeed != null
+                ? navigationSeedAsEntitySeed.GetOrCreateEntity(index, null)
+                : navigationSeed.Build();
             repository.Add(value);
         }
 

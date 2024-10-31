@@ -91,7 +91,7 @@ public static class EntitySeedExtensions
         {
             WithRecursive(entitySeed, getter, values);
         }
-        else
+        else if (values.Length > 1)
         {
             var customisation =
                 new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, (index, _) => values[index])
@@ -100,6 +100,11 @@ public static class EntitySeedExtensions
                 };
 
             entitySeed.AddCustomisation(customisation);
+        }
+        else
+        {
+            // Should only get here if we've called this method via reflection
+            entitySeed.With(getter, values[0]);
         }
 
         return entitySeed;
@@ -561,7 +566,7 @@ public static class EntitySeedExtensions
         parentSeed.WithDifferentReflection(right, left.Body.Type, typeof(TNavigation));
 
         // Add a WithDifferent for the EntitySeed<Parent> with getter x => x.GrandParent
-        AddWithDifferentForParent(entitySeed, left, parentSeed);
+        AddWithDifferentForNavigationProperty(entitySeed, left, parentSeed);
     }
 
     private static void WithRecursive<TEntity, TProperty>(
@@ -579,7 +584,14 @@ public static class EntitySeedExtensions
         parentSeed.WithReflection(right, sourceType, values);
 
         // Add a WithNew for the EntitySeed<Parent> with getter x => x.GrandParent
-        AddWithNewForParent(entitySeed, left, parentSeed);
+        if (values.Length > 1)
+        {
+            AddWithDifferentForNavigationProperty(entitySeed, left, parentSeed);
+        }
+        else
+        {
+            AddWithNewForNavigationProperty(entitySeed, left, parentSeed);
+        }
     }
 
     private static void WithDifferentReflection(
@@ -627,13 +639,14 @@ public static class EntitySeedExtensions
         var seed = existingSeed ?? EntryPointAssembly.Load().FindSeed(left.Body.Type);
 
         // todo needed?
-        seed.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
+        seed.Options.InsertionBehavior =
+            amountToCreate > 1 ? SeedingInsertionBehaviour.AddNew : SeedingInsertionBehaviour.TryFindNew;
         seed.Options.AmountToCreate = amountToCreate;
 
         return seed;
     }
 
-    private static void AddWithDifferentForParent<TEntity>(
+    private static void AddWithDifferentForNavigationProperty<TEntity>(
         EntitySeed<TEntity> entitySeed,
         LambdaExpression left,
         IEntitySeed seed) where TEntity : class
@@ -647,15 +660,15 @@ public static class EntitySeedExtensions
             .Invoke(entitySeed, [customisation]);
     }
 
-    private static void AddWithNewForParent<TEntity>(
+    private static void AddWithNewForNavigationProperty<TEntity>(
         EntitySeed<TEntity> entitySeed,
         LambdaExpression left,
-        IEntitySeed seed) where TEntity : class
+        IEntitySeed navigationPropertySeed) where TEntity : class
     {
-        var typeInfo = typeof(SeedDifferentNavigationPropertyConfiguration<,>).MakeGenericType(
+        var typeInfo = typeof(SeedNavigationPropertyConfiguration<,>).MakeGenericType(
             typeof(TEntity),
             left.Body.Type);
-        object[] newArgs = [left, seed];
+        object[] newArgs = [left, navigationPropertySeed];
         var customisation = Activator.CreateInstance(typeInfo, newArgs);
         entitySeed.GetType().GetMethod(nameof(EntitySeed<TEntity>.AddCustomisation))!
             .Invoke(entitySeed, [customisation]);

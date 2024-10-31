@@ -1419,6 +1419,29 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
+    public void SpecifyingExplicitPropertyForGrandparentToTheSameValue_DoesNotSeedMoreDataThanItShould()
+    {
+        var membershipGroup = _context.Seed<MembershipGroup>();
+
+        var bookingSeed = new EntitySeed<Booking>()
+            .With(b => b.Member.MembershipGroupId, membershipGroup.Id);
+        const int amountToCreate = 2;
+        _context.SeedMany(amountToCreate, bookingSeed);
+
+        using (new AssertionScope())
+        {
+            var members = _context.Set<Member>().ToList();
+            members.Should().HaveCount(1);
+            var groups = _context.Set<MembershipGroup>().ToList();
+            groups.Should().HaveCount(1);
+            var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
+            bookingsAfterSave.Should().HaveCount(2);
+            bookingsAfterSave.Select(b => b.Member.MembershipGroupId).Should()
+                .BeEquivalentTo([membershipGroup.Id, membershipGroup.Id]);
+        }
+    }
+
+    [Fact]
     public void SeedingChildrenWithDifferentBaseClassInheritors_CanChildrenOfDifferentTypes()
     {
         IEntitySeed<Asset>[] seeds =
