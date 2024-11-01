@@ -39,16 +39,7 @@ public static class EntitySeedExtensions
                 $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
         }
 
-        // Check the getter passed in is setting a nested property or not
-        // E.g x => x.Parent.GrandParentId is nested, but x => x.ParentId is not.
-        if (getter.Body is MemberExpression m && m.Expression?.Type != typeof(TEntity))
-        {
-            WithRecursive(entitySeed, getter, value);
-        }
-        else
-        {
-            entitySeed.AddCustomisation(new SeedPropertyConfiguration<TEntity, TProperty>(getter, value));
-        }
+        entitySeed.AddCustomisation(new SeedPropertyConfiguration<TEntity, TProperty>(getter, value));
 
         return entitySeed;
     }
@@ -87,25 +78,21 @@ public static class EntitySeedExtensions
 
         // Check the getter passed in is setting a nested property or not
         // E.g x => x.Parent.GrandParentId is nested, but x => x.ParentId is not.
-        if (getter.Body is MemberExpression m && m.Expression?.Type != typeof(TEntity) && values.Length > 1)
+        if (getter.Body is MemberExpression m
+            && m.Expression?.Type != typeof(TEntity) && values.Length > 1)
         {
-            WithRecursive(entitySeed, getter, values);
+            // If specifying > 1, we will therefore want each parent to be different if the property belongs to a parent.
+            var (left, _) = getter.SplitLastMemberAccessLayer();
+            entitySeed.WithDifferentReflection(left, typeof(TEntity), left.Body.Type);
         }
-        else if (values.Length > 1)
-        {
-            var customisation =
-                new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, (index, _) => values[index])
-                {
-                    AmountOfValuesToSet = values.Length
-                };
 
-            entitySeed.AddCustomisation(customisation);
-        }
-        else
-        {
-            // Should only get here if we've called this method via reflection
-            entitySeed.With(getter, values[0]);
-        }
+        var customisation =
+            new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, (index, _) => values[index])
+            {
+                AmountOfValuesToSet = values.Length
+            };
+
+        entitySeed.AddCustomisation(customisation);
 
         return entitySeed;
     }
@@ -585,31 +572,6 @@ public static class EntitySeedExtensions
         AddWithDifferentForNavigationProperty(entitySeed, left, parentSeed);
     }
 
-    private static void WithRecursive<TEntity, TProperty>(
-        EntitySeed<TEntity> entitySeed,
-        Expression<Func<TEntity, TProperty>> getter,
-        params TProperty[] values)
-        where TEntity : class
-    {
-        var (left, right) = getter.SplitFirstMemberAccessLayer();
-
-        // For a x => x.Parent.GrandParent, get a EntitySeed<Parent>, with WithDifferent applied
-        var parentSeed = GetOrCreateParentSeed(entitySeed, left, values.Length);
-
-        var sourceType = left.Body.Type;
-        parentSeed.WithReflection(right, sourceType, values);
-
-        // Add a WithNew for the EntitySeed<Parent> with getter x => x.GrandParent
-        if (values.Length > 1)
-        {
-            AddWithDifferentForNavigationProperty(entitySeed, left, parentSeed);
-        }
-        else
-        {
-            AddWithNewForNavigationProperty(entitySeed, left, parentSeed);
-        }
-    }
-
     private static void WithDifferentReflection(
         this IEntitySeed seed,
         LambdaExpression getter,
@@ -621,26 +583,6 @@ public static class EntitySeedExtensions
             .MakeGenericMethod(sourceType, destinationType);
         object[] args = [seed, getter];
         withDifferent.Invoke(null, args);
-    }
-
-    private static void WithReflection<TProperty>(
-        this IEntitySeed seed,
-        LambdaExpression getter,
-        Type sourceType,
-        params TProperty[] values)
-    {
-        var withMethod = typeof(EntitySeedExtensions).GetMethods()
-            .Single(method =>
-            {
-                var parameters = method.GetParameters();
-                return method.Name == nameof(With)
-                       && parameters.Length == 3
-                       // We want to re-use the params TProperty[] method if there is > 1 value provided.
-                       && parameters.Last().ParameterType.IsArray;
-            })
-            .MakeGenericMethod(sourceType, typeof(TProperty));
-        object[] args = [seed, getter, values];
-        withMethod.Invoke(null, args);
     }
 
     private static IEntitySeed GetOrCreateParentSeed<TEntity>(
@@ -671,20 +613,6 @@ public static class EntitySeedExtensions
             typeof(TEntity),
             left.Body.Type);
         object[] newArgs = [left, seed];
-        var customisation = Activator.CreateInstance(typeInfo, newArgs);
-        entitySeed.GetType().GetMethod(nameof(EntitySeed<TEntity>.AddCustomisation))!
-            .Invoke(entitySeed, [customisation]);
-    }
-
-    private static void AddWithNewForNavigationProperty<TEntity>(
-        EntitySeed<TEntity> entitySeed,
-        LambdaExpression left,
-        IEntitySeed navigationPropertySeed) where TEntity : class
-    {
-        var typeInfo = typeof(SeedNavigationPropertyConfiguration<,>).MakeGenericType(
-            typeof(TEntity),
-            left.Body.Type);
-        object[] newArgs = [left, navigationPropertySeed];
         var customisation = Activator.CreateInstance(typeInfo, newArgs);
         entitySeed.GetType().GetMethod(nameof(EntitySeed<TEntity>.AddCustomisation))!
             .Invoke(entitySeed, [customisation]);
