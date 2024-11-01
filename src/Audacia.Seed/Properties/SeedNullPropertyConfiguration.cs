@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.Extensions;
+using Audacia.Seed.Options;
 
 namespace Audacia.Seed.Properties;
 
@@ -38,11 +39,16 @@ public class SeedNullPropertyConfiguration<TEntity, TProperty>(Expression<Func<T
     }
 
     /// <inheritdoc/>
-    public bool EqualsPrerequisite(ISeedPrerequisite prerequisite)
+    public PrerequisiteMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
     {
         ArgumentNullException.ThrowIfNull(prerequisite);
 
-        return prerequisite.PropertyInfo == Getter.GetPropertyInfo();
+        if (prerequisite.PropertyInfo == Getter.GetPropertyInfo())
+        {
+            return PrerequisiteMatch.Full;
+        }
+
+        return PrerequisiteMatch.None;
     }
 
     /// <inheritdoc/>

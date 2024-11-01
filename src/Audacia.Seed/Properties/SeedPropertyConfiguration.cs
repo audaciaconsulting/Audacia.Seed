@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.Extensions;
+using Audacia.Seed.Options;
 
 namespace Audacia.Seed.Properties;
 
@@ -49,14 +50,19 @@ public class SeedPropertyConfiguration<TEntity, TProperty>(Expression<Func<TEnti
     }
 
     /// <inheritdoc/>
-    public bool EqualsPrerequisite(ISeedPrerequisite prerequisite)
+    public PrerequisiteMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
     {
         ArgumentNullException.ThrowIfNull(prerequisite);
 
         // If this property is a foreign key, swap it out for the navigation property so we can overwrite prerequisites.
         var getter = Getter.ToNavigationProperty();
 
-        return prerequisite.PropertyInfo == getter.GetPropertyInfo();
+        if (prerequisite.PropertyInfo == getter.GetPropertyInfo())
+        {
+            return PrerequisiteMatch.Full;
+        }
+
+        return PrerequisiteMatch.None;
     }
 
     /// <inheritdoc/>

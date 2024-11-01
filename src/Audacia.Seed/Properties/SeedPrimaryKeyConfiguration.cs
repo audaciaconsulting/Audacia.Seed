@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.Exceptions;
+using Audacia.Seed.Options;
 
 namespace Audacia.Seed.Properties;
 
@@ -27,6 +28,13 @@ public class SeedPrimaryKeyConfiguration<TEntity, TKey>(TKey[] primaryKeyValue) 
         {
             throw new DataSeedingException($"Unable to set the primary key on {typeof(TEntity).Name} dynamically. Ensure you've passed in enough values to match the number of entities being created.", exception);
         }
+    }
+
+    /// <inheritdoc />
+    public PrerequisiteMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
+    {
+        // we can't have a prerequisite for a primary key
+        return PrerequisiteMatch.None;
     }
 
     /// <inheritdoc />

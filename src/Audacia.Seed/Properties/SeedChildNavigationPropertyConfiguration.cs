@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.Extensions;
+using Audacia.Seed.Options;
 
 namespace Audacia.Seed.Properties;
 
@@ -75,7 +76,7 @@ public class
         ArgumentNullException.ThrowIfNull(repository);
         SeedConfiguration.Repository ??= repository;
 
-        var value = GetValueToSet(repository, index, previous);
+        var value = GetValueToSet();
 
         var obj = Getter.GetPropertyOwner(entity);
 
@@ -86,10 +87,7 @@ public class
         }
     }
 
-    private ICollection<TChildNavigation> GetValueToSet(
-        ISeedableRepository repository,
-        int index,
-        TEntity? previous)
+    private ICollection<TChildNavigation> GetValueToSet()
     {
         var validEntities = SeedConfiguration.BuildMany(AmountOfChildren).AsQueryable();
 
@@ -99,10 +97,15 @@ public class
     }
 
     /// <inheritdoc/>
-    public bool EqualsPrerequisite(ISeedPrerequisite prerequisite)
+    public PrerequisiteMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
     {
         ArgumentNullException.ThrowIfNull(prerequisite);
 
-        return prerequisite.PropertyInfo == Getter.GetPropertyInfo();
+        if (prerequisite.PropertyInfo == Getter.GetPropertyInfo())
+        {
+            return PrerequisiteMatch.Full;
+        }
+
+        return PrerequisiteMatch.None;
     }
 }

@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Audacia.Seed.Constants;
 using Audacia.Seed.Contracts;
+using Audacia.Seed.Options;
 
 namespace Audacia.Seed.Properties;
 
@@ -21,11 +22,11 @@ public interface ISeedCustomisation<TEntity>
     public void Apply(TEntity entity, ISeedableRepository repository, int index, TEntity? previous);
 
     /// <summary>
-    /// Return a value indicating whether this customisation is for the same property as the provided prerequisite.
+    /// Return a value indicating how well this customisation matches the same property as the provided prerequisite.
     /// </summary>
     /// <param name="prerequisite">The prerequisite to compare to.</param>
-    /// <returns>True if the prerequisite is for the same property at this. Otherwise false.</returns>
-    bool EqualsPrerequisite(ISeedPrerequisite prerequisite) => false;
+    /// <returns></returns>
+    PrerequisiteMatch MatchToPrerequisite(ISeedPrerequisite prerequisite);
 
     /// <summary>
     /// Return a predicate that would match a <typeparamref name="TEntity"/> to the customisation this represents.

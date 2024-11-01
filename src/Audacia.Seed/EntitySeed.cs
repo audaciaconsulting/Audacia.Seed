@@ -331,11 +331,16 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     {
         var seedPrerequisites = Prerequisites().ToList();
         foreach (var seedPrerequisite in seedPrerequisites
-                     .Where(sp => Customisations.All(c => !c.EqualsPrerequisite(sp))))
+                     .Where(sp => Customisations.All(c => c.MatchToPrerequisite(sp) != PrerequisiteMatch.Full)))
         {
             var seed = seedPrerequisite.Seed;
             seed.GetType().GetProperty(nameof(Repository))?.SetValue(seed, Repository);
             var buildMethod = seed.GetType().GetMethod(nameof(Build), BindingFlags.Instance | BindingFlags.Public);
+
+            // TODO: if any of the customisations are a partial match:
+            // - Split the access chain and pass up the 'right' expression
+            // - In this method, only add to the database the right is 1 level deep, and matches the prereq
+
             var navigationProperty = buildMethod?.Invoke(seed, null)!;
             seedPrerequisite.PropertyInfo.SetValue(entity, navigationProperty);
 

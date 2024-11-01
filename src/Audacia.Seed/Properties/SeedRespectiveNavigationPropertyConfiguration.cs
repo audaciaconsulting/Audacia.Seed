@@ -86,11 +86,16 @@ public class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation>
     }
 
     /// <inheritdoc/>
-    public bool EqualsPrerequisite(ISeedPrerequisite prerequisite)
+    public PrerequisiteMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
     {
         ArgumentNullException.ThrowIfNull(prerequisite);
 
-        return prerequisite.PropertyInfo == Getter.GetPropertyInfo();
+        if (prerequisite.PropertyInfo == Getter.GetPropertyInfo())
+        {
+            return PrerequisiteMatch.Full;
+        }
+
+        return PrerequisiteMatch.None;
     }
 
     /// <inheritdoc/>
