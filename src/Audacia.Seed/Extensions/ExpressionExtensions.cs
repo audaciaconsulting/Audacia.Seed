@@ -37,26 +37,23 @@ internal static class ExpressionExtensions
         TSource root)
     {
         ArgumentNullException.ThrowIfNull(expression);
-        if (expression.Body is MemberExpression memberExpression)
+        object? obj = root;
+        try
         {
-            var lambda = Expression.Lambda(memberExpression.Expression!, expression.Parameters[0]);
+            if (expression.Body is MemberExpression memberExpression)
+            {
+                var lambda = Expression.Lambda(memberExpression.Expression!, expression.Parameters[0]);
 
-            // Safe to invoke the lambda if we know it's a member expression
-            return lambda.Compile().DynamicInvoke(root)!;
+                obj = lambda.Compile().DynamicInvoke(root);
+            }
+        }
+        catch (NullReferenceException)
+        {
+            // Do nothing. We'd rather show a more useful error (below).
         }
 
-        if (expression.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)expression.Body).Operand is MemberExpression)
-        {
-            memberExpression = (MemberExpression)((UnaryExpression)expression.Body).Operand;
-
-            var lambda = Expression.Lambda(memberExpression.Expression!, expression.Parameters[0]);
-
-            // Safe to invoke the lambda if we know it's a member expression
-            return lambda.Compile().DynamicInvoke(root)!;
-        }
-
-        throw new DataSeedingException(
-            $"The provided {nameof(expression)} ({expression}) does not access a property on {typeof(TSource).Name}.");
+        return obj ?? throw new DataSeedingException(
+            $"Unable to get the property owner of the provided expression {expression}. This may be because the property is being accessed via a nullable property.");
     }
 
     /// <summary>
