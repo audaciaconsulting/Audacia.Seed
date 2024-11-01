@@ -596,9 +596,7 @@ public static class EntitySeedExtensions
             .FirstOrDefault(s => s != null);
         var seed = existingSeed ?? EntryPointAssembly.Load().FindSeed(left.Body.Type);
 
-        // todo needed?
-        seed.Options.InsertionBehavior =
-            amountToCreate > 1 ? SeedingInsertionBehaviour.AddNew : SeedingInsertionBehaviour.TryFindNew;
+        seed.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
         seed.Options.AmountToCreate = amountToCreate;
 
         return seed;
