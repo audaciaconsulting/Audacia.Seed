@@ -11,7 +11,7 @@ namespace Audacia.Seed.Properties;
 /// </summary>
 /// <typeparam name="TEntity">The type with the property to populate.</typeparam>
 /// <typeparam name="TNavigation">The type of the destination property.</typeparam>
-public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
+internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     Expression<Func<TEntity, TNavigation?>> getter,
     IEntitySeed<TNavigation> seedConfiguration)
     : ISeedCustomisation<TEntity>
@@ -20,6 +20,12 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
 {
     /// <inheritdoc/>
     public int Order => 50;
+
+    /// <inheritdoc />
+    public LambdaExpression GetterLambda => Getter;
+
+    /// <inheritdoc />
+    public IEntitySeed Seed => SeedConfiguration;
 
     /// <inheritdoc/>
     public IEntitySeed? FindSeedForGetter(LambdaExpression getter)

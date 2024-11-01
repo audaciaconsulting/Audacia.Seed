@@ -12,7 +12,7 @@ namespace Audacia.Seed.Properties;
 /// <typeparam name="TEntity">The type with the children to populate.</typeparam>
 /// <typeparam name="TChildNavigation">The type of the destination property child class.</typeparam>
 /// <typeparam name="TSeed">An <see cref="IEntitySeed"/> for the child navigation property.</typeparam>
-public class
+internal class
     SeedChildNavigationPropertyConfiguration<TEntity, TChildNavigation, TSeed>(
         Expression<Func<TEntity, IEnumerable<TChildNavigation>>> getter,
         TSeed seedConfiguration,
@@ -22,6 +22,12 @@ public class
     where TChildNavigation : class
     where TSeed : EntitySeed<TChildNavigation>
 {
+    /// <inheritdoc />
+    public LambdaExpression GetterLambda => Getter;
+
+    /// <inheritdoc />
+    public IEntitySeed Seed => SeedConfiguration;
+
     /// <summary>
     /// Gets a lambda to the property to populate.
     /// </summary>

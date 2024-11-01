@@ -218,11 +218,10 @@ internal static class ExpressionExtensions
     /// </summary>
     /// <param name="expression">The expression to use to find the navigation property.</param>
     /// <typeparam name="TEntity">The type of the source of the getter.</typeparam>
-    /// <typeparam name="TProperty">The type of the destination of the getter.</typeparam>
     /// <returns>The navigation property this foreign key represents. If this isn't a foreign key, the original expression is returned.</returns>
     /// <exception cref="ArgumentException">If the provided expression doesn't access data on <typeparamref name="TEntity"/>.</exception>
-    internal static LambdaExpression ToNavigationProperty<TEntity, TProperty>(
-        this Expression<Func<TEntity, TProperty>> expression)
+    internal static LambdaExpression ToNavigationProperty<TEntity>(
+        this LambdaExpression expression)
     {
         if (expression.Body is not MemberExpression memberExpression)
         {
@@ -230,19 +229,26 @@ internal static class ExpressionExtensions
                 $"The provided {nameof(expression)} ({expression}) does not access a property on {typeof(TEntity).Name}.");
         }
 
-        LambdaExpression lambdaExpression = expression;
-        if (!typeof(TProperty).IsClass && memberExpression.Member.Name.EndsWith(SeedingConstants.ForeignKeySuffix))
+        // TODO check if this works!!!
+        var propertyType = expression.Body.Type;
+        if (!propertyType.IsClass && memberExpression.Member.Name.EndsWith(SeedingConstants.ForeignKeySuffix))
         {
             var navigationPropertyName = memberExpression.Member.Name[..^SeedingConstants.ForeignKeySuffix.Length];
             var navigationProperty = typeof(TEntity).GetProperty(navigationPropertyName);
             if (navigationProperty != null)
             {
                 var param = Expression.Parameter(memberExpression.Expression!.Type, "x");
-                lambdaExpression = Expression.Lambda(Expression.MakeMemberAccess(param, navigationProperty), param);
+                expression = Expression.Lambda(Expression.MakeMemberAccess(param, navigationProperty), param);
             }
         }
 
-        return lambdaExpression;
+        return expression;
+    }
+
+    internal static LambdaExpression ToNavigationProperty<TEntity, TProperty>(
+        this Expression<Func<TEntity, TProperty>> expression)
+    {
+        return expression.ToNavigationProperty<TEntity>();
     }
 
     public static PrerequisiteMatch MatchToPrerequisite(this LambdaExpression expression, ISeedPrerequisite prerequisite)

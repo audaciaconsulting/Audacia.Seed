@@ -11,7 +11,7 @@ namespace Audacia.Seed.Properties;
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity to set the property as null on.</typeparam>
 /// <typeparam name="TProperty">The type of the property to set as null. Must be nullable.</typeparam>
-public class SeedNullPropertyConfiguration<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> getter)
+internal class SeedNullPropertyConfiguration<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> getter)
     : ISeedCustomisation<TEntity>
     where TEntity : class
 {
@@ -20,6 +20,12 @@ public class SeedNullPropertyConfiguration<TEntity, TProperty>(Expression<Func<T
     {
         return null;
     }
+
+    /// <inheritdoc />
+    public LambdaExpression GetterLambda => Getter;
+
+    /// <inheritdoc />
+    public IEntitySeed? Seed => null;
 
     /// <summary>
     /// Gets a lambda to the property to set as null.

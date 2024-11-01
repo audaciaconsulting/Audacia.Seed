@@ -113,6 +113,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     [Fact]
     public void With_ForPropertyOnOptionalNavigation_SetsUpOptionalNavigationsAutomatically()
     {
+        //todo expected behaviour??
         var couponName = Guid.NewGuid().ToString();
         var seedConfiguration = new BookingSeed()
             .With(b => b.Coupon!.Name, couponName);
@@ -398,6 +399,18 @@ public sealed class EntitySeedExtensionTests : IDisposable
             companyAsset.Asset.Should().Be(singleAssetInTheDatabase);
             ((EmployeeAsset)companyAsset.Asset).Employee.FirstName.Should().Be("John");
         }
+    }
+
+    [Fact]
+    public void Foo()
+    {
+        var value = Guid.NewGuid().ToString();
+        var seed = new BookingSeed()
+            .WithNew(b => b.Facility.Room)
+            .With(b => b.Facility.Name, value)
+            ;
+
+        _context.Seed(seed);
     }
 
     [Fact]
@@ -1442,12 +1455,35 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void SpecifyingExplicitPropertyForGrandparentToTheSameValue_DoesNotSeedMoreDataThanItShould()
+    public void SpecifyingExplicitIdForGrandparentToTheSameValue_DoesNotSeedMoreDataThanItShould()
     {
         var membershipGroup = _context.Seed<MembershipGroup>();
 
         var bookingSeed = new EntitySeed<Booking>()
             .With(b => b.Member.MembershipGroupId, membershipGroup.Id);
+        const int amountToCreate = 2;
+        _context.SeedMany(amountToCreate, bookingSeed);
+
+        using (new AssertionScope())
+        {
+            var members = _context.Set<Member>().ToList();
+            members.Should().HaveCount(1);
+            var groups = _context.Set<MembershipGroup>().ToList();
+            groups.Should().HaveCount(1);
+            var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
+            bookingsAfterSave.Should().HaveCount(2);
+            bookingsAfterSave.Select(b => b.Member.MembershipGroupId).Should()
+                .BeEquivalentTo([membershipGroup.Id, membershipGroup.Id]);
+        }
+    }
+
+    [Fact]
+    public void SpecifyingExplicitPropertyForGrandparentToTheSameValue_DoesNotSeedMoreDataThanItShould()
+    {
+        var membershipGroup = _context.Seed<MembershipGroup>();
+
+        var bookingSeed = new EntitySeed<Booking>()
+            .With(b => b.Member.MembershipGroup, membershipGroup);
         const int amountToCreate = 2;
         _context.SeedMany(amountToCreate, bookingSeed);
 

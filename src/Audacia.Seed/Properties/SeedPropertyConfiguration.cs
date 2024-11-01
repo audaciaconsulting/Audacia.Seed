@@ -11,7 +11,7 @@ namespace Audacia.Seed.Properties;
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity to set the property on.</typeparam>
 /// <typeparam name="TProperty">The type of the property being set.</typeparam>
-public class SeedPropertyConfiguration<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> getter, TProperty value)
+internal class SeedPropertyConfiguration<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> getter, TProperty value)
     : ISeedCustomisation<TEntity>
     where TEntity : class
 {
@@ -23,6 +23,12 @@ public class SeedPropertyConfiguration<TEntity, TProperty>(Expression<Func<TEnti
     {
         return null;
     }
+
+    /// <inheritdoc />
+    public LambdaExpression GetterLambda => Getter;
+
+    /// <inheritdoc />
+    public IEntitySeed? Seed => null;
 
     /// <summary>
     /// Gets a lambda to the property to populate.

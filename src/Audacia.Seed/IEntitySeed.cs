@@ -1,5 +1,6 @@
 ﻿using Audacia.Seed.Contracts;
 using Audacia.Seed.Options;
+using Audacia.Seed.Properties;
 
 namespace Audacia.Seed;
 
@@ -37,13 +38,15 @@ public interface IEntitySeed
     /// This should be kept as succinct as possible, and seeding prerequisites for optional navigation properties should be avoided.
     /// </summary>
     /// <returns>An enumerable of prerequisites that will be seeded before this.</returns>
-    public IEnumerable<ISeedPrerequisite> Prerequisites();
+    IEnumerable<ISeedPrerequisite> Prerequisites();
 
     /// <summary>
     /// Seed this entity into the provided <paramref name="seedableRepository"/>.
     /// </summary>
     /// <param name="seedableRepository">The repository to seed the entity into.</param>
     void PerformSeeding(ISeedableRepository seedableRepository);
+
+    void AddCustomisation(ISeedCustomisation customisation);
 }
 
 /// <summary>

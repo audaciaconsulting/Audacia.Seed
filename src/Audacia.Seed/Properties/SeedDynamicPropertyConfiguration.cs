@@ -12,12 +12,18 @@ namespace Audacia.Seed.Properties;
 /// </summary>
 /// <typeparam name="TEntity">The type with the property to populate.</typeparam>
 /// <typeparam name="TProperty">The type of the destination property.</typeparam>
-public class SeedDynamicPropertyConfiguration<TEntity, TProperty>(
+internal class SeedDynamicPropertyConfiguration<TEntity, TProperty>(
     Expression<Func<TEntity, TProperty>> getter,
     Func<int, TEntity?, TProperty> valueSetter)
     : ISeedCustomisation<TEntity>
     where TEntity : class
 {
+    /// <inheritdoc />
+    public LambdaExpression GetterLambda => Getter;
+
+    /// <inheritdoc />
+    public IEntitySeed? Seed => null;
+
     /// <inheritdoc/>
     public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
     {
