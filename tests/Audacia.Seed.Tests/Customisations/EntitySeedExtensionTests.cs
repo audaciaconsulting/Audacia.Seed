@@ -403,18 +403,6 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void Foo()
-    {
-        var value = Guid.NewGuid().ToString();
-        var seed = new BookingSeed()
-            .WithNew(b => b.Facility.Room)
-            .With(b => b.Facility.Name, value)
-            ;
-
-        _context.Seed(seed);
-    }
-
-    [Fact]
     public async Task WithNew_SpecifiesNewSeedForNavigationProperty_OverridesDefaultSeededData()
     {
         const string expectedName = "Squash court 2";
