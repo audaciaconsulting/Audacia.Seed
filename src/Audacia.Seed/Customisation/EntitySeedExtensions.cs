@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Audacia.Core.Extensions;
-using Audacia.Seed.Contracts;
 using Audacia.Seed.Exceptions;
 using Audacia.Seed.Extensions;
 using Audacia.Seed.Helpers;
@@ -41,6 +40,7 @@ public static class EntitySeedExtensions
         }
 
         entitySeed.AddCustomisation(new SeedPropertyConfiguration<TEntity, TProperty>(getter, value));
+
         return entitySeed;
     }
 
@@ -361,6 +361,22 @@ public static class EntitySeedExtensions
                 getter,
                 seedConfigurations.ToList()));
         }
+        else if (seedConfigurations[0].EntityType != typeof(TNavigation))
+        {
+            var genericType =
+                typeof(SeedNavigationPropertyConfiguration<,>).MakeGenericType(
+                    typeof(TEntity), seedConfigurations[0].EntityType);
+
+            var memberExpression = (MemberExpression)getter.Body;
+            var param = Expression.Parameter(memberExpression.Expression!.Type, getter.Parameters[0].Name);
+            var memberAccess = Expression.MakeMemberAccess(param, memberExpression.Member);
+            var explicitCast = Expression.Convert(memberAccess, seedConfigurations[0].EntityType);
+            var newGetter = Expression.Lambda(explicitCast, param);
+
+            var customisation = Activator.CreateInstance(genericType, newGetter, seedConfigurations[0]);
+            entitySeed.GetType().GetMethod(nameof(EntitySeed<TEntity>.AddCustomisation))!
+                .Invoke(entitySeed, [customisation]);
+        }
         else
         {
             entitySeed.AddCustomisation(new SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
@@ -553,7 +569,7 @@ public static class EntitySeedExtensions
         parentSeed.WithDifferentReflection(right, left.Body.Type, typeof(TNavigation));
 
         // Add a WithDifferent for the EntitySeed<Parent> with getter x => x.GrandParent
-        AddWithDifferentForParent(entitySeed, left, parentSeed);
+        AddWithDifferentForNavigationProperty(entitySeed, left, parentSeed);
     }
 
     private static void WithDifferentReflection(
@@ -586,7 +602,7 @@ public static class EntitySeedExtensions
         return seed;
     }
 
-    private static void AddWithDifferentForParent<TEntity>(
+    private static void AddWithDifferentForNavigationProperty<TEntity>(
         EntitySeed<TEntity> entitySeed,
         LambdaExpression left,
         IEntitySeed seed) where TEntity : class
