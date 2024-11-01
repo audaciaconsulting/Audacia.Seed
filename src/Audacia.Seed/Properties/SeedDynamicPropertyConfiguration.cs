@@ -70,12 +70,7 @@ public class SeedDynamicPropertyConfiguration<TEntity, TProperty>(
         // If this property is a foreign key, swap it out for the navigation property so we can overwrite prerequisites.
         var getter = Getter.ToNavigationProperty();
 
-        if (prerequisite.PropertyInfo == getter.GetPropertyInfo())
-        {
-            return PrerequisiteMatch.Full;
-        }
-
-        return PrerequisiteMatch.None;
+        return getter.MatchToPrerequisite(prerequisite);
     }
 
     /// <inheritdoc/>

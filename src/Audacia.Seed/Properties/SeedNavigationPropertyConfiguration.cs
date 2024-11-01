@@ -105,12 +105,7 @@ public class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     {
         ArgumentNullException.ThrowIfNull(prerequisite);
 
-        if (prerequisite.PropertyInfo == Getter.GetPropertyInfo())
-        {
-            return PrerequisiteMatch.Full;
-        }
-
-        return PrerequisiteMatch.None;
+        return Getter.MatchToPrerequisite(prerequisite);
     }
 
     /// <summary>

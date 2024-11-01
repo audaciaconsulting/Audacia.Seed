@@ -43,12 +43,7 @@ public class SeedNullPropertyConfiguration<TEntity, TProperty>(Expression<Func<T
     {
         ArgumentNullException.ThrowIfNull(prerequisite);
 
-        if (prerequisite.PropertyInfo == Getter.GetPropertyInfo())
-        {
-            return PrerequisiteMatch.Full;
-        }
-
-        return PrerequisiteMatch.None;
+        return Getter.MatchToPrerequisite(prerequisite);
     }
 
     /// <inheritdoc/>

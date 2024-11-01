@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Audacia.Seed.Constants;
 using Audacia.Seed.Exceptions;
+using Audacia.Seed.Options;
 
 namespace Audacia.Seed.Extensions;
 
@@ -88,8 +89,8 @@ internal static class ExpressionExtensions
     /// <typeparam name="T">The type of the parameter of the expression.</typeparam>
     /// <typeparam name="TProperty">The destination type of the expression.</typeparam>
     /// <returns>An array with an item for each nested member access.</returns>
-    public static IEnumerable<LambdaExpression> SplitMemberAccessChain<T, TProperty>(
-        this Expression<Func<T, TProperty>> expression)
+    public static IEnumerable<LambdaExpression> SplitMemberAccessChain(
+        this LambdaExpression expression)
     {
         ArgumentNullException.ThrowIfNull(expression);
 
@@ -170,8 +171,8 @@ internal static class ExpressionExtensions
     /// <typeparam name="TRoot">The type of the parameter of the provided <paramref name="expression"/>.</typeparam>
     /// <typeparam name="TDestination">The type of the property returned by the expression.</typeparam>
     /// <returns>Two expressions that represent the inputted <paramref name="expression"/> when combined together.</returns>
-    internal static (LambdaExpression Left, LambdaExpression Right) SplitFirstMemberAccessLayer<TRoot, TDestination>(
-        this Expression<Func<TRoot, TDestination>> expression)
+    internal static (LambdaExpression Left, LambdaExpression Right) SplitFirstMemberAccessLayer(
+        this LambdaExpression expression)
     {
         var memberAccessChain = expression.SplitMemberAccessChain().ToList();
         var left = memberAccessChain[0];
@@ -242,5 +243,24 @@ internal static class ExpressionExtensions
         }
 
         return lambdaExpression;
+    }
+
+    public static PrerequisiteMatch MatchToPrerequisite(this LambdaExpression expression, ISeedPrerequisite prerequisite)
+    {
+        if (prerequisite.PropertyInfo == expression.GetPropertyInfo())
+        {
+            return PrerequisiteMatch.Full;
+        }
+
+        if (expression.SplitMemberAccessChain().Count() > 1)
+        {
+            var (left, _) = expression.SplitFirstMemberAccessLayer();
+            if (prerequisite.PropertyInfo == left.GetPropertyInfo())
+            {
+                return PrerequisiteMatch.Partial;
+            }
+        }
+
+        return PrerequisiteMatch.None;
     }
 }
