@@ -100,11 +100,16 @@ internal static class ExpressionExtensions
             if (current is MemberExpression memberExpression)
             {
                 var param = Expression.Parameter(memberExpression.Expression!.Type, parameterName);
-                var memberAccess = Expression.MakeMemberAccess(param, memberExpression.Member);
-                chain.Add(Expression.Lambda(memberAccess, param));
+                var memberAccess = Expression.Property(param, memberExpression.Member.Name);
+                var lamduh = Expression.Lambda(memberAccess, param);
+                var foo = lamduh.GetPropertyInfo();
+                Console.WriteLine(foo.DeclaringType);
+                Console.WriteLine(foo.ReflectedType);
+                chain.Add(lamduh);
                 current = memberExpression.Expression;
             }
-            else if (current.NodeType == ExpressionType.Convert && ((UnaryExpression)current).Operand is MemberExpression)
+            else if (current.NodeType == ExpressionType.Convert &&
+                     ((UnaryExpression)current).Operand is MemberExpression)
             {
                 memberExpression = (MemberExpression)((UnaryExpression)current).Operand;
                 var param = Expression.Parameter(memberExpression.Expression!.Type, parameterName);
@@ -134,24 +139,19 @@ internal static class ExpressionExtensions
         ArgumentNullException.ThrowIfNull(expressions);
 
         var chain = expressions.ToList();
-        if (chain.First().Body is not MemberExpression body)
+        var lambda = chain.First();
+        var memberExpression = lambda.Body;
+        foreach (var currentLambda in chain.Skip(1))
         {
-            throw new ArgumentException("The provided expressions should be member accesses.");
-        }
-
-        var parameter = chain.First().Parameters.First();
-        var memberExpression = Expression.Property(parameter, body.Member.Name);
-        foreach (var lambda in chain.Skip(1))
-        {
-            if (lambda.Body is not MemberExpression current)
+            memberExpression = currentLambda.Body switch
             {
-                throw new ArgumentException("The provided expressions should be member accesses.");
-            }
-
-            memberExpression = Expression.Property(memberExpression, current.Member.Name);
+                MemberExpression member => Expression.Property(memberExpression, member.Member.Name),
+                UnaryExpression { Operand: MemberExpression } unary => unary,
+                _ => memberExpression
+            };
         }
 
-        return Expression.Lambda(memberExpression, parameter);
+        return Expression.Lambda(memberExpression, lambda.Parameters.First());
     }
 
     /// <summary>
@@ -248,9 +248,11 @@ internal static class ExpressionExtensions
         return expression.ToNavigationProperty<TEntity>();
     }
 
-    public static PrerequisiteMatch MatchToPrerequisite(this LambdaExpression expression, ISeedPrerequisite prerequisite)
+    public static PrerequisiteMatch MatchToPrerequisite(this LambdaExpression expression,
+        ISeedPrerequisite prerequisite)
     {
-        if (prerequisite.PropertyInfo == expression.GetPropertyInfo())
+        var propertyInfo = expression.GetPropertyInfo();
+        if (prerequisite.PropertyInfo == propertyInfo)
         {
             return PrerequisiteMatch.Full;
         }

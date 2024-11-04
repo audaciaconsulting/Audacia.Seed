@@ -127,7 +127,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         }
         else
         {
-            Build();
+            _ = Build();
         }
     }
 

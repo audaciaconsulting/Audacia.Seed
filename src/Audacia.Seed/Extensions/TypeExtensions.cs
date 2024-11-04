@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using Audacia.Seed.Constants;
-using Audacia.Seed.Contracts;
 using Audacia.Seed.Exceptions;
 
 namespace Audacia.Seed.Extensions;
@@ -9,7 +8,7 @@ namespace Audacia.Seed.Extensions;
 /// <summary>
 /// Extensions for <see cref="Type"/>.
 /// </summary>
-public static class TypeExtensions
+internal static class TypeExtensions
 {
     /// <summary>
     /// Gets the properties on the provided <paramref name="type"/> that are required navigation properties.
