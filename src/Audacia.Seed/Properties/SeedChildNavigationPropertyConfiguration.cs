@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.Extensions;
+using Audacia.Seed.Options;
 
 namespace Audacia.Seed.Properties;
 
@@ -11,7 +12,7 @@ namespace Audacia.Seed.Properties;
 /// <typeparam name="TEntity">The type with the children to populate.</typeparam>
 /// <typeparam name="TChildNavigation">The type of the destination property child class.</typeparam>
 /// <typeparam name="TSeed">An <see cref="IEntitySeed"/> for the child navigation property.</typeparam>
-public class
+internal class
     SeedChildNavigationPropertyConfiguration<TEntity, TChildNavigation, TSeed>(
         Expression<Func<TEntity, IEnumerable<TChildNavigation>>> getter,
         TSeed seedConfiguration,
@@ -21,6 +22,12 @@ public class
     where TChildNavigation : class
     where TSeed : EntitySeed<TChildNavigation>
 {
+    /// <inheritdoc />
+    public LambdaExpression GetterLambda => Getter;
+
+    /// <inheritdoc />
+    public IEntitySeed Seed => SeedConfiguration;
+
     /// <summary>
     /// Gets a lambda to the property to populate.
     /// </summary>
@@ -59,13 +66,12 @@ public class
     public void Merge(ISeedCustomisation<TEntity> other)
     {
         if (other is SeedChildNavigationPropertyConfiguration<TEntity, TChildNavigation, EntitySeed<TChildNavigation>>
-            otherSeed)
+            otherCustomisation)
         {
-            var newCustomisations = otherSeed.SeedConfiguration.Customisations
-                .Where(c => !SeedConfiguration.Customisations.Contains(c));
-            foreach (var customisation in newCustomisations)
+            SeedConfiguration.Options.Merge(otherCustomisation.SeedConfiguration.Options);
+            foreach (var customisation in otherCustomisation.SeedConfiguration.Customisations)
             {
-                SeedConfiguration.Customisations.Add(customisation);
+                SeedConfiguration.AddCustomisation(customisation);
             }
         }
     }
@@ -76,7 +82,7 @@ public class
         ArgumentNullException.ThrowIfNull(repository);
         SeedConfiguration.Repository ??= repository;
 
-        var value = GetValueToSet(repository, index, previous);
+        var value = GetValueToSet();
 
         var obj = Getter.GetPropertyOwner(entity);
 
@@ -87,10 +93,7 @@ public class
         }
     }
 
-    private ICollection<TChildNavigation> GetValueToSet(
-        ISeedableRepository repository,
-        int index,
-        TEntity? previous)
+    private ICollection<TChildNavigation> GetValueToSet()
     {
         var validEntities = SeedConfiguration.BuildMany(AmountOfChildren).AsQueryable();
 
@@ -100,10 +103,10 @@ public class
     }
 
     /// <inheritdoc/>
-    public bool EqualsPrerequisite(ISeedPrerequisite prerequisite)
+    public LambdaExpressionMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
     {
         ArgumentNullException.ThrowIfNull(prerequisite);
 
-        return prerequisite.PropertyInfo == Getter.GetPropertyInfo();
+        return Getter.MatchToPrerequisite(prerequisite);
     }
 }

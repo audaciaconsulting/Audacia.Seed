@@ -6,7 +6,9 @@ namespace Audacia.Seed.Options;
 public enum SeedingInsertionBehaviour
 {
     /// <summary>
-    /// The default behaviour, which is to find an entity in the repository that has not yet been saved, or create a new one if not.
+    /// The default behaviour, which is to try and find an entity in the change tracker (whether it's been saved or not).
+    /// <br/>
+    /// If it can't find one, we'll fall back on the behaviour described by <see cref="AddNew"/>.
     /// </summary>
     TryFindNew = 0,
 
@@ -16,9 +18,11 @@ public enum SeedingInsertionBehaviour
     AddNew = 100,
 
     /// <summary>
-    /// Like <see cref="TryFindNew"/>, but will also check if it can match up with an already saved entity.
+    /// Try to match up with an already saved entity (not in the change tracker).
     /// <br/>
     /// Use this if your seed has hardcoded IDs to prevent duplicates.
+    /// <br/>
+    /// If it can't find one, we'll fall back on the behaviour described by <see cref="TryFindNew"/>.
     /// </summary>
     TryFindExisting = 200,
 }

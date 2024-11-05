@@ -3,6 +3,7 @@ using System.Reflection;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.Exceptions;
 using Audacia.Seed.Extensions;
+using Audacia.Seed.Options;
 
 namespace Audacia.Seed.Properties;
 
@@ -11,12 +12,18 @@ namespace Audacia.Seed.Properties;
 /// </summary>
 /// <typeparam name="TEntity">The type with the property to populate.</typeparam>
 /// <typeparam name="TProperty">The type of the destination property.</typeparam>
-public class SeedDynamicPropertyConfiguration<TEntity, TProperty>(
+internal class SeedDynamicPropertyConfiguration<TEntity, TProperty>(
     Expression<Func<TEntity, TProperty>> getter,
     Func<int, TEntity?, TProperty> valueSetter)
     : ISeedCustomisation<TEntity>
     where TEntity : class
 {
+    /// <inheritdoc />
+    public LambdaExpression GetterLambda => Getter;
+
+    /// <inheritdoc />
+    public IEntitySeed? Seed => null;
+
     /// <inheritdoc/>
     public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
     {
@@ -41,6 +48,8 @@ public class SeedDynamicPropertyConfiguration<TEntity, TProperty>(
     /// <inheritdoc />
     public void Apply(TEntity entity, ISeedableRepository repository, int index, TEntity? previous)
     {
+        ArgumentNullException.ThrowIfNull(repository);
+
         var obj = Getter.GetPropertyOwner(entity);
 
         if (Getter.Body is MemberExpression memberSelectorExpression)
@@ -49,6 +58,7 @@ public class SeedDynamicPropertyConfiguration<TEntity, TProperty>(
             try
             {
                 var value = ValueSetter(index, previous);
+                repository.PrepareToSet(value);
                 property.SetValue(obj, value, null);
             }
             catch (IndexOutOfRangeException exception)
@@ -59,11 +69,14 @@ public class SeedDynamicPropertyConfiguration<TEntity, TProperty>(
     }
 
     /// <inheritdoc/>
-    public bool EqualsPrerequisite(ISeedPrerequisite prerequisite)
+    public LambdaExpressionMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
     {
         ArgumentNullException.ThrowIfNull(prerequisite);
 
-        return prerequisite.PropertyInfo == Getter.GetPropertyInfo();
+        // If this property is a foreign key, swap it out for the navigation property so we can overwrite prerequisites.
+        var getter = Getter.ToNavigationProperty();
+
+        return getter.MatchToPrerequisite(prerequisite);
     }
 
     /// <inheritdoc/>

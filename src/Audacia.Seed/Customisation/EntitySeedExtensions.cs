@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Audacia.Core.Extensions;
-using Audacia.Seed.Contracts;
 using Audacia.Seed.Exceptions;
 using Audacia.Seed.Extensions;
 using Audacia.Seed.Helpers;
@@ -41,6 +40,7 @@ public static class EntitySeedExtensions
         }
 
         entitySeed.AddCustomisation(new SeedPropertyConfiguration<TEntity, TProperty>(getter, value));
+
         return entitySeed;
     }
 
@@ -553,7 +553,7 @@ public static class EntitySeedExtensions
         parentSeed.WithDifferentReflection(right, left.Body.Type, typeof(TNavigation));
 
         // Add a WithDifferent for the EntitySeed<Parent> with getter x => x.GrandParent
-        AddWithDifferentForParent(entitySeed, left, parentSeed);
+        AddWithDifferentForNavigationProperty(entitySeed, left, parentSeed);
     }
 
     private static void WithDifferentReflection(
@@ -586,7 +586,7 @@ public static class EntitySeedExtensions
         return seed;
     }
 
-    private static void AddWithDifferentForParent<TEntity>(
+    private static void AddWithDifferentForNavigationProperty<TEntity>(
         EntitySeed<TEntity> entitySeed,
         LambdaExpression left,
         IEntitySeed seed) where TEntity : class

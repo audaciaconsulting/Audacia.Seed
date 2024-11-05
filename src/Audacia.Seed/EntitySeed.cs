@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -126,7 +127,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         }
         else
         {
-            Build();
+            _ = Build();
         }
     }
 
@@ -187,7 +188,8 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         where TNavigation : class
     {
         var query = Repository?.DbSet<TNavigation>() ??
-                    throw new DataSeedingException($"Unable to seed data as the repository is null. Make sure you are calling this from the {nameof(GetDefault)} method.");
+                    throw new DataSeedingException(
+                        $"Unable to seed data as the repository is null. Make sure you are calling this from the {nameof(GetDefault)} method.");
 
         var matchedEntities = query
             .Where(predicate)
@@ -265,16 +267,21 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     /// Add a customisation to the entity seed.
     /// </summary>
     /// <param name="customisation">The customisation to add.</param>
-    public void AddCustomisation(ISeedCustomisation<TEntity> customisation)
+    public void AddCustomisation(ISeedCustomisation customisation)
     {
-        var matchingCustomisation = Customisations.Find(c => c.Equals(customisation));
-        if (matchingCustomisation != null)
+        ArgumentNullException.ThrowIfNull(customisation);
+
+        if (customisation is ISeedCustomisation<TEntity> seedCustomisation)
         {
-            matchingCustomisation.Merge(customisation);
-        }
-        else
-        {
-            Customisations.Add(customisation);
+            var matchingCustomisation = Customisations.Find(c => c.Equals(customisation));
+            if (matchingCustomisation != null)
+            {
+                matchingCustomisation.Merge(seedCustomisation);
+            }
+            else
+            {
+                Customisations.Add(seedCustomisation);
+            }
         }
     }
 
@@ -285,7 +292,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     /// <param name="previous">The entity seeded previously. This will not be null if creating many.</param>
     /// <returns>A new or existing entity depending on whether we found an existing appropriate one.</returns>
     /// <exception cref="DataSeedingException">If we don't have a <see cref="Repository"/> set.</exception>
-    private TEntity GetOrCreateEntity(int index, TEntity? previous)
+    internal TEntity GetOrCreateEntity(int index, TEntity? previous)
     {
         if (Repository == null)
         {
@@ -296,7 +303,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         var entity = Options.InsertionBehavior switch
         {
             SeedingInsertionBehaviour.TryFindExisting => Repository.FindLocal(predicate)
-                                                          ?? Repository.DbSet<TEntity>().FirstOrDefault(predicate),
+                                                         ?? Repository.DbSet<TEntity>().FirstOrDefault(predicate),
             SeedingInsertionBehaviour.TryFindNew => Repository.FindLocal(predicate),
             _ => null
         };
@@ -329,23 +336,71 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
 
     private void PopulatePrerequisites(TEntity entity)
     {
-        foreach (var seedPrerequisite in Prerequisites()
-                     .Where(sp => Customisations.All(c => !c.EqualsPrerequisite(sp))))
+        var prerequisites = Prerequisites().ToList();
+        foreach (var prerequisite in prerequisites)
         {
-            var seed = seedPrerequisite.Seed;
-            seed.GetType().GetProperty(nameof(Repository))?.SetValue(seed, Repository);
-            var buildMethod = seed.GetType().GetMethod(nameof(Build), BindingFlags.Instance | BindingFlags.Public);
-            var navigationProperty = buildMethod?.Invoke(seed, null)!;
-            seedPrerequisite.PropertyInfo.SetValue(entity, navigationProperty);
-
-            if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
+            // We only want set up a pre-requisite if we haven't overridden it by a customisation
+            var shouldPopulatePrerequisite = true;
+            var seed = prerequisite.Seed;
+            foreach (var customisation in Customisations)
             {
-                var addMethod = Repository!
-                    .GetType()
-                    .GetMethod(nameof(Repository.Add))!
-                    .MakeGenericMethod(navigationProperty.GetType());
-                addMethod.Invoke(Repository, [navigationProperty]);
+                var shouldStillPopulatePrerequisite = MatchToCustomisation(prerequisite, customisation, seed);
+
+                shouldPopulatePrerequisite &= shouldStillPopulatePrerequisite;
             }
+
+            if (shouldPopulatePrerequisite)
+            {
+                PopulatePrerequisite(entity, seed, prerequisite);
+            }
+        }
+    }
+
+    private bool MatchToCustomisation(ISeedPrerequisite prerequisite, ISeedCustomisation<TEntity> customisation, IEntitySeed seed)
+    {
+        var match = customisation.MatchToPrerequisite(prerequisite);
+        var shouldStillPopulatePrerequisite = true;
+        if (match == LambdaExpressionMatch.Full)
+        {
+            shouldStillPopulatePrerequisite = false;
+        }
+        else if (match == LambdaExpressionMatch.Partial && customisation.GetterLambda != null)
+        {
+            AddVoidCustomisation(customisation, seed, prerequisite);
+        }
+
+        return shouldStillPopulatePrerequisite;
+    }
+
+    private void PopulatePrerequisite(TEntity entity, IEntitySeed seed, ISeedPrerequisite prerequisite)
+    {
+        seed.GetType().GetProperty(nameof(Repository))?.SetValue(seed, Repository);
+        var buildMethod = seed.GetType().GetMethod(nameof(Build), BindingFlags.Instance | BindingFlags.Public);
+        var navigationProperty = buildMethod?.Invoke(seed, null)!;
+        prerequisite.PropertyInfo.SetValue(entity, navigationProperty);
+
+        if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
+        {
+            // Add to the repo now in case two prerequisites use the same type
+            var addMethod = Repository!
+                .GetType()
+                .GetMethod(nameof(Repository.Add))!
+                .MakeGenericMethod(navigationProperty.GetType());
+            addMethod.Invoke(Repository, [navigationProperty]);
+        }
+    }
+
+    private void AddVoidCustomisation(ISeedCustomisation<TEntity> customisation, IEntitySeed seed, ISeedPrerequisite prerequisite)
+    {
+        var (_, right) = customisation.GetterLambda!.SplitFirstMemberAccessLayer();
+        var genericType = typeof(SeedVoidConfiguration<>).MakeGenericType(seed.EntityType);
+        var customisationToAdd = (ISeedCustomisation)Activator.CreateInstance(genericType, right)!;
+        seed.AddCustomisation(customisationToAdd);
+        var fullMatches = Customisations
+            .Where(c => c.MatchToPrerequisite(prerequisite) == LambdaExpressionMatch.Full).ToList();
+        foreach (var fullMatch in fullMatches)
+        {
+            fullMatch.Seed?.AddCustomisation(customisationToAdd);
         }
     }
 }

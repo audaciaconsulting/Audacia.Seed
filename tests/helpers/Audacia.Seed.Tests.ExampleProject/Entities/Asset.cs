@@ -14,5 +14,9 @@ public class Asset
 
     public required string Name { get; set; }
 
+    public int AssetTypeId { get; set; }
+
+    public AssetType AssetType { get; set; } = null!;
+
     public ICollection<CompanyAsset> CompanyAssets { get; set; } = [];
 }

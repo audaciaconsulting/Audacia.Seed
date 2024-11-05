@@ -14,7 +14,7 @@ namespace Audacia.Seed.Properties;
 /// </summary>
 /// <typeparam name="TEntity">The type with the property to populate.</typeparam>
 /// <typeparam name="TNavigation">The type of the destination property.</typeparam>
-public class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation>(
+internal class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation>(
     Expression<Func<TEntity, TNavigation?>> getter,
     List<IEntitySeed<TNavigation>> seedConfigurations)
     : ISeedCustomisation<TEntity>
@@ -26,6 +26,12 @@ public class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation>
     {
         return null;
     }
+
+    /// <inheritdoc />
+    public LambdaExpression GetterLambda => Getter;
+
+    /// <inheritdoc />
+    public IEntitySeed? Seed => SeedConfigurations.FirstOrDefault();
 
     /// <summary>
     /// Gets a lambda to the property to populate.
@@ -59,15 +65,15 @@ public class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation>
     private TNavigation GetValueToSet(ISeedableRepository repository, int index, TEntity? previous,
         IEntitySeed<TNavigation> seedConfiguration)
     {
-        Expression<Func<TNavigation, bool>> defaultPredicate = _ => true;
-        var predicate = seedConfiguration is EntitySeed<TNavigation> seedConfigurationAsEntitySeed
+        var seedConfigurationAsEntitySeed = seedConfiguration as EntitySeed<TNavigation>;
+        var predicate = seedConfigurationAsEntitySeed != null
             ? seedConfigurationAsEntitySeed.ToPredicate(index)
-            : defaultPredicate;
+            : _ => true;
         var value = repository.FindLocal(predicate);
         if (index > 0
             && !ReferenceEquals(SeedConfigurations[index], SeedConfigurations[index - 1])
             // Force a new creation if we've explicitly provided an extra seed, even if it's identical
-            && predicate.ToString() == defaultPredicate.ToString())
+            && predicate.ToString() == ((Expression<Func<TNavigation, bool>>)(_ => true)).ToString())
         {
             // Force a new creation
             value = null;
@@ -76,7 +82,9 @@ public class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation>
         if (value == null)
         {
             seedConfiguration.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
-            value = seedConfiguration.Build();
+            value = seedConfigurationAsEntitySeed != null
+                ? seedConfigurationAsEntitySeed.GetOrCreateEntity(index, null)
+                : seedConfiguration.Build();
             repository.Add(value);
         }
 
@@ -84,11 +92,11 @@ public class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation>
     }
 
     /// <inheritdoc/>
-    public bool EqualsPrerequisite(ISeedPrerequisite prerequisite)
+    public LambdaExpressionMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
     {
         ArgumentNullException.ThrowIfNull(prerequisite);
 
-        return prerequisite.PropertyInfo == Getter.GetPropertyInfo();
+        return Getter.MatchToPrerequisite(prerequisite);
     }
 
     /// <inheritdoc/>

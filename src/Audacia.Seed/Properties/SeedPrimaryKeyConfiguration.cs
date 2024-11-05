@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.Exceptions;
+using Audacia.Seed.Options;
 
 namespace Audacia.Seed.Properties;
 
@@ -10,7 +11,7 @@ namespace Audacia.Seed.Properties;
 /// <param name="primaryKeyValue">The primary key value to set.</param>
 /// <typeparam name="TEntity">The type of the entity we are setting the primary key on.</typeparam>
 /// <typeparam name="TKey">The type of the primary key we are setting.</typeparam>
-public class SeedPrimaryKeyConfiguration<TEntity, TKey>(TKey[] primaryKeyValue) : ISeedCustomisation<TEntity> where TEntity : class
+internal class SeedPrimaryKeyConfiguration<TEntity, TKey>(TKey[] primaryKeyValue) : ISeedCustomisation<TEntity> where TEntity : class
 {
     private readonly TKey[] _primaryKeyValue = primaryKeyValue;
 
@@ -28,6 +29,19 @@ public class SeedPrimaryKeyConfiguration<TEntity, TKey>(TKey[] primaryKeyValue) 
             throw new DataSeedingException($"Unable to set the primary key on {typeof(TEntity).Name} dynamically. Ensure you've passed in enough values to match the number of entities being created.", exception);
         }
     }
+
+    /// <inheritdoc />
+    public LambdaExpressionMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
+    {
+        // we can't have a prerequisite for a primary key
+        return LambdaExpressionMatch.None;
+    }
+
+    /// <inheritdoc />
+    public LambdaExpression? GetterLambda => null;
+
+    /// <inheritdoc />
+    public IEntitySeed? Seed => null;
 
     /// <inheritdoc />
     public IEntitySeed? FindSeedForGetter(LambdaExpression getter)

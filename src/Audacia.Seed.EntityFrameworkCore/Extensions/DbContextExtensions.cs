@@ -1,9 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
-using Audacia.Seed.Customisation;
 using Audacia.Seed.EntityFrameworkCore.Repositories;
 using Audacia.Seed.Extensions;
 using Audacia.Seed.Helpers;
-using Audacia.Seed.Options;
 using Microsoft.EntityFrameworkCore;
 
 namespace Audacia.Seed.EntityFrameworkCore.Extensions;
@@ -18,7 +16,11 @@ public static class DbContextExtensions
     /// </summary>
     /// <param name="context">The database context to insert into.</param>
     /// <typeparam name="TEntity">The type of the entity to seed.</typeparam>
-    /// <returns>An entity that exists in the database, with a generated ID.</returns>
+    /// <returns>
+    /// An entity that exists in the database, with a generated ID.
+    /// <br/>
+    /// Note that this entity is not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     public static TEntity Seed<TEntity>(this DbContext context)
         where TEntity : class
     {
@@ -35,7 +37,11 @@ public static class DbContextExtensions
     /// <param name="context">The database context to insert into.</param>
     /// <typeparam name="T1">The type of the first entity to seed.</typeparam>
     /// <typeparam name="T2">The type of the second entity to seed.</typeparam>
-    /// <returns>The saved entities in the order they were provided.</returns>
+    /// <returns>
+    /// The saved entities in the order they were provided.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     public static (T1 T1, T2 T2) Seed<T1, T2>(
@@ -59,7 +65,11 @@ public static class DbContextExtensions
     /// <typeparam name="T1">The type of the first entity to seed.</typeparam>
     /// <typeparam name="T2">The type of the second entity to seed.</typeparam>
     /// <typeparam name="T3">The type of the third entity to seed.</typeparam>
-    /// <returns>The saved entities in the order they were provided.</returns>
+    /// <returns>
+    /// The saved entities in the order they were provided.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     public static (T1 T1, T2 T2, T3 T3) Seed<T1, T2, T3>(
@@ -86,7 +96,11 @@ public static class DbContextExtensions
     /// <typeparam name="T2">The type of the second entity to seed.</typeparam>
     /// <typeparam name="T3">The type of the third entity to seed.</typeparam>
     /// <typeparam name="T4">The type of the fourth entity to seed.</typeparam>
-    /// <returns>The saved entities in the order they were provided.</returns>
+    /// <returns>
+    /// The saved entities in the order they were provided.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     public static (T1 T1, T2 T2, T3 T3, T4 T4) Seed<T1, T2, T3, T4>(
@@ -116,7 +130,11 @@ public static class DbContextExtensions
     /// <typeparam name="T3">The type of the third entity to seed.</typeparam>
     /// <typeparam name="T4">The type of the fourth entity to seed.</typeparam>
     /// <typeparam name="T5">The type of the fifth entity to seed.</typeparam>
-    /// <returns>The saved entities in the order they were provided.</returns>
+    /// <returns>
+    /// The saved entities in the order they were provided.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     public static (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5) Seed<T1, T2, T3, T4, T5>(
@@ -149,7 +167,11 @@ public static class DbContextExtensions
     /// <typeparam name="T4">The type of the fourth entity to seed.</typeparam>
     /// <typeparam name="T5">The type of the fifth entity to seed.</typeparam>
     /// <typeparam name="T6">The type of the sixth entity to seed.</typeparam>
-    /// <returns>The saved entities in the order they were provided.</returns>
+    /// <returns>
+    /// The saved entities in the order they were provided.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     public static (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5, T6 T6) Seed<T1, T2, T3, T4, T5, T6>(
@@ -185,7 +207,11 @@ public static class DbContextExtensions
     /// <typeparam name="T5">The type of the fifth entity to seed.</typeparam>
     /// <typeparam name="T6">The type of the sixth entity to seed.</typeparam>
     /// <typeparam name="T7">The type of the seventh entity to seed.</typeparam>
-    /// <returns>The saved entities in the order they were provided.</returns>
+    /// <returns>
+    /// The saved entities in the order they were provided.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     public static (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5, T6 T6, T7 T7) Seed<T1, T2, T3, T4, T5, T6, T7>(
@@ -224,7 +250,11 @@ public static class DbContextExtensions
     /// <typeparam name="T6">The type of the sixth entity to seed.</typeparam>
     /// <typeparam name="T7">The type of the seventh entity to seed.</typeparam>
     /// <typeparam name="T8">The type of the eighth entity to seed.</typeparam>
-    /// <returns>The saved entities in the order they were provided.</returns>
+    /// <returns>
+    /// The saved entities in the order they were provided.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
         Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
     public static (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5, T6 T6, T7 T7, T8 T8) Seed<T1, T2, T3, T4, T5, T6, T7, T8>(
@@ -259,7 +289,11 @@ public static class DbContextExtensions
     /// <param name="context">The database context to insert into.</param>
     /// <param name="seed">The seed configuration that creates the entity.</param>
     /// <typeparam name="T">The type of the entity to seed.</typeparam>
-    /// <returns>The saved entities in the order they were provided.</returns>
+    /// <returns>
+    /// An entity that exists in the database, with a generated ID.
+    /// <br/>
+    /// Note that this entity is not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
     [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
@@ -288,7 +322,11 @@ public static class DbContextExtensions
     /// <param name="seed2">The second seed to add.</param>
     /// <typeparam name="T1">The type of the first seed.</typeparam>
     /// <typeparam name="T2">The type of the second seed.</typeparam>
-    /// <returns>The saved entities in the order they were provided.</returns>
+    /// <returns>
+    /// The saved entities in the order they were provided.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
     [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
@@ -322,7 +360,11 @@ public static class DbContextExtensions
     /// <typeparam name="T1">The type of the first seed.</typeparam>
     /// <typeparam name="T2">The type of the second seed.</typeparam>
     /// <typeparam name="T3">The type of the third seed.</typeparam>
-    /// <returns>The saved entities in the order they were provided.</returns>
+    /// <returns>
+    /// The saved entities in the order they were provided.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
     [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
@@ -361,7 +403,11 @@ public static class DbContextExtensions
     /// <typeparam name="T2">The type of the second seed.</typeparam>
     /// <typeparam name="T3">The type of the third seed.</typeparam>
     /// <typeparam name="T4">The type of the fourth seed.</typeparam>
-    /// <returns>The saved entities in the order they were provided.</returns>
+    /// <returns>
+    /// The saved entities in the order they were provided.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
     [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
@@ -407,7 +453,11 @@ public static class DbContextExtensions
     /// <typeparam name="T3">The type of the third seed.</typeparam>
     /// <typeparam name="T4">The type of the fourth seed.</typeparam>
     /// <typeparam name="T5">The type of the fifth seed.</typeparam>
-    /// <returns>The saved entities in the order they were provided.</returns>
+    /// <returns>
+    /// The saved entities in the order they were provided.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
     [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
@@ -458,7 +508,11 @@ public static class DbContextExtensions
     /// <typeparam name="T4">The type of the fourth seed.</typeparam>
     /// <typeparam name="T5">The type of the fifth seed.</typeparam>
     /// <typeparam name="T6">The type of the sixth seed.</typeparam>
-    /// <returns>The saved entities in the order they were provided.</returns>
+    /// <returns>
+    /// The saved entities in the order they were provided.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
     [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
@@ -514,7 +568,11 @@ public static class DbContextExtensions
     /// <typeparam name="T5">The type of the fifth seed.</typeparam>
     /// <typeparam name="T6">The type of the sixth seed.</typeparam>
     /// <typeparam name="T7">The type of the seventh seed.</typeparam>
-    /// <returns>The saved entities in the order they were provided.</returns>
+    /// <returns>
+    /// The saved entities in the order they were provided.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
     [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
@@ -575,7 +633,11 @@ public static class DbContextExtensions
     /// <typeparam name="T6">The type of the sixth seed.</typeparam>
     /// <typeparam name="T7">The type of the seventh seed.</typeparam>
     /// <typeparam name="T8">The type of the eighth seed.</typeparam>
-    /// <returns>The saved entities in the order they were provided.</returns>
+    /// <returns>
+    /// The saved entities in the order they were provided.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
     [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
@@ -649,7 +711,11 @@ public static class DbContextExtensions
     /// <param name="amountToCreate">The amount of entities to create.</param>
     /// <param name="seed">The seed configuration that creates the entity.</param>
     /// <typeparam name="TEntity">The type of the entity to seed.</typeparam>
-    /// <returns>An entity that exists in the database, with a generated ID.</returns>
+    /// <returns>
+    /// The saved entities of the amount specified by <paramref name="amountToCreate"/>, with generated IDs.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     public static IEnumerable<TEntity> SeedMany<TEntity>(
         this DbContext context,
         int amountToCreate,
@@ -660,7 +726,7 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed);
 
         var repository = new EntityFrameworkCoreSeedableRepository(context);
-        var entities = repository.SeedMany(amountToCreate, seed);
+        var entities = repository.SeedMany(amountToCreate, seed).ToList();
         repository.Save();
         return entities;
     }
@@ -671,7 +737,11 @@ public static class DbContextExtensions
     /// <param name="context">The database context to insert into.</param>
     /// <param name="amountToCreate">The amount of entities to create.</param>
     /// <typeparam name="TEntity">The type of the entity to seed.</typeparam>
-    /// <returns>An entity that exists in the database, with a generated ID.</returns>
+    /// <returns>
+    /// The saved entities of the amount specified by <paramref name="amountToCreate"/>, with generated IDs.
+    /// <br/>
+    /// Note that these entities are not tracked by the change tracker, so need to be re-loaded from the database if subsequent changes are required.
+    /// </returns>
     public static IEnumerable<TEntity> SeedMany<TEntity>(
         this DbContext context,
         int amountToCreate)

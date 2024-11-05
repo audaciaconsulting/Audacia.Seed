@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Audacia.Seed.Constants;
 using Audacia.Seed.Exceptions;
+using Audacia.Seed.Options;
 
 namespace Audacia.Seed.Extensions;
 
@@ -67,7 +68,8 @@ internal static class ExpressionExtensions
         if (expression == null) throw new ArgumentNullException(nameof(expression));
         return expression.Body switch
         {
-            null => throw new ArgumentException($"The {nameof(expression.Body)} of the provided {nameof(expression)} is null"),
+            null => throw new ArgumentException(
+                $"The {nameof(expression.Body)} of the provided {nameof(expression)} is null"),
             UnaryExpression { Operand: MemberExpression me } => (PropertyInfo)me.Member,
             MemberExpression me => (PropertyInfo)me.Member,
             _ => throw new ArgumentException($"The expression doesn't indicate a valid property. [ {expression} ]")
@@ -81,28 +83,58 @@ internal static class ExpressionExtensions
     /// </para>
     /// </summary>
     /// <param name="expression">The expression to split into many expressions.</param>
-    /// <typeparam name="T">The type of the parameter of the expression.</typeparam>
-    /// <typeparam name="TProperty">The destination type of the expression.</typeparam>
     /// <returns>An array with an item for each nested member access.</returns>
-    public static IEnumerable<LambdaExpression> SplitMemberAccessChain<T, TProperty>(
-        this Expression<Func<T, TProperty>> expression)
+    internal static IEnumerable<LambdaExpression> SplitMemberAccessChain(
+        this LambdaExpression expression)
     {
         ArgumentNullException.ThrowIfNull(expression);
 
         var chain = new List<LambdaExpression>();
-        var current = expression.Body;
-        const string parameterName = "x";
+        var currentMember = TryAddNextLambda(expression.Body, chain);
 
-        while (current is MemberExpression memberExpression)
+        while (currentMember != null)
         {
-            var param = Expression.Parameter(memberExpression.Expression!.Type, parameterName);
-            var memberAccess = Expression.MakeMemberAccess(param, memberExpression.Member);
-            chain.Add(Expression.Lambda(memberAccess, param));
-            current = memberExpression.Expression;
+            currentMember = TryAddNextLambda(currentMember.Expression, chain);
         }
 
         chain.Reverse();
         return chain;
+    }
+
+    private static MemberExpression? TryAddNextLambda(Expression? current, List<LambdaExpression> chain)
+    {
+        if (current is MemberExpression memberExpression)
+        {
+            chain.Add(GetLambdaFromMemberExpression(memberExpression));
+            return memberExpression;
+        }
+
+        if (current?.NodeType == ExpressionType.Convert &&
+                 ((UnaryExpression)current).Operand is MemberExpression)
+        {
+            memberExpression = (MemberExpression)((UnaryExpression)current).Operand;
+            chain.Add(GetLambdaFromConvertedMemberExpression(memberExpression, current.Type));
+            return memberExpression;
+        }
+
+        return null;
+    }
+
+    private static LambdaExpression GetLambdaFromMemberExpression(MemberExpression memberExpression)
+    {
+        var param = Expression.Parameter(memberExpression.Expression!.Type, "x");
+        var property = Expression.Property(param, memberExpression.Member.Name);
+        var lambdaExpression = Expression.Lambda(property, param);
+        return lambdaExpression;
+    }
+
+    private static LambdaExpression GetLambdaFromConvertedMemberExpression(MemberExpression memberExpression, Type convertTo)
+    {
+        var param = Expression.Parameter(memberExpression.Expression!.Type, "x");
+        var memberAccess = Expression.MakeMemberAccess(param, memberExpression.Member);
+        var explicitCast = Expression.Convert(memberAccess, convertTo);
+        var lambdaExpression = Expression.Lambda(explicitCast, param);
+        return lambdaExpression;
     }
 
     /// <summary>
@@ -116,24 +148,19 @@ internal static class ExpressionExtensions
         ArgumentNullException.ThrowIfNull(expressions);
 
         var chain = expressions.ToList();
-        if (chain.First().Body is not MemberExpression body)
+        var lambda = chain.First();
+        var memberExpression = lambda.Body;
+        foreach (var currentLambda in chain.Skip(1))
         {
-            throw new ArgumentException("The provided expressions should be member accesses.");
-        }
-
-        var parameter = chain.First().Parameters.First();
-        var memberExpression = Expression.Property(parameter, body.Member.Name);
-        foreach (var lambda in chain.Skip(1))
-        {
-            if (lambda.Body is not MemberExpression current)
+            memberExpression = currentLambda.Body switch
             {
-                throw new ArgumentException("The provided expressions should be member accesses.");
-            }
-
-            memberExpression = Expression.Property(memberExpression, current.Member.Name);
+                MemberExpression member => Expression.Property(memberExpression, member.Member.Name),
+                UnaryExpression { Operand: MemberExpression } unary => unary,
+                _ => memberExpression
+            };
         }
 
-        return Expression.Lambda(memberExpression, parameter);
+        return Expression.Lambda(memberExpression, lambda.Parameters.First());
     }
 
     /// <summary>
@@ -147,11 +174,9 @@ internal static class ExpressionExtensions
     /// </example>
     /// </summary>
     /// <param name="expression">The expression to split.</param>
-    /// <typeparam name="TRoot">The type of the parameter of the provided <paramref name="expression"/>.</typeparam>
-    /// <typeparam name="TDestination">The type of the property returned by the expression.</typeparam>
     /// <returns>Two expressions that represent the inputted <paramref name="expression"/> when combined together.</returns>
-    internal static (LambdaExpression Left, LambdaExpression Right) SplitFirstMemberAccessLayer<TRoot, TDestination>(
-        this Expression<Func<TRoot, TDestination>> expression)
+    internal static (LambdaExpression Left, LambdaExpression Right) SplitFirstMemberAccessLayer(
+        this LambdaExpression expression)
     {
         var memberAccessChain = expression.SplitMemberAccessChain().ToList();
         var left = memberAccessChain[0];
@@ -197,11 +222,10 @@ internal static class ExpressionExtensions
     /// </summary>
     /// <param name="expression">The expression to use to find the navigation property.</param>
     /// <typeparam name="TEntity">The type of the source of the getter.</typeparam>
-    /// <typeparam name="TProperty">The type of the destination of the getter.</typeparam>
     /// <returns>The navigation property this foreign key represents. If this isn't a foreign key, the original expression is returned.</returns>
     /// <exception cref="ArgumentException">If the provided expression doesn't access data on <typeparamref name="TEntity"/>.</exception>
-    internal static LambdaExpression ToNavigationProperty<TEntity, TProperty>(
-        this Expression<Func<TEntity, TProperty>> expression)
+    internal static LambdaExpression ToNavigationProperty<TEntity>(
+        this LambdaExpression expression)
     {
         if (expression.Body is not MemberExpression memberExpression)
         {
@@ -209,18 +233,67 @@ internal static class ExpressionExtensions
                 $"The provided {nameof(expression)} ({expression}) does not access a property on {typeof(TEntity).Name}.");
         }
 
-        LambdaExpression lambdaExpression = expression;
-        if (!typeof(TProperty).IsClass && memberExpression.Member.Name.EndsWith(SeedingConstants.ForeignKeySuffix))
+        var propertyType = expression.Body.Type;
+        if (!propertyType.IsClass && memberExpression.Member.Name.EndsWith(SeedingConstants.ForeignKeySuffix))
         {
             var navigationPropertyName = memberExpression.Member.Name[..^SeedingConstants.ForeignKeySuffix.Length];
             var navigationProperty = typeof(TEntity).GetProperty(navigationPropertyName);
             if (navigationProperty != null)
             {
                 var param = Expression.Parameter(memberExpression.Expression!.Type, "x");
-                lambdaExpression = Expression.Lambda(Expression.MakeMemberAccess(param, navigationProperty), param);
+                expression = Expression.Lambda(Expression.MakeMemberAccess(param, navigationProperty), param);
             }
         }
 
-        return lambdaExpression;
+        return expression;
+    }
+
+    /// <summary>
+    /// <para>
+    /// Try to find a navigation property if this property is deemed to represent a foreign key.
+    /// Otherwise, return the expression.
+    /// <example>
+    /// For example, passing in <c>x => x.ParentId</c> will search for a Parent property and attempt to return <c>x => x.Parent</c>.
+    /// </example>
+    /// </para>
+    /// </summary>
+    /// <param name="expression">The expression to use to find the navigation property.</param>
+    /// <typeparam name="TEntity">The type of the source of the getter.</typeparam>
+    /// <typeparam name="TProperty">The type of the destination of the getter.</typeparam>
+    /// <returns>The navigation property this foreign key represents. If this isn't a foreign key, the original expression is returned.</returns>
+    /// <exception cref="ArgumentException">If the provided expression doesn't access data on <typeparamref name="TEntity"/>.</exception>
+    internal static LambdaExpression ToNavigationProperty<TEntity, TProperty>(
+        this Expression<Func<TEntity, TProperty>> expression)
+    {
+        return expression.ToNavigationProperty<TEntity>();
+    }
+
+    /// <summary>
+    /// Match the <paramref name="expression"/> to the provided <paramref name="prerequisite"/>.
+    /// </summary>
+    /// <param name="expression">The expression to match.</param>
+    /// <param name="prerequisite">The prerequisite to compare to.</param>
+    /// <returns>A value indicating how well they match.</returns>
+    internal static LambdaExpressionMatch MatchToPrerequisite(
+        this LambdaExpression expression,
+        ISeedPrerequisite prerequisite)
+    {
+        var propertyInfo = expression.GetPropertyInfo();
+        if (prerequisite.PropertyInfo == propertyInfo)
+        {
+            return LambdaExpressionMatch.Full;
+        }
+
+        // Check if they have any commonality in their member access chain.
+        if (expression.SplitMemberAccessChain().Count() > 1)
+        {
+            var (left, _) = expression.SplitFirstMemberAccessLayer();
+            if (prerequisite.PropertyInfo == left.GetPropertyInfo())
+            {
+                return LambdaExpressionMatch.Partial;
+            }
+        }
+
+        return LambdaExpressionMatch.None;
     }
 }

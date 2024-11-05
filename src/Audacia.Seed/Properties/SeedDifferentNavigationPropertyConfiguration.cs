@@ -13,13 +13,19 @@ namespace Audacia.Seed.Properties;
 /// </summary>
 /// <typeparam name="TEntity">The type with the property to populate.</typeparam>
 /// <typeparam name="TNavigation">The type of the destination property.</typeparam>
-public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
+internal class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
     Expression<Func<TEntity, TNavigation?>> getter,
     EntitySeed<TNavigation> seedConfiguration)
     : ISeedCustomisation<TEntity>
     where TEntity : class
     where TNavigation : class
 {
+    /// <inheritdoc />
+    public LambdaExpression GetterLambda => Getter;
+
+    /// <inheritdoc />
+    public IEntitySeed Seed => SeedConfiguration;
+
     /// <inheritdoc/>
     public int Order => 50;
 
@@ -44,7 +50,7 @@ public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
     /// <summary>
     /// Gets a lambda to the property to populate.
     /// </summary>
-    internal Expression<Func<TEntity, TNavigation?>> Getter { get; } = getter;
+    private Expression<Func<TEntity, TNavigation?>> Getter { get; } = getter;
 
     /// <summary>
     /// Gets the seed configuration to use.
@@ -79,7 +85,7 @@ public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
         if (value == null)
         {
             SeedConfiguration.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
-            value = SeedConfiguration.Build();
+            value = SeedConfiguration.GetOrCreateEntity(index, null);
             repository.Add(value);
         }
 
@@ -87,11 +93,11 @@ public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
     }
 
     /// <inheritdoc/>
-    public bool EqualsPrerequisite(ISeedPrerequisite prerequisite)
+    public LambdaExpressionMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
     {
         ArgumentNullException.ThrowIfNull(prerequisite);
 
-        return prerequisite.PropertyInfo == Getter.GetPropertyInfo();
+        return Getter.MatchToPrerequisite(prerequisite);
     }
 
     /// <inheritdoc/>
@@ -136,13 +142,12 @@ public class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
     public void Merge(ISeedCustomisation<TEntity> other)
     {
         if (other is SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>
-            otherSeed)
+            otherCustomisation)
         {
-            var newCustomisations = otherSeed.SeedConfiguration.Customisations
-                .Where(c => !SeedConfiguration.Customisations.Contains(c));
-            foreach (var customisation in newCustomisations)
+            SeedConfiguration.Options.Merge(otherCustomisation.SeedConfiguration.Options);
+            foreach (var customisation in otherCustomisation.SeedConfiguration.Customisations)
             {
-                SeedConfiguration.Customisations.Add(customisation);
+                SeedConfiguration.AddCustomisation(customisation);
             }
         }
     }

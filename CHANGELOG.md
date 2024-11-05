@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.2 - 2024-11-05
+### Fixed
+- Bug Fix: don't reload entities after saving them to protect against false-positives in unit tests (#182829).
+
 ## 2.0.1 - 2024-10-30
 ### Fixed
 - Bug Fix: entities not saved when seeding many using the `IEntitySeed.PerformSeeding` method (#182830).

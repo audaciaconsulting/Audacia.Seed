@@ -13,7 +13,7 @@ internal static class SeedingConstants
     public const string ForeignKeySuffix = "Id";
 
     /// <summary>
-    /// The default value <see cref="ISeedCustomisation{TEntity}.Order"/>.
+    /// The default value <see cref="ISeedCustomisation.Order"/>.
     /// </summary>
     public const int DefaultCustomisationOrder = 100;
 }
