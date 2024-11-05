@@ -334,57 +334,73 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         }
     }
 
-    [SuppressMessage("Maintainability", "ACL1011:Signature contains too many nested control flow statements")]
     private void PopulatePrerequisites(TEntity entity)
     {
         var prerequisites = Prerequisites().ToList();
         foreach (var prerequisite in prerequisites)
         {
-            var setupPrereq = true;
+            // We only want set up a pre-requisite if we haven't overridden it by a customisation
+            var shouldPopulatePrerequisite = true;
             var seed = prerequisite.Seed;
-            foreach (var matchingCustomisation in Customisations)
+            foreach (var customisation in Customisations)
             {
-                switch (matchingCustomisation.MatchToPrerequisite(prerequisite))
-                {
-                    case PrerequisiteMatch.Partial:
-                        if (matchingCustomisation.GetterLambda != null)
-                        {
-                            var (_, right) = matchingCustomisation.GetterLambda!.SplitFirstMemberAccessLayer();
-                            var genericType = typeof(SeedVoidConfiguration<>).MakeGenericType(seed.EntityType);
-                            var customisation = (ISeedCustomisation)Activator.CreateInstance(genericType, right)!;
-                            seed.AddCustomisation(customisation);
-                            var fullMatches = Customisations
-                                .Where(c => c.MatchToPrerequisite(prerequisite) == PrerequisiteMatch.Full).ToList();
-                            foreach (var fullMatch in fullMatches)
-                            {
-                                fullMatch.Seed?.AddCustomisation(customisation);
-                            }
-                        }
+                var shouldStillPopulatePrerequisite = MatchToCustomisation(prerequisite, customisation, seed);
 
-                        break;
-                    case PrerequisiteMatch.Full:
-                        setupPrereq = false;
-                        break;
-                }
+                shouldPopulatePrerequisite &= shouldStillPopulatePrerequisite;
             }
 
-            if (setupPrereq)
+            if (shouldPopulatePrerequisite)
             {
-                seed.GetType().GetProperty(nameof(Repository))?.SetValue(seed, Repository);
-                var buildMethod = seed.GetType().GetMethod(nameof(Build), BindingFlags.Instance | BindingFlags.Public);
-                var navigationProperty = buildMethod?.Invoke(seed, null)!;
-                prerequisite.PropertyInfo.SetValue(entity, navigationProperty);
-
-                if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
-                {
-                    // Add to the repo now in case two prerequisites use the same type
-                    var addMethod = Repository!
-                        .GetType()
-                        .GetMethod(nameof(Repository.Add))!
-                        .MakeGenericMethod(navigationProperty.GetType());
-                    addMethod.Invoke(Repository, [navigationProperty]);
-                }
+                PopulatePrerequisite(entity, seed, prerequisite);
             }
+        }
+    }
+
+    private bool MatchToCustomisation(ISeedPrerequisite prerequisite, ISeedCustomisation<TEntity> customisation, IEntitySeed seed)
+    {
+        var match = customisation.MatchToPrerequisite(prerequisite);
+        var shouldStillPopulatePrerequisite = true;
+        if (match == LambdaExpressionMatch.Full)
+        {
+            shouldStillPopulatePrerequisite = false;
+        }
+        else if (match == LambdaExpressionMatch.Partial && customisation.GetterLambda != null)
+        {
+            AddVoidCustomisation(customisation, seed, prerequisite);
+        }
+
+        return shouldStillPopulatePrerequisite;
+    }
+
+    private void PopulatePrerequisite(TEntity entity, IEntitySeed seed, ISeedPrerequisite prerequisite)
+    {
+        seed.GetType().GetProperty(nameof(Repository))?.SetValue(seed, Repository);
+        var buildMethod = seed.GetType().GetMethod(nameof(Build), BindingFlags.Instance | BindingFlags.Public);
+        var navigationProperty = buildMethod?.Invoke(seed, null)!;
+        prerequisite.PropertyInfo.SetValue(entity, navigationProperty);
+
+        if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
+        {
+            // Add to the repo now in case two prerequisites use the same type
+            var addMethod = Repository!
+                .GetType()
+                .GetMethod(nameof(Repository.Add))!
+                .MakeGenericMethod(navigationProperty.GetType());
+            addMethod.Invoke(Repository, [navigationProperty]);
+        }
+    }
+
+    private void AddVoidCustomisation(ISeedCustomisation<TEntity> customisation, IEntitySeed seed, ISeedPrerequisite prerequisite)
+    {
+        var (_, right) = customisation.GetterLambda!.SplitFirstMemberAccessLayer();
+        var genericType = typeof(SeedVoidConfiguration<>).MakeGenericType(seed.EntityType);
+        var customisationToAdd = (ISeedCustomisation)Activator.CreateInstance(genericType, right)!;
+        seed.AddCustomisation(customisationToAdd);
+        var fullMatches = Customisations
+            .Where(c => c.MatchToPrerequisite(prerequisite) == LambdaExpressionMatch.Full).ToList();
+        foreach (var fullMatch in fullMatches)
+        {
+            fullMatch.Seed?.AddCustomisation(customisationToAdd);
         }
     }
 }

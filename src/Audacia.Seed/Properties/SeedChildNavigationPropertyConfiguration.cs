@@ -103,7 +103,7 @@ internal class
     }
 
     /// <inheritdoc/>
-    public PrerequisiteMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
+    public LambdaExpressionMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
     {
         ArgumentNullException.ThrowIfNull(prerequisite);
 

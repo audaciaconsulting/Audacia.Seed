@@ -90,37 +90,4 @@ internal static class TypeExtensions
 
         return type.Name;
     }
-
-    public static bool IsAssignableToGeneric(this Type type, Type? otherType)
-    {
-        ArgumentNullException.ThrowIfNull(type);
-        if (otherType == null)
-        {
-            return false;
-        }
-
-        // Check if both types are generic
-        if (!type.IsGenericType || !otherType.IsGenericType)
-        {
-            return false;
-        }
-
-        // Check if the generic type definitions are the same
-        if (type.GetGenericTypeDefinition() != otherType.GetGenericTypeDefinition())
-        {
-            return false;
-        }
-
-        // Get generic arguments for both types
-        var typeArgs = type.GetGenericArguments();
-        var otherTypeArgs = otherType.GetGenericArguments();
-
-        var incompatibleArgs = typeArgs
-            .Where((typeArg, argIndex) =>
-                // Where you can't assign to each other
-                !typeArg.IsAssignableFrom(otherTypeArgs[argIndex]) && !otherTypeArgs[argIndex].IsAssignableFrom(typeArg))
-            .ToList();
-        return typeArgs.Length == otherTypeArgs.Length
-               && !incompatibleArgs.Any();
-    }
 }

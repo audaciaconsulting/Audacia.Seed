@@ -31,10 +31,10 @@ internal class SeedPrimaryKeyConfiguration<TEntity, TKey>(TKey[] primaryKeyValue
     }
 
     /// <inheritdoc />
-    public PrerequisiteMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
+    public LambdaExpressionMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
     {
         // we can't have a prerequisite for a primary key
-        return PrerequisiteMatch.None;
+        return LambdaExpressionMatch.None;
     }
 
     /// <inheritdoc />

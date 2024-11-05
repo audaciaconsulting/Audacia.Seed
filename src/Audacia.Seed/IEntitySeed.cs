@@ -46,6 +46,10 @@ public interface IEntitySeed
     /// <param name="seedableRepository">The repository to seed the entity into.</param>
     void PerformSeeding(ISeedableRepository seedableRepository);
 
+    /// <summary>
+    /// Add a <see cref="ISeedCustomisation"/> to this seed.
+    /// </summary>
+    /// <param name="customisation">The customisation to add.</param>
     void AddCustomisation(ISeedCustomisation customisation);
 }
 

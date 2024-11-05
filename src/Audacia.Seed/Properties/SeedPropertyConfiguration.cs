@@ -56,7 +56,7 @@ internal class SeedPropertyConfiguration<TEntity, TProperty>(Expression<Func<TEn
     }
 
     /// <inheritdoc/>
-    public PrerequisiteMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
+    public LambdaExpressionMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
     {
         ArgumentNullException.ThrowIfNull(prerequisite);
 

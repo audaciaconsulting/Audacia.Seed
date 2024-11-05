@@ -6,7 +6,44 @@ using Audacia.Seed.Options;
 namespace Audacia.Seed.Properties;
 
 /// <summary>
-/// Interface for populating a property on an entity to override default behaviour.
+/// Interface for customising an entity to override default behaviour.
+/// </summary>
+public interface ISeedCustomisation
+{
+    /// <summary>
+    /// Gets a value indicating the order in which this customisation should be applied.
+    /// The lower the number, the higher the priority.
+    /// Defaults to 100 so that we can insert customisations at the start or end of the pipeline.
+    /// </summary>
+    int Order => SeedingConstants.DefaultCustomisationOrder;
+
+    /// <summary>
+    /// Based on the provided <paramref name="getter"/>, return a <see cref="EntitySeed{TNavigation}"/>.
+    /// </summary>
+    /// <param name="getter">An expression lambda to the property being customised.</param>
+    /// <returns>A seed configuration if the getter represents the same member as this. Otherwise null.</returns>
+    IEntitySeed? FindSeedForGetter(LambdaExpression getter);
+
+    /// <summary>
+    /// Return a value indicating how well this customisation matches the same property as the provided prerequisite.
+    /// </summary>
+    /// <param name="prerequisite">The prerequisite to compare to.</param>
+    /// <returns>A value indicating how well the prerequisite matches to this customatisation.</returns>
+    LambdaExpressionMatch MatchToPrerequisite(ISeedPrerequisite prerequisite);
+
+    /// <summary>
+    /// Gets a lambda to the property. This is null if no property is being set.
+    /// </summary>
+    LambdaExpression? GetterLambda { get; }
+
+    /// <summary>
+    /// Gets a seed used to set the property. This is null if no property is being set, or cannot be set with a seed (i.e is not a class).
+    /// </summary>
+    IEntitySeed? Seed { get; }
+}
+
+/// <summary>
+/// Interface for customising an entity to override default behaviour.
 /// </summary>
 /// <typeparam name="TEntity">The type of entity that the property belongs to.</typeparam>
 public interface ISeedCustomisation<TEntity> : ISeedCustomisation
@@ -40,32 +77,4 @@ public interface ISeedCustomisation<TEntity> : ISeedCustomisation
     /// </summary>
     /// <param name="other">The other customisation to merge in.</param>
     void Merge(ISeedCustomisation<TEntity> other);
-}
-
-public interface ISeedCustomisation
-{
-    /// <summary>
-    /// Gets a value indicating the order in which this customisation should be applied.
-    /// The lower the number, the higher the priority.
-    /// Defaults to 100 so that we can insert customisations at the start or end of the pipeline.
-    /// </summary>
-    int Order => SeedingConstants.DefaultCustomisationOrder;
-
-    /// <summary>
-    /// Based on the provided <paramref name="getter"/>, return a <see cref="EntitySeed{TNavigation}"/>.
-    /// </summary>
-    /// <param name="getter">An expression lambda to the property being customised.</param>
-    /// <returns>A seed configuration if the getter represents the same member as this. Otherwise null.</returns>
-    IEntitySeed? FindSeedForGetter(LambdaExpression getter);
-
-    /// <summary>
-    /// Return a value indicating how well this customisation matches the same property as the provided prerequisite.
-    /// </summary>
-    /// <param name="prerequisite">The prerequisite to compare to.</param>
-    /// <returns></returns>
-    PrerequisiteMatch MatchToPrerequisite(ISeedPrerequisite prerequisite);
-
-    LambdaExpression? GetterLambda { get; }
-
-    IEntitySeed? Seed { get; }
 }

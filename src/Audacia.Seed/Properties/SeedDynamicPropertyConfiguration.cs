@@ -69,7 +69,7 @@ internal class SeedDynamicPropertyConfiguration<TEntity, TProperty>(
     }
 
     /// <inheritdoc/>
-    public PrerequisiteMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
+    public LambdaExpressionMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
     {
         ArgumentNullException.ThrowIfNull(prerequisite);
 

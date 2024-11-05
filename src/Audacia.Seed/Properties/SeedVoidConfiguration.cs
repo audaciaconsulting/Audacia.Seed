@@ -5,6 +5,12 @@ using Audacia.Seed.Options;
 
 namespace Audacia.Seed.Properties;
 
+/// <summary>
+/// Signpost a property that is being set by another <see cref="ISeedCustomisation{TEntity}"/>.
+/// This doesn't actually set the property, but ensures we don't seed more data in the database than we need to.
+/// </summary>
+/// <param name="getter">A lambda to the property to signpost.</param>
+/// <typeparam name="TEntity">The type of the entity containing the property.</typeparam>
 internal class SeedVoidConfiguration<TEntity>(LambdaExpression getter) : ISeedCustomisation<TEntity>
     where TEntity : class
 {
@@ -26,7 +32,7 @@ internal class SeedVoidConfiguration<TEntity>(LambdaExpression getter) : ISeedCu
     }
 
     /// <inheritdoc/>
-    public PrerequisiteMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
+    public LambdaExpressionMatch MatchToPrerequisite(ISeedPrerequisite prerequisite)
     {
         ArgumentNullException.ThrowIfNull(prerequisite);
 

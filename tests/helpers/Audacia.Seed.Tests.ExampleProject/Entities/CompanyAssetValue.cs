@@ -1,6 +1,6 @@
 namespace Audacia.Seed.Tests.ExampleProject.Entities;
 
-public class CompanyAssetAttribute
+public class CompanyAssetValue
 {
     public int Id { get; set; }
 

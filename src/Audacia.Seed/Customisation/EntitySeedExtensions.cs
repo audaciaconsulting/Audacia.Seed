@@ -361,22 +361,6 @@ public static class EntitySeedExtensions
                 getter,
                 seedConfigurations.ToList()));
         }
-        else if (seedConfigurations[0].EntityType != typeof(TNavigation))
-        {
-            var genericType =
-                typeof(SeedNavigationPropertyConfiguration<,>).MakeGenericType(
-                    typeof(TEntity), seedConfigurations[0].EntityType);
-
-            var memberExpression = (MemberExpression)getter.Body;
-            var param = Expression.Parameter(memberExpression.Expression!.Type, getter.Parameters[0].Name);
-            var memberAccess = Expression.MakeMemberAccess(param, memberExpression.Member);
-            var explicitCast = Expression.Convert(memberAccess, seedConfigurations[0].EntityType);
-            var newGetter = Expression.Lambda(explicitCast, param);
-
-            var customisation = Activator.CreateInstance(genericType, newGetter, seedConfigurations[0]);
-            entitySeed.GetType().GetMethod(nameof(EntitySeed<TEntity>.AddCustomisation))!
-                .Invoke(entitySeed, [customisation]);
-        }
         else
         {
             entitySeed.AddCustomisation(new SeedNavigationPropertyConfiguration<TEntity, TNavigation>(

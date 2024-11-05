@@ -12,5 +12,5 @@ public class CompanyAsset
 
     public Asset Asset { get; set; } = null!;
 
-    public ICollection<CompanyAssetAttribute>? Attributes { get; set; } = [];
+    public ICollection<CompanyAssetValue>? Values { get; set; } = [];
 }
