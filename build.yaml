@@ -21,7 +21,7 @@ stages:
   - template: src/build/dotnet/jobs/nuget-package.job.yaml@templates
     parameters:
       projects: 'src/**/*.csproj'
-      excludePaths: 'tests/**/*.csproj'
+      excludePaths: '*.Test*.csproj'
 
 - stage: Stage_Release
   displayName: Release
