@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
+using Audacia.Seed.Customisation;
 using Audacia.Seed.Exceptions;
 using Audacia.Seed.Extensions;
 using Audacia.Seed.Helpers;
@@ -42,12 +43,57 @@ public class SeedPrerequisite<TEntity, TNavigation> : ISeedPrerequisite
     /// </summary>
     /// <param name="getter">A getter to the navigation property.</param>
     /// <param name="seed">A seed class for the navigation property.</param>
-    public SeedPrerequisite(Expression<Func<TEntity, TNavigation>> getter, EntitySeed<TNavigation>? seed)
+    public SeedPrerequisite(
+        Expression<Func<TEntity, TNavigation>> getter,
+        EntitySeed<TNavigation>? seed)
     {
         Getter = getter;
         Seed = seed
                ?? EntryPointAssembly.Load().FindSeed(typeof(TNavigation))
                ?? throw new DataSeedingException(
                    $"Unable to find an appropriate seed for the entity {typeof(TEntity).Name} and getter {Getter}.");
+    }
+}
+
+/// <summary>
+/// Something that is required to seed an entity.
+/// </summary>
+/// <typeparam name="TEntity">The type that this prerequisite is for.</typeparam>
+/// <typeparam name="TNavigation">The type of the property that is a prerequisite e.g navigation property.</typeparam>
+/// <typeparam name="TChildNavigation">The single type of the property that is a prerequisite e.g navigation property.</typeparam>
+public class SeedPrerequisite<TEntity, TNavigation, TChildNavigation> : ISeedPrerequisite
+    where TEntity : class
+    where TChildNavigation : class
+    where TNavigation : IEnumerable<TChildNavigation>
+{
+    /// <summary>
+    /// Gets a getter for the navigation property.
+    /// </summary>
+    public Expression<Func<TEntity, IEnumerable<TChildNavigation>>> Getter { get; }
+
+    /// <inheritdoc />
+    public IEntitySeed Seed { get; }
+
+    /// <inheritdoc />
+    public Type EntityType => typeof(TNavigation);
+
+    /// <inheritdoc />
+    public PropertyInfo PropertyInfo => Getter.GetPropertyInfo();
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SeedPrerequisite{TEntity, TNavigation, TChildNavigation}"/> class.
+    /// </summary>
+    /// <param name="getter">A getter to the navigation property.</param>
+    /// <param name="parentSeed">A seed class for the parent of the navigation property.</param>
+    /// <param name="seed">A seed class for the navigation property.</param>
+    /// <param name="numberOfChildren">The number of children seeds to place within the navigation property.</param>
+    public SeedPrerequisite(
+        Expression<Func<TEntity, IEnumerable<TChildNavigation>>> getter,
+        EntitySeed<TEntity> parentSeed,
+        EntitySeed<TChildNavigation> seed,
+        int numberOfChildren)
+    {
+        Getter = getter;
+        Seed = parentSeed.WithChildren(getter, numberOfChildren, seed);
     }
 }
