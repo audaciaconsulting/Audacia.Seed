@@ -95,7 +95,7 @@ public sealed class EntitySeedTests : IDisposable
     public void EntityHasChildren_CanBeSeededWithSingleChildSeedForCollectionNavigation()
     {
         // Arrange
-        var olympicPoolSeed = new OlympicPoolSeed();
+        var olympicPoolSeed = new PoolSeed();
 
         // Act
         var seededEntity = _context.Seed(olympicPoolSeed);

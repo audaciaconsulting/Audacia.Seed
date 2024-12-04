@@ -374,10 +374,17 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
 
     private void PopulatePrerequisite(TEntity entity, IEntitySeed seed, ISeedPrerequisite prerequisite)
     {
-        seed.GetType().GetProperty(nameof(Repository))?.SetValue(seed, Repository);
-        var buildMethod = seed.GetType().GetMethod(nameof(Build), BindingFlags.Instance | BindingFlags.Public);
-        var navigationProperty = buildMethod?.Invoke(seed, null)!;
-        prerequisite.PropertyInfo.SetValue(entity, navigationProperty);
+        if (prerequisite.PropertyInfo.PropertyType.IsEnumerable())
+        {
+            // TODO Build Many and set the property with the list of entities
+        }
+        else
+        {
+            seed.GetType().GetProperty(nameof(Repository))?.SetValue(seed, Repository);
+            var buildMethod = seed.GetType().GetMethod(nameof(Build), BindingFlags.Instance | BindingFlags.Public);
+            var navigationProperty = buildMethod?.Invoke(seed, null)!;
+            prerequisite.PropertyInfo.SetValue(entity, navigationProperty);
+        }
 
         if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
         {

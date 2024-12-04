@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
 using Audacia.Seed.Constants;
@@ -89,5 +90,12 @@ internal static class TypeExtensions
         }
 
         return type.Name;
+    }
+
+    public static bool IsEnumerable(this Type type)
+    {
+        // Check if the property's type implements IEnumerable
+        return typeof(IEnumerable).IsAssignableFrom(type)
+               && type != typeof(string);
     }
 }

@@ -60,16 +60,14 @@ public class SeedPrerequisite<TEntity, TNavigation> : ISeedPrerequisite
 /// </summary>
 /// <typeparam name="TEntity">The type that this prerequisite is for.</typeparam>
 /// <typeparam name="TNavigation">The type of the property that is a prerequisite e.g navigation property.</typeparam>
-/// <typeparam name="TChildNavigation">The single type of the property that is a prerequisite e.g navigation property.</typeparam>
-public class SeedPrerequisite<TEntity, TNavigation, TChildNavigation> : ISeedPrerequisite
+public class SeedChildrenPrerequisite<TEntity, TNavigation> : ISeedPrerequisite
     where TEntity : class
-    where TChildNavigation : class
-    where TNavigation : IEnumerable<TChildNavigation>
+    where TNavigation : class
 {
     /// <summary>
     /// Gets a getter for the navigation property.
     /// </summary>
-    public Expression<Func<TEntity, IEnumerable<TChildNavigation>>> Getter { get; }
+    public Expression<Func<TEntity, IEnumerable<TNavigation>>> Getter { get; }
 
     /// <inheritdoc />
     public IEntitySeed Seed { get; }
@@ -87,13 +85,16 @@ public class SeedPrerequisite<TEntity, TNavigation, TChildNavigation> : ISeedPre
     /// <param name="parentSeed">A seed class for the parent of the navigation property.</param>
     /// <param name="seed">A seed class for the navigation property.</param>
     /// <param name="numberOfChildren">The number of children seeds to place within the navigation property.</param>
-    public SeedPrerequisite(
-        Expression<Func<TEntity, IEnumerable<TChildNavigation>>> getter,
-        EntitySeed<TEntity> parentSeed,
-        EntitySeed<TChildNavigation> seed,
+    public SeedChildrenPrerequisite(
+        Expression<Func<TEntity, IEnumerable<TNavigation>>> getter,
+        EntitySeed<TNavigation>? seed,
         int numberOfChildren)
     {
         Getter = getter;
-        Seed = parentSeed.WithChildren(getter, numberOfChildren, seed);
+        Seed = seed
+               ?? EntryPointAssembly.Load().FindSeed(typeof(TNavigation))
+               ?? throw new DataSeedingException(
+                   $"Unable to find an appropriate seed for the entity {typeof(TEntity).Name} and getter {Getter}.");
+        Seed.Options.AmountToCreate = numberOfChildren;
     }
 }
