@@ -92,16 +92,29 @@ public sealed class EntitySeedTests : IDisposable
     }
 
     [Fact]
-    public void EntityHasChildren_CanBeSeededWithSingleChildSeedForCollectionNavigation()
+    public void EntityHasChildren_CanBeSeededWithOverridenNumberOfChildSeedForCollectionNavigation()
     {
         // Arrange
-        var poolSeed = new PoolSeed();
+        var claimSeed = new ClaimSeed(1);
 
         // Act
-        var seededEntity = _context.Seed(poolSeed);
+        var seededEntity = _context.Seed(claimSeed);
 
         // Assert
-        seededEntity.Facilities.Should().HaveCount(1, "the olympic seed has a prerequisite of seeding 2 facilities as it's default");
+        seededEntity.Contacts.Should().HaveCount(1, "the claim seed has a prerequisite overriden with only seeding 1 contact");
+    }
+
+    [Fact]
+    public void EntityHasChildren_CanBeSeededWithDefaultNumberOfChildSeedForCollectionNavigation()
+    {
+        // Arrange
+        var claimSeed = new ClaimSeed();
+
+        // Act
+        var seededEntity = _context.Seed(claimSeed);
+
+        // Assert
+        seededEntity.Contacts.Should().HaveCount(2, "the claim seed has a prerequisite of seeding 2 contacts as it's default");
     }
 
     [Fact]

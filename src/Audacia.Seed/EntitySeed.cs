@@ -139,7 +139,9 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     /// <param name="previous">The previously created entity at the index before this. Use if seeding more than one, and you want to re-use properties on the previous entity.</param>
     /// <returns>An entity in its simplest form without prerequisites populated.</returns>
     /// <exception cref="DataSeedingException">If we cannot find an appropriate constructor.</exception>
-    protected virtual TEntity GetDefault(int index, TEntity? previous)
+    protected virtual TEntity GetDefault(
+        int index,
+        TEntity? previous)
     {
         var type = typeof(TEntity);
         var simplestConstructor = type.GetConstructors().MinBy(c => c.GetParameters().Length)
@@ -199,8 +201,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         {
             var sb = new StringBuilder($"You must set up at least one {typeof(TNavigation)} ");
 
-            sb.Append(
-                "in the database. ");
+            sb.Append("in the database. ");
             sb.Append("Look further down this stack trace to see which SeedConfiguration class is being run, ");
             sb.Append("and ensure that it already exists in the database.");
 
@@ -296,7 +297,9 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     /// <param name="previous">The entity seeded previously. This will not be null if creating many.</param>
     /// <returns>A new or existing entity depending on whether we found an existing appropriate one.</returns>
     /// <exception cref="DataSeedingException">If we don't have a <see cref="Repository"/> set.</exception>
-    internal TEntity GetOrCreateEntity(int index, TEntity? previous)
+    internal TEntity GetOrCreateEntity(
+        int index,
+        TEntity? previous)
     {
         if (Repository == null)
         {
@@ -328,7 +331,10 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         return entity;
     }
 
-    private void PopulateCustomisations(int index, TEntity? previous, TEntity entity)
+    private void PopulateCustomisations(
+        int index,
+        TEntity? previous,
+        TEntity entity)
     {
         var uniqueCustomisations = Customisations.OrderBy(c => c.Order).Distinct().ToList();
         foreach (var customisation in uniqueCustomisations)
@@ -360,7 +366,10 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         }
     }
 
-    private bool MatchToCustomisation(ISeedPrerequisite prerequisite, ISeedCustomisation<TEntity> customisation, IEntitySeed seed)
+    private bool MatchToCustomisation(
+        ISeedPrerequisite prerequisite,
+        ISeedCustomisation<TEntity> customisation,
+        IEntitySeed seed)
     {
         var match = customisation.MatchToPrerequisite(prerequisite);
         var shouldStillPopulatePrerequisite = true;
@@ -376,33 +385,20 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         return shouldStillPopulatePrerequisite;
     }
 
-    private void PopulatePrerequisite(TEntity entity, IEntitySeed seed, ISeedPrerequisite prerequisite)
+    private void PopulatePrerequisite(
+        TEntity entity,
+        IEntitySeed seed,
+        ISeedPrerequisite prerequisite)
     {
-        object navigationProperty;
         seed.GetType().GetProperty(nameof(Repository))?.SetValue(seed, Repository);
         if (prerequisite.PropertyInfo.PropertyType.IsEnumerable())
         {
-            var buildMethod = seed.GetType().GetMethod(nameof(BuildMany), BindingFlags.Instance | BindingFlags.Public);
-            navigationProperty = buildMethod!.Invoke(seed, [prerequisite.Seed.Options.AmountToCreate])!;
-            prerequisite.PropertyInfo.SetValue(entity, navigationProperty);
-
-            if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
-            {
-                // Add to the repo now in case two prerequisites use the same type
-                var addMethod = Repository!
-                    .GetType()
-                    .GetMethod(nameof(Repository.Add))!
-                    .MakeGenericMethod(navigationProperty.GetType().GetGenericArguments().First());
-                foreach (var foo in (IEnumerable)navigationProperty)
-                {
-                    addMethod.Invoke(Repository, [foo]);
-                }
-            }
+            PopulateCollectionPrerequisite(entity, seed, prerequisite);
         }
         else
         {
             var buildMethod = seed.GetType().GetMethod(nameof(Build), BindingFlags.Instance | BindingFlags.Public);
-            navigationProperty = buildMethod!.Invoke(seed, null)!;
+            object navigationProperty = buildMethod!.Invoke(seed, null)!;
             prerequisite.PropertyInfo.SetValue(entity, navigationProperty);
 
             if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
@@ -417,7 +413,33 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         }
     }
 
-    private void AddVoidCustomisation(ISeedCustomisation<TEntity> customisation, IEntitySeed seed, ISeedPrerequisite prerequisite)
+    private void PopulateCollectionPrerequisite(
+        TEntity entity,
+        IEntitySeed seed,
+        ISeedPrerequisite prerequisite)
+    {
+        var buildMethod = seed.GetType().GetMethod(nameof(BuildMany), BindingFlags.Instance | BindingFlags.Public);
+        object navigationProperty = buildMethod!.Invoke(seed, [prerequisite.Seed.Options.AmountToCreate])!;
+        prerequisite.PropertyInfo.SetValue(entity, navigationProperty);
+
+        if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
+        {
+            // Add to the repo now in case two prerequisites use the same type
+            var addMethod = Repository!
+                .GetType()
+                .GetMethod(nameof(Repository.Add))!
+                .MakeGenericMethod(navigationProperty.GetType().GetGenericArguments().First());
+            foreach (var elementOfNavigationProperty in (IEnumerable)navigationProperty)
+            {
+                addMethod.Invoke(Repository, [elementOfNavigationProperty]);
+            }
+        }
+    }
+
+    private void AddVoidCustomisation(
+        ISeedCustomisation<TEntity> customisation,
+        IEntitySeed seed,
+        ISeedPrerequisite prerequisite)
     {
         var (_, right) = customisation.GetterLambda!.SplitFirstMemberAccessLayer();
         var genericType = typeof(SeedVoidConfiguration<>).MakeGenericType(seed.EntityType);
