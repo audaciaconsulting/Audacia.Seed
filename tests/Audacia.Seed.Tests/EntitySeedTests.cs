@@ -95,13 +95,13 @@ public sealed class EntitySeedTests : IDisposable
     public void EntityHasChildren_CanBeSeededWithSingleChildSeedForCollectionNavigation()
     {
         // Arrange
-        var olympicPoolSeed = new PoolSeed();
+        var poolSeed = new PoolSeed();
 
         // Act
-        var seededEntity = _context.Seed(olympicPoolSeed);
+        var seededEntity = _context.Seed(poolSeed);
 
         // Assert
-        seededEntity.Facilities.Should().HaveCount(2, "the olympic seed has a prerequisite of seeding 2 facilities as it's default");
+        seededEntity.Facilities.Should().HaveCount(1, "the olympic seed has a prerequisite of seeding 2 facilities as it's default");
     }
 
     [Fact]

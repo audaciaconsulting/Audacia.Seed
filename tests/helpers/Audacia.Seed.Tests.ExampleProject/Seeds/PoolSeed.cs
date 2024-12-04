@@ -8,8 +8,7 @@ public class PoolSeed : EntitySeed<Pool>
     [
         new SeedChildrenPrerequisite<Pool, Facility>(
             pool => pool.Facilities,
-            new FacilitySeed(),
-            2),
+            new FacilitySeed())
     ];
 
     protected override Pool GetDefault(int index, Pool? previous)

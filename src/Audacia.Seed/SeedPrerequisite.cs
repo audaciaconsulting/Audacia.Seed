@@ -97,4 +97,10 @@ public class SeedChildrenPrerequisite<TEntity, TNavigation> : ISeedPrerequisite
                    $"Unable to find an appropriate seed for the entity {typeof(TEntity).Name} and getter {Getter}.");
         Seed.Options.AmountToCreate = numberOfChildren;
     }
+
+    public SeedChildrenPrerequisite(
+        Expression<Func<TEntity, IEnumerable<TNavigation>>> getter,
+        EntitySeed<TNavigation>? seed) : this(getter, seed, 1)
+    {
+    }
 }

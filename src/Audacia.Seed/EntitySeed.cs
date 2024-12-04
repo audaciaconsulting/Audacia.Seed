@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -214,7 +215,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     /// </summary>
     /// <param name="amountToCreate">The amount of entities to create.</param>
     /// <returns>An enumerable with count <paramref name="amountToCreate"/> of valid entities to seed.</returns>
-    internal IEnumerable<TEntity> BuildMany(int amountToCreate)
+    public ICollection<TEntity> BuildMany(int amountToCreate)
     {
         Options.AmountToCreate = amountToCreate;
         if (Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
@@ -224,14 +225,17 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
                 : SeedingInsertionBehaviour.TryFindNew;
         }
 
+        var entities = new List<TEntity>();
         TEntity? previous = null;
         for (var index = 0; index < Options.AmountToCreate; index++)
         {
             var entity = GetOrCreateEntity(index, previous);
 
             previous = entity;
-            yield return entity;
+            entities.Add(entity);
         }
+
+        return entities;
     }
 
     /// <summary>
@@ -374,26 +378,42 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
 
     private void PopulatePrerequisite(TEntity entity, IEntitySeed seed, ISeedPrerequisite prerequisite)
     {
+        object navigationProperty;
+        seed.GetType().GetProperty(nameof(Repository))?.SetValue(seed, Repository);
         if (prerequisite.PropertyInfo.PropertyType.IsEnumerable())
         {
-            // TODO Build Many and set the property with the list of entities
+            var buildMethod = seed.GetType().GetMethod(nameof(BuildMany), BindingFlags.Instance | BindingFlags.Public);
+            navigationProperty = buildMethod!.Invoke(seed, [prerequisite.Seed.Options.AmountToCreate])!;
+            prerequisite.PropertyInfo.SetValue(entity, navigationProperty);
+
+            if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
+            {
+                // Add to the repo now in case two prerequisites use the same type
+                var addMethod = Repository!
+                    .GetType()
+                    .GetMethod(nameof(Repository.Add))!
+                    .MakeGenericMethod(navigationProperty.GetType().GetGenericArguments().First());
+                foreach (var foo in (IEnumerable)navigationProperty)
+                {
+                    addMethod.Invoke(Repository, [foo]);
+                }
+            }
         }
         else
         {
-            seed.GetType().GetProperty(nameof(Repository))?.SetValue(seed, Repository);
             var buildMethod = seed.GetType().GetMethod(nameof(Build), BindingFlags.Instance | BindingFlags.Public);
-            var navigationProperty = buildMethod?.Invoke(seed, null)!;
+            navigationProperty = buildMethod!.Invoke(seed, null)!;
             prerequisite.PropertyInfo.SetValue(entity, navigationProperty);
-        }
 
-        if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
-        {
-            // Add to the repo now in case two prerequisites use the same type
-            var addMethod = Repository!
-                .GetType()
-                .GetMethod(nameof(Repository.Add))!
-                .MakeGenericMethod(navigationProperty.GetType());
-            addMethod.Invoke(Repository, [navigationProperty]);
+            if (seed.Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
+            {
+                // Add to the repo now in case two prerequisites use the same type
+                var addMethod = Repository!
+                    .GetType()
+                    .GetMethod(nameof(Repository.Add))!
+                    .MakeGenericMethod(navigationProperty.GetType());
+                addMethod.Invoke(Repository, [navigationProperty]);
+            }
         }
     }
 

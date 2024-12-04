@@ -121,10 +121,19 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <inheritdoc />
     public void Add<TEntity>(TEntity entity) where TEntity : class
     {
-        // If not already in the context
-        if (_context.Entry(entity).State == EntityState.Detached)
+        try
         {
-            _context.Set<TEntity>().Add(entity);
+            // If not already in the context
+            if (_context.Entry(entity).State == EntityState.Detached)
+            {
+                _context.Set<TEntity>().Add(entity);
+            }
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
         }
     }
 
