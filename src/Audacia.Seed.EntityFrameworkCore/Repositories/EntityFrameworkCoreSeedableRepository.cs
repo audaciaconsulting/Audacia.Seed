@@ -51,7 +51,9 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     }
 
     /// <inheritdoc />
-    public void SetPrimaryKey<TEntity, TKey>(TEntity entity, TKey primaryKeyValue)
+    public void SetPrimaryKey<TEntity, TKey>(
+        TEntity entity,
+        TKey primaryKeyValue)
         where TEntity : class
     {
         ArgumentNullException.ThrowIfNull(primaryKeyValue);
@@ -113,7 +115,12 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
                 .Select(n => n.PropertyInfo!).ToList()
         };
 
-        TypeCaches.ModelInformation.AddOrUpdate(typeof(TEntity), modelInformation, (_, _) => modelInformation);
+        TypeCaches.ModelInformation.AddOrUpdate(
+            typeof(TEntity),
+            modelInformation,
+            (
+                _,
+                _) => modelInformation);
 
         return modelInformation;
     }
@@ -134,7 +141,9 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <param name="seed">The first seed to add.</param>
     /// <typeparam name="T">The type of the seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
-    [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
+    [SuppressMessage(
+        "Maintainability",
+        "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
     internal T PerformSeeding<T>(EntitySeed<T> seed)
         where T : class
@@ -161,15 +170,26 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <typeparam name="T1">The type of the first seed.</typeparam>
     /// <typeparam name="T2">The type of the second seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
-    [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
+    [SuppressMessage(
+        "Maintainability",
+        "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
-        Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
-    [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
+    [SuppressMessage(
+        "Naming",
+        "ACL1014: Do not include numbers in identifier name",
+        Justification =
+            "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
+    [SuppressMessage(
+        "Maintainability",
+        "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
-    [SuppressMessage("Maintainability", "ACL1003: Don't declare signatures with more than a predefined number of parameters.",
+    [SuppressMessage(
+        "Maintainability",
+        "ACL1003: Don't declare signatures with more than a predefined number of parameters.",
         Justification = "The parameters are essentially array params, but we want to return the actual type.")]
-    internal (T1 T1, T2 T2) PerformSeeding<T1, T2>(EntitySeed<T1> seed1, EntitySeed<T2> seed2)
+    internal (T1 T1, T2 T2) PerformSeeding<T1, T2>(
+        EntitySeed<T1> seed1,
+        EntitySeed<T2> seed2)
         where T1 : class
         where T2 : class
     {
@@ -199,15 +219,27 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <typeparam name="T2">The type of the second seed.</typeparam>
     /// <typeparam name="T3">The type of the third seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
-    [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
+    [SuppressMessage(
+        "Maintainability",
+        "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
-        Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
-    [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
+    [SuppressMessage(
+        "Naming",
+        "ACL1014: Do not include numbers in identifier name",
+        Justification =
+            "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
+    [SuppressMessage(
+        "Maintainability",
+        "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
-    [SuppressMessage("Maintainability", "ACL1003: Don't declare signatures with more than a predefined number of parameters.",
+    [SuppressMessage(
+        "Maintainability",
+        "ACL1003: Don't declare signatures with more than a predefined number of parameters.",
         Justification = "The parameters are essentially array params, but we want to return the actual type.")]
-    internal (T1 T1, T2 T2, T3 T3) PerformSeeding<T1, T2, T3>(EntitySeed<T1> seed1, EntitySeed<T2> seed2, EntitySeed<T3> seed3)
+    internal (T1 T1, T2 T2, T3 T3) PerformSeeding<T1, T2, T3>(
+        EntitySeed<T1> seed1,
+        EntitySeed<T2> seed2,
+        EntitySeed<T3> seed3)
         where T1 : class
         where T2 : class
         where T3 : class
@@ -242,15 +274,27 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <typeparam name="T3">The type of the third seed.</typeparam>
     /// <typeparam name="T4">The type of the fourth seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
-    [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
+    [SuppressMessage(
+        "Maintainability",
+        "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
-        Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
-    [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
+    [SuppressMessage(
+        "Naming",
+        "ACL1014: Do not include numbers in identifier name",
+        Justification =
+            "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
+    [SuppressMessage(
+        "Maintainability",
+        "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
-    [SuppressMessage("Maintainability", "ACL1003: Don't declare signatures with more than a predefined number of parameters.",
+    [SuppressMessage(
+        "Maintainability",
+        "ACL1003: Don't declare signatures with more than a predefined number of parameters.",
         Justification = "The parameters are essentially array params, but we want to return the actual type.")]
-    internal (T1 T1, T2 T2, T3 T3, T4 T4) PerformSeeding<T1, T2, T3, T4>(EntitySeed<T1> seed1, EntitySeed<T2> seed2, EntitySeed<T3> seed3,
+    internal (T1 T1, T2 T2, T3 T3, T4 T4) PerformSeeding<T1, T2, T3, T4>(
+        EntitySeed<T1> seed1,
+        EntitySeed<T2> seed2,
+        EntitySeed<T3> seed3,
         EntitySeed<T4> seed4)
         where T1 : class
         where T2 : class
@@ -291,16 +335,29 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <typeparam name="T4">The type of the fourth seed.</typeparam>
     /// <typeparam name="T5">The type of the fifth seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
-    [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
+    [SuppressMessage(
+        "Maintainability",
+        "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
-        Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
-    [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
+    [SuppressMessage(
+        "Naming",
+        "ACL1014: Do not include numbers in identifier name",
+        Justification =
+            "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
+    [SuppressMessage(
+        "Maintainability",
+        "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
-    [SuppressMessage("Maintainability", "ACL1003: Don't declare signatures with more than a predefined number of parameters.",
+    [SuppressMessage(
+        "Maintainability",
+        "ACL1003: Don't declare signatures with more than a predefined number of parameters.",
         Justification = "The parameters are essentially array params, but we want to return the actual type.")]
-    internal (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5) PerformSeeding<T1, T2, T3, T4, T5>(EntitySeed<T1> seed1, EntitySeed<T2> seed2, EntitySeed<T3> seed3,
-        EntitySeed<T4> seed4, EntitySeed<T5> seed5)
+    internal (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5) PerformSeeding<T1, T2, T3, T4, T5>(
+        EntitySeed<T1> seed1,
+        EntitySeed<T2> seed2,
+        EntitySeed<T3> seed3,
+        EntitySeed<T4> seed4,
+        EntitySeed<T5> seed5)
         where T1 : class
         where T2 : class
         where T3 : class
@@ -345,16 +402,30 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <typeparam name="T5">The type of the fifth seed.</typeparam>
     /// <typeparam name="T6">The type of the sixth seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
-    [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
+    [SuppressMessage(
+        "Maintainability",
+        "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
-        Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
-    [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
+    [SuppressMessage(
+        "Naming",
+        "ACL1014: Do not include numbers in identifier name",
+        Justification =
+            "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
+    [SuppressMessage(
+        "Maintainability",
+        "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
-    [SuppressMessage("Maintainability", "ACL1003: Don't declare signatures with more than a predefined number of parameters.",
+    [SuppressMessage(
+        "Maintainability",
+        "ACL1003: Don't declare signatures with more than a predefined number of parameters.",
         Justification = "The parameters are essentially array params, but we want to return the actual type.")]
-    internal (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5, T6 T6) PerformSeeding<T1, T2, T3, T4, T5, T6>(EntitySeed<T1> seed1, EntitySeed<T2> seed2, EntitySeed<T3> seed3,
-        EntitySeed<T4> seed4, EntitySeed<T5> seed5, EntitySeed<T6> seed6)
+    internal (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5, T6 T6) PerformSeeding<T1, T2, T3, T4, T5, T6>(
+        EntitySeed<T1> seed1,
+        EntitySeed<T2> seed2,
+        EntitySeed<T3> seed3,
+        EntitySeed<T4> seed4,
+        EntitySeed<T5> seed5,
+        EntitySeed<T6> seed6)
         where T1 : class
         where T2 : class
         where T3 : class
@@ -403,16 +474,31 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <typeparam name="T6">The type of the sixth seed.</typeparam>
     /// <typeparam name="T7">The type of the seventh seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
-    [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
+    [SuppressMessage(
+        "Maintainability",
+        "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
-        Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
-    [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
+    [SuppressMessage(
+        "Naming",
+        "ACL1014: Do not include numbers in identifier name",
+        Justification =
+            "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
+    [SuppressMessage(
+        "Maintainability",
+        "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
-    [SuppressMessage("Maintainability", "ACL1003: Don't declare signatures with more than a predefined number of parameters.",
+    [SuppressMessage(
+        "Maintainability",
+        "ACL1003: Don't declare signatures with more than a predefined number of parameters.",
         Justification = "The parameters are essentially array params, but we want to return the actual type.")]
-    internal (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5, T6 T6, T7 T7) PerformSeeding<T1, T2, T3, T4, T5, T6, T7>(EntitySeed<T1> seed1, EntitySeed<T2> seed2, EntitySeed<T3> seed3,
-        EntitySeed<T4> seed4, EntitySeed<T5> seed5, EntitySeed<T6> seed6, EntitySeed<T7> seed7)
+    internal (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5, T6 T6, T7 T7) PerformSeeding<T1, T2, T3, T4, T5, T6, T7>(
+        EntitySeed<T1> seed1,
+        EntitySeed<T2> seed2,
+        EntitySeed<T3> seed3,
+        EntitySeed<T4> seed4,
+        EntitySeed<T5> seed5,
+        EntitySeed<T6> seed6,
+        EntitySeed<T7> seed7)
         where T1 : class
         where T2 : class
         where T3 : class
@@ -466,16 +552,33 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <typeparam name="T7">The type of the seventh seed.</typeparam>
     /// <typeparam name="T8">The type of the eighth seed.</typeparam>
     /// <returns>The saved entities in the order they were provided.</returns>
-    [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
+    [SuppressMessage(
+        "Maintainability",
+        "ACL1002: Methods should not exceed a predefined number of statements",
         Justification = "The method is long due to repeated code rather than complexity.")]
-    [SuppressMessage("Naming", "ACL1014: Do not include numbers in identifier name",
-        Justification = "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
-    [SuppressMessage("Maintainability", "AV1551: Overloaded method should call another overload.",
+    [SuppressMessage(
+        "Naming",
+        "ACL1014: Do not include numbers in identifier name",
+        Justification =
+            "The method has a clear pattern and naming variables like this doesn't affect readability / understanding.")]
+    [SuppressMessage(
+        "Maintainability",
+        "AV1551: Overloaded method should call another overload.",
         Justification = "We want to save once so each method is doing everything itself.")]
-    [SuppressMessage("Maintainability", "ACL1003: Don't declare signatures with more than a predefined number of parameters.",
+    [SuppressMessage(
+        "Maintainability",
+        "ACL1003: Don't declare signatures with more than a predefined number of parameters.",
         Justification = "The parameters are essentially array params, but we want to return the actual type.")]
-    internal virtual (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5, T6 T6, T7 T7, T8 T8) PerformSeeding<T1, T2, T3, T4, T5, T6, T7, T8>(EntitySeed<T1> seed1, EntitySeed<T2> seed2, EntitySeed<T3> seed3,
-        EntitySeed<T4> seed4, EntitySeed<T5> seed5, EntitySeed<T6> seed6, EntitySeed<T7> seed7, EntitySeed<T8> seed8)
+    internal virtual (T1 T1, T2 T2, T3 T3, T4 T4, T5 T5, T6 T6, T7 T7, T8 T8)
+        PerformSeeding<T1, T2, T3, T4, T5, T6, T7, T8>(
+            EntitySeed<T1> seed1,
+            EntitySeed<T2> seed2,
+            EntitySeed<T3> seed3,
+            EntitySeed<T4> seed4,
+            EntitySeed<T5> seed5,
+            EntitySeed<T6> seed6,
+            EntitySeed<T7> seed7,
+            EntitySeed<T8> seed8)
         where T1 : class
         where T2 : class
         where T3 : class
@@ -526,7 +629,8 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
 
         var entity = seed.Build();
 
-        if (seed.Customisations.Any(c => c.GetType().GetGenericTypeDefinition() == typeof(SeedPrimaryKeyConfiguration<,>)))
+        if (seed.Customisations.Any(
+                c => c.GetType().GetGenericTypeDefinition() == typeof(SeedPrimaryKeyConfiguration<,>)))
         {
             EnableIdentityInsert<T>();
             _afterSaveJobs.Add(DisableIdentityInsert<T>);
@@ -544,13 +648,16 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     /// <param name="seed">The seed to add to the database.</param>
     /// <typeparam name="T">The type of entity to seed.</typeparam>
     /// <returns>The seeded entities, before saving.</returns>
-    internal IEnumerable<T> SeedMany<T>(int amountToCreate, EntitySeed<T> seed) where T : class
+    internal IEnumerable<T> SeedMany<T>(
+        int amountToCreate,
+        EntitySeed<T> seed) where T : class
     {
         seed.PrepareToSeed(this);
 
         var entities = seed.BuildMany(amountToCreate).ToList();
 
-        if (seed.Customisations.Any(c => c.GetType().GetGenericTypeDefinition() == typeof(SeedPrimaryKeyConfiguration<,>)))
+        if (seed.Customisations.Any(
+                c => c.GetType().GetGenericTypeDefinition() == typeof(SeedPrimaryKeyConfiguration<,>)))
         {
             EnableIdentityInsert<T>();
             _afterSaveJobs.Add(DisableIdentityInsert<T>);
@@ -595,20 +702,22 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
         var baseType = entityType.GetAllBaseTypes().FirstOrDefault(bt => bt.BaseType == null) ?? entityType;
 
         var requiredNavigations = entityType.GetNavigations()
-            .Where(n =>
-            {
-                var typeTheNavigationBelongsTo = n.ForeignKey.DeclaringEntityType;
-                var navigationBaseType = typeTheNavigationBelongsTo.GetAllBaseTypes()
-                    .FirstOrDefault(bt => bt.BaseType == null) ?? typeTheNavigationBelongsTo;
-                return n.ForeignKey.IsRequired && navigationBaseType == baseType;
-            })
+            .Where(
+                n =>
+                {
+                    var typeTheNavigationBelongsTo = n.ForeignKey.DeclaringEntityType;
+                    var navigationBaseType = typeTheNavigationBelongsTo.GetAllBaseTypes()
+                        .FirstOrDefault(bt => bt.BaseType == null) ?? typeTheNavigationBelongsTo;
+                    return n.ForeignKey.IsRequired && navigationBaseType == baseType;
+                })
             .Where(n => n.PropertyInfo != null)
-            .Select(n =>
-            {
-                var matchedForeignKey =
-                    foreignKeys.FirstOrDefault(fk => n.ForeignKey.Properties[0] == fk)?.PropertyInfo;
-                return new NavigationPropertyConfiguration(n.PropertyInfo!, matchedForeignKey);
-            })
+            .Select(
+                n =>
+                {
+                    var matchedForeignKey =
+                        foreignKeys.FirstOrDefault(fk => n.ForeignKey.Properties[0] == fk)?.PropertyInfo;
+                    return new NavigationPropertyConfiguration(n.PropertyInfo!, matchedForeignKey);
+                })
             .ToList();
         return requiredNavigations;
     }

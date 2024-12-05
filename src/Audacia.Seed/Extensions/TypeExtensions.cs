@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
 using Audacia.Seed.Constants;
@@ -89,5 +90,17 @@ internal static class TypeExtensions
         }
 
         return type.Name;
+    }
+
+    /// <summary>
+    /// Checks the provided <paramref name="type"/> if it is an IEnumerable or inherit from.
+    /// </summary>
+    /// <param name="type">The type to check an IEnumerable.</param>
+    /// <returns>Whether the provided <paramref name="type"/> is an enumerable or not.</returns>
+    public static bool IsEnumerable(this Type type)
+    {
+        // Check if the property's type implements IEnumerable
+        return typeof(IEnumerable).IsAssignableFrom(type)
+               && type != typeof(string);
     }
 }

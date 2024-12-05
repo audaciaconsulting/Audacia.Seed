@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0 - 2024-12-05
+### Added
+- Support for seeding a collection as a pre-requisite to an entity seed.
+
 ## 2.0.2 - 2024-11-05
 ### Fixed
 - Bug Fix: don't reload entities after saving them to protect against false-positives in unit tests (#182829).

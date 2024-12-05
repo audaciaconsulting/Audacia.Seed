@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
+using Audacia.Seed.Customisation;
 using Audacia.Seed.Exceptions;
 using Audacia.Seed.Extensions;
 using Audacia.Seed.Helpers;
@@ -42,7 +43,9 @@ public class SeedPrerequisite<TEntity, TNavigation> : ISeedPrerequisite
     /// </summary>
     /// <param name="getter">A getter to the navigation property.</param>
     /// <param name="seed">A seed class for the navigation property.</param>
-    public SeedPrerequisite(Expression<Func<TEntity, TNavigation>> getter, EntitySeed<TNavigation>? seed)
+    public SeedPrerequisite(
+        Expression<Func<TEntity, TNavigation>> getter,
+        EntitySeed<TNavigation>? seed)
     {
         Getter = getter;
         Seed = seed
