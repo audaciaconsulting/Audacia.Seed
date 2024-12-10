@@ -8,7 +8,6 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Title>Audacia.Seed.EntityFramework</Title>
         <Authors>Audacia</Authors>
-        <Version>2.0.2</Version>
         <Description>Entity Framework integration for Audacia.Seed.</Description>
         <Copyright>Copyright © Audacia $([System.DateTime]::Now.Year)</Copyright>
         <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
