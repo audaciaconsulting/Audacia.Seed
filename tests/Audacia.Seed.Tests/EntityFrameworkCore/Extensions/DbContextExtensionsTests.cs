@@ -17,7 +17,6 @@ namespace Audacia.Seed.Tests.EntityFrameworkCore.Extensions;
 public sealed class DbContextExtensionsTests : IDisposable
 {
     private readonly TestDatabaseContext _context;
-    private readonly IDbContextTransaction _transaction;
 
     public DbContextExtensionsTests()
     {
