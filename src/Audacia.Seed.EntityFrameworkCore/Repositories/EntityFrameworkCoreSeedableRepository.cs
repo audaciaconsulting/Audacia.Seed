@@ -140,6 +140,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
         where T : class
     {
         ArgumentNullException.ThrowIfNull(seed);
+        _context.ChangeTracker.Clear();
 
         var entity = Seed(seed);
 
@@ -175,6 +176,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     {
         ArgumentNullException.ThrowIfNull(seed1);
         ArgumentNullException.ThrowIfNull(seed2);
+        _context.ChangeTracker.Clear();
 
         var entity1 = Seed(seed1);
         var entity2 = Seed(seed2);
@@ -215,6 +217,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
         ArgumentNullException.ThrowIfNull(seed1);
         ArgumentNullException.ThrowIfNull(seed2);
         ArgumentNullException.ThrowIfNull(seed3);
+        _context.ChangeTracker.Clear();
 
         var entity1 = Seed(seed1);
         var entity2 = Seed(seed2);
@@ -261,6 +264,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
         ArgumentNullException.ThrowIfNull(seed2);
         ArgumentNullException.ThrowIfNull(seed3);
         ArgumentNullException.ThrowIfNull(seed4);
+        _context.ChangeTracker.Clear();
 
         var entity1 = Seed(seed1);
         var entity2 = Seed(seed2);
@@ -312,6 +316,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
         ArgumentNullException.ThrowIfNull(seed3);
         ArgumentNullException.ThrowIfNull(seed4);
         ArgumentNullException.ThrowIfNull(seed5);
+        _context.ChangeTracker.Clear();
 
         var entity1 = Seed(seed1);
         var entity2 = Seed(seed2);
@@ -367,6 +372,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
         ArgumentNullException.ThrowIfNull(seed3);
         ArgumentNullException.ThrowIfNull(seed4);
         ArgumentNullException.ThrowIfNull(seed6);
+        _context.ChangeTracker.Clear();
 
         var entity1 = Seed(seed1);
         var entity2 = Seed(seed2);
@@ -427,6 +433,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
         ArgumentNullException.ThrowIfNull(seed4);
         ArgumentNullException.ThrowIfNull(seed6);
         ArgumentNullException.ThrowIfNull(seed7);
+        _context.ChangeTracker.Clear();
 
         var entity1 = Seed(seed1);
         var entity2 = Seed(seed2);
@@ -492,6 +499,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
         ArgumentNullException.ThrowIfNull(seed6);
         ArgumentNullException.ThrowIfNull(seed7);
         ArgumentNullException.ThrowIfNull(seed8);
+        _context.ChangeTracker.Clear();
 
         var entity1 = Seed(seed1);
         var entity2 = Seed(seed2);
