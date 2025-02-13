@@ -636,7 +636,6 @@ public sealed class EntitySeedExtensionTests : IDisposable
             "we should be able to seed grandparents as a prerequisite");
     }
 
-
     [Fact]
     public void WithNew_ParentAlreadyInChangeTrackerWhenSeedingMany_SeedsNewGrandparent()
     {
@@ -658,7 +657,6 @@ public sealed class EntitySeedExtensionTests : IDisposable
                 "each new booking should have the same new member");
         }
     }
-
 
     [Fact]
     public void WithNew_ParentAlreadyInChangeTracker_SeedsNewGrandparent()
