@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.3 - 2025-02-13
+### Fixed
+- Clear the change tracker when seeding begins to ensure WithNew is respected (#190707).
+- Fix issue where the CHANGELOG & README files were appearing in consuming projects (#188898).
+
 ## 2.0.2 - 2024-11-05
 ### Fixed
 - Bug Fix: don't reload entities after saving them to protect against false-positives in unit tests (#182829).
