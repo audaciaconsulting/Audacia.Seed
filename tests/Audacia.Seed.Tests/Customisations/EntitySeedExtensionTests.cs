@@ -651,7 +651,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         using (new AssertionScope())
         {
             bookings.All(b => b.MemberId != existingMember.Id).Should().BeTrue(
-                "we should ignore things in the change tracker when using WithNew and seeding many entities");
+                "we should ignore entities in the change tracker when using WithNew and seeding many entities");
             bookings.Select(b => b.MemberId).Distinct().Should().HaveCount(
                 1,
                 "each new booking should have the same new member");
@@ -671,7 +671,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var seededEntity = _context.Seed(seed);
 
         var booking = _context.Set<Booking>().Single(b => b.Id == seededEntity.Id);
-        booking.MemberId.Should().NotBe(existingMember.Id, "we should ignore things in the change tracker when using WithNew");
+        booking.MemberId.Should().NotBe(existingMember.Id, "we should ignore entities in the change tracker when using WithNew");
     }
 
     [Fact]
@@ -685,7 +685,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var seededEntity = _context.Seed(seed);
 
         var booking = _context.Set<Booking>().Include(b => b.Member).Single(b => b.Id == seededEntity.Id);
-        booking.Member.MembershipGroupId.Should().NotBe(existingGroup.Id, "we should ignore things in the change tracker when using WithNew");
+        booking.Member.MembershipGroupId.Should().NotBe(existingGroup.Id, "we should ignore entities in the change tracker when using WithNew");
     }
 
     [Fact]
