@@ -637,7 +637,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void WithNew_ParentAlreadyInChangeTrackerWhenSeedingMany_SeedsNewGrandparent()
+    public void WithNew_ParentAlreadyInChangeTrackerWhenSeedingMany_SeedsNewParent()
     {
         // This adds a Member because it's a required parent
         _context.Seed<Booking>();
@@ -659,7 +659,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void WithNew_ParentAlreadyInChangeTracker_SeedsNewGrandparent()
+    public void WithNew_ParentAlreadyInChangeTracker_SeedsNewParent()
     {
         // This adds a Member because it's a required parent
         _context.Seed<Booking>();
