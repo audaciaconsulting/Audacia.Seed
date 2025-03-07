@@ -61,7 +61,7 @@ There are two ways that the library implements the above two methods to seed dat
 > [!IMPORTANT]
 > This is only supported in `Audacia.Seed.EntityFrameworkCore`. For EF6, please see [reflection-based-seeding](#reflection-based-seeding) below.
 
-The library uses EF Core's [`IModel` interface](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.metadata.imodel) to get information about what prerequisites `TEntity` needs to be created - namely, it's required foreign keys. Once we've determined all required foreign keys, we'll construct a `EntitySeed<TNavigation>` for it.
+The library uses EF Core's [`IModel` interface](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.metadata.imodel) to get information about what prerequisites `TEntity` needs to be created - namely, its required foreign keys. Once we've determined all required foreign keys, we'll construct a `EntitySeed<TNavigation>` for it.
 
 ### Reflection-based seeding
 
@@ -574,4 +574,6 @@ public class MyTests
 The `Audacia.Seed` repository change history can be found in this [changelog](./CHANGELOG.md):
 
 # Contributing
-We welcome contributions! Please feel free to check our [Contribution Guidlines](https://github.com/audaciaconsulting/.github/blob/main/CONTRIBUTING.md) for feature requests, issue reporting and guidelines.
+We welcome contributions! 
+- See our [contributing documentation](./CONTRIBUTING.md) for this repo.
+- Please feel free to check our [Contribution Guidlines](https://github.com/audaciaconsulting/.github/blob/main/CONTRIBUTING.md) for feature requests, issue reporting and guidelines.
