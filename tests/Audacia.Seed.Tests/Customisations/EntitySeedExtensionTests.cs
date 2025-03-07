@@ -668,9 +668,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         // This asks for a new member to be set up regardless
         var seed = new BookingSeed().WithNew(b => b.Member);
 
-        var seededEntity = _context.Seed(seed);
+        var booking = _context.Seed(seed);
 
-        var booking = _context.Set<Booking>().Single(b => b.Id == seededEntity.Id);
         booking.MemberId.Should().NotBe(existingMember.Id, "we should ignore entities in the change tracker when using WithNew");
     }
 
