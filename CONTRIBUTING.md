@@ -4,10 +4,10 @@ This documentation covers how the seeding process works, so that developers unde
 
 ## Building an entity
 
-To go from a `EntitySeed<T>` to `T` using the `Build`/`BuildMany` methods on `EntitySeed`. There are three main stages to building:
+To go from a `EntitySeed<T>` to `T` using the `Build`/`BuildMany` methods on `EntitySeed`, there are three main stages to building:
 1. Get default
 1. Populate prerequisites
-1. Apply customisations.
+1. Apply customisations
 
 Before seeding can take place, the seed must have a `ISeedableRepository` set so it can keep track of the entities it's building for potential re-use. This repository is set based on what you're seeding into, for example there is a `EntityFrameworkCoreSeedableRepository` which is a wrapper around EF Core's `DbContext`, as well as an `InMemorySeedableRepository`, which acts as its own data store.
 

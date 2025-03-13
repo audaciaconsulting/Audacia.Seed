@@ -1,4 +1,4 @@
-# 2. EF6 does not support calcualting model information for an entity
+# 2. EF6 does not support calculating model information for an entity
 
 Date: 2025-03-07
 
