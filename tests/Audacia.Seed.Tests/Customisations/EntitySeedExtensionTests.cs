@@ -637,6 +637,57 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
+    public void WithNew_ParentAlreadyInChangeTrackerWhenSeedingMany_SeedsNewParent()
+    {
+        // This adds a Member because it's a required parent
+        _context.Seed<Booking>();
+        // This pulls a Member into the change tracker
+        var existingMember = _context.Set<Member>().Single();
+        // This asks for a new member to be set up regardless
+        var seed = new BookingSeed().WithNew(b => b.Member);
+
+        var bookings = _context.SeedMany(2, seed).ToList();
+
+        using (new AssertionScope())
+        {
+            bookings.All(b => b.MemberId != existingMember.Id).Should().BeTrue(
+                "we should ignore entities in the change tracker when using WithNew and seeding many entities");
+            bookings.Select(b => b.MemberId).Distinct().Should().HaveCount(
+                1,
+                "each new booking should have the same new member");
+        }
+    }
+
+    [Fact]
+    public void WithNew_ParentAlreadyInChangeTracker_SeedsNewParent()
+    {
+        // This adds a Member because it's a required parent
+        _context.Seed<Booking>();
+        // This pulls a Member into the change tracker
+        var existingMember = _context.Set<Member>().Single();
+        // This asks for a new member to be set up regardless
+        var seed = new BookingSeed().WithNew(b => b.Member);
+
+        var booking = _context.Seed(seed);
+
+        booking.MemberId.Should().NotBe(existingMember.Id, "we should ignore entities in the change tracker when using WithNew");
+    }
+
+    [Fact]
+    public void WithNew_GrandparentAlreadyInChangeTracker_SeedsNewGrandparent()
+    {
+        _context.Seed<Booking>();
+        var existingGroup = _context.Set<MembershipGroup>().Single();
+        var seed = new EntitySeed<Booking>()
+            .WithNew(b => b.Member.MembershipGroup);
+
+        var seededEntity = _context.Seed(seed);
+
+        var booking = _context.Set<Booking>().Include(b => b.Member).Single(b => b.Id == seededEntity.Id);
+        booking.Member.MembershipGroupId.Should().NotBe(existingGroup.Id, "we should ignore entities in the change tracker when using WithNew");
+    }
+
+    [Fact]
     public void WithNew_FewerValuesProvidedThanWeWantToSeed_ThrowsException()
     {
         RoomSeed[] prerequisites = [new RoomSeed(), new RoomSeed(), new RoomSeed()];

@@ -236,6 +236,8 @@ new BookingSeed().Without(b => b.Name);
 
 ### `WithNew` (single entity)
 Specify that an navigation optional property should be non-null, or override the default behaviour for a mandatory navigation property.
+When using `WithNew`, the library will always seed a new instance of the navigation property. When using this with `SeedMany`, each child will share the same newly-added parent.
+
 #### Set a navigation property without a seed:
 ```csharp
 new BookingSeed().WithNew(b => b.Coupon);
