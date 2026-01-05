@@ -13,6 +13,8 @@ resources:
       name: audaciaconsulting/Audacia.Build
 pool:
   vmImage: windows-2022
+variables:
+  - group: Code Signing
 
 stages:
 - stage: Stage_Build
@@ -23,7 +25,7 @@ stages:
       trustedSigningEndpoint: $(TrustedSigningEndpoint)
       trustedSigningAccount: $(TrustedSigningAccount)
       trustedSigningCertificateProfile: $(TrustedSigningCertificateProfile)
-      directory: $(Build.SourcesDirectory)/src/Audacia.Seed
+      directory: $(Build.SourcesDirectory)/src
       fileToSignPattern: 'Audacia.Seed.dll'
       serviceConnection: 'Audacia Code Signing'
       projects: 'src/**/*.csproj'
