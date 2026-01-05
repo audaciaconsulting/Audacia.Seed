@@ -23,7 +23,7 @@ stages:
       trustedSigningEndpoint: $(TrustedSigningEndpoint)
       trustedSigningAccount: $(TrustedSigningAccount)
       trustedSigningCertificateProfile: $(TrustedSigningCertificateProfile)
-      directory: $(Build.SourcesDirectory)/src
+      directory: $(Build.SourcesDirectory)/src/Audacia.Seed
       fileToSignPattern: 'Audacia.Seed.dll'
       serviceConnection: 'Audacia Code Signing'
       projects: 'src/**/*.csproj'
