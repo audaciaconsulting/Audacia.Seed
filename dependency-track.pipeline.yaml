@@ -39,6 +39,7 @@ variables:
       $(System.DefaultWorkingDirectory)/src/Audacia.Seed/Audacia.Seed.csproj
       $(System.DefaultWorkingDirectory)/src/Audacia.Seed.EntityFramework/Audacia.Seed.EntityFramework.csproj
       $(System.DefaultWorkingDirectory)/src/Audacia.Seed.EntityFrameworkCore/Audacia.Seed.EntityFrameworkCore.csproj
+      $(System.DefaultWorkingDirectory)/tests/Audacia.Seed.Tests/Audacia.Seed.Tests.csproj
 
   - name: artifactName
     value: 'sbom-files'
