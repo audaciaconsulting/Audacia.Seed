@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -8,7 +8,7 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Title>Audacia.Seed.EntityFrameworkCore</Title>
         <Authors>Audacia</Authors>
-        <Version>2.0.3</Version>
+        <Version>3.0.0</Version>
         <Description>Entity Framework Core integration for Audacia.Seed.</Description>
         <Copyright>Copyright © Audacia $([System.DateTime]::Now.Year)</Copyright>
         <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
@@ -32,8 +32,8 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.2" />
     </ItemGroup>
 
 </Project>
