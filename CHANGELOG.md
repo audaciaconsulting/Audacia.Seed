@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.1 - 2026-05-28
+### Changed
+- Updated Audacia Dependecies to .NET 10.0 compatible versions
+- Replaced XUnit with XUnit v3 in the test project.
+
+## 3.0.0 - 2026-02-05
+### Changed
+- Updated target framework to .NET 10.0
+
 ## 2.0.3 - 2025-02-13
 ### Fixed
 - EF Core only: Clear the change tracker when seeding begins to ensure WithNew is respected (#190707).
