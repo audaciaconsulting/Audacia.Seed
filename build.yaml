@@ -22,6 +22,7 @@ stages:
   jobs: 
   - template: src/build/dotnet/jobs/signed-nuget-package.job.yaml@templates
     parameters:
+      dotNetVersion: '10.0.0'
       trustedSigningEndpoint: $(TrustedSigningEndpoint)
       trustedSigningAccount: $(TrustedSigningAccount)
       trustedSigningCertificateProfile: $(TrustedSigningCertificateProfile)
