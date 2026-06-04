@@ -12,7 +12,7 @@ resources:
       type: github
       endpoint: shared-github
       name: audaciaconsulting/Audacia.Build
-      branch: feature/210873-replace-trusted-signing
+      ref: refs/heads/feature/210873-replace-trusted-signing
 pool:
   vmImage: windows-2022
 variables:
