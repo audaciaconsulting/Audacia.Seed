@@ -1,6 +1,7 @@
 name: $(Year:yy)$(DayOfYear).$(Rev:r)
 trigger:
   - master
+  - feature/211055-update-audacia-nuget-packages-dotnet-10
 pr:
   branches:
     include:
