@@ -65,7 +65,8 @@ internal static class ExpressionExtensions
     /// <exception cref="ArgumentException">If the expression isn't a getter to a property on the source of the lambda.</exception>
     internal static PropertyInfo GetPropertyInfo(this LambdaExpression expression)
     {
-        if (expression == null) throw new ArgumentNullException(nameof(expression));
+        ArgumentNullException.ThrowIfNull(expression);
+
         return expression.Body switch
         {
             null => throw new ArgumentException(
@@ -109,12 +110,10 @@ internal static class ExpressionExtensions
             return memberExpression;
         }
 
-        if (current?.NodeType == ExpressionType.Convert &&
-                 ((UnaryExpression)current).Operand is MemberExpression)
+        if (current?.NodeType == ExpressionType.Convert && ((UnaryExpression)current).Operand is MemberExpression convertedMember)
         {
-            memberExpression = (MemberExpression)((UnaryExpression)current).Operand;
-            chain.Add(GetLambdaFromConvertedMemberExpression(memberExpression, current.Type));
-            return memberExpression;
+            chain.Add(GetLambdaFromConvertedMemberExpression(convertedMember, current.Type));
+            return convertedMember;
         }
 
         return null;
@@ -155,7 +154,8 @@ internal static class ExpressionExtensions
             memberExpression = currentLambda.Body switch
             {
                 MemberExpression member => Expression.Property(memberExpression, member.Member.Name),
-                UnaryExpression { Operand: MemberExpression } unary => unary,
+                UnaryExpression { Operand: MemberExpression operand } unary =>
+                    Expression.Convert(Expression.Property(memberExpression, operand.Member.Name), unary.Type),
                 _ => memberExpression
             };
         }

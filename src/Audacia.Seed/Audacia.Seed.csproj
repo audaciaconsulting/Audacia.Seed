@@ -4,6 +4,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <NoWarn>CS1591</NoWarn>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Title>Audacia.Seed</Title>
@@ -12,10 +13,6 @@
         <Copyright>Copyright © Audacia $([System.DateTime]::Now.Year)</Copyright>
         <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <ItemGroup>
