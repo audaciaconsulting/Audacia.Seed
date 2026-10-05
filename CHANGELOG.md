@@ -1,55 +1,87 @@
 # Changelog
 
-## 3.0.1 - 2026-05-28
+## 3.0.2 - 2026-10-05
+
 ### Changed
+
+- Updated FluentAssertions to version 6.12.2
+- Updated Microsoft.EntityFrameworkCore to version 10.0.12
+- Updated Microsoft.EntityFrameworkCore.Relational to version 10.0.12
+- Updated Microsoft.EntityFrameworkCore.SqlServer to version 10.0.12
+- Updated Microsoft.NET.Test.Sdk to version 18.10.1
+
+## 3.0.1 - 2026-05-28
+
+### Changed
+
 - Updated Audacia Dependecies to .NET 10.0 compatible versions
 - Replaced XUnit with XUnit v3 in the test project.
 
 ## 3.0.0 - 2026-02-05
+
 ### Changed
+
 - Updated target framework to .NET 10.0
 
 ## 2.0.3 - 2025-02-13
+
 ### Fixed
+
 - EF Core only: Clear the change tracker when seeding begins to ensure WithNew is respected (#190707).
 - Fix issue where the CHANGELOG & README files were appearing in consuming projects (#188898).
 
 ## 2.0.2 - 2024-11-05
+
 ### Fixed
+
 - Bug Fix: don't reload entities after saving them to protect against false-positives in unit tests (#182829).
 
 ## 2.0.1 - 2024-10-30
+
 ### Fixed
+
 - Bug Fix: entities not saved when seeding many using the `IEntitySeed.PerformSeeding` method (#182830).
 
 ## 2.0.0 - 2024-09-24
+
 ### Added
+
 - Complete rewrite of the project based on existing need, and lack of uptake on the current project.
-- Support for EF Core, EF6, and in-memory seeding 
+- Support for EF Core, EF6, and in-memory seeding
 
 ### Changed
+
 - All existing functionality removed:
-   - `web.confg` based configuration not supported.
-   - `Autofixture` reference removed.
+  - `web.confg` based configuration not supported.
+  - `Autofixture` reference removed.
 
 ## 1.1.0 - 2023-10-05
+
 ### Added
+
 - No new functionality added
 
 ### Changed
+
 - Prepare codebase for GitHub migration
 
 ## 1.0.0 - 2020-04-30
+
 ### Added
+
 - No new functionality added
 
 ### Changed
+
 - Changed build pipeline name to date format
 
 ## 0.1.0 - 2019-09-16
+
 ### Added
+
 - Added stylecop static analysis
 
 ### Changed
-- Updated EF6 project format 
+
+- Updated EF6 project format
 - Simplified build pipeline
