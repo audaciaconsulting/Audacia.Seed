@@ -6,10 +6,9 @@ using Audacia.Seed.Tests.ExampleProject.Entities;
 using Audacia.Seed.Tests.ExampleProject.EntityFrameworkCore;
 using Audacia.Seed.Tests.ExampleProject.Seeds;
 using Audacia.Seed.Tests.TestHelpers;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Shouldly;
 using Xunit;
 
 namespace Audacia.Seed.Tests;
@@ -35,26 +34,24 @@ public sealed class EntitySeedTests : IDisposable
         var booking = _context.Seed(seedConfiguration);
 
         var savedEntity = _context.Set<Booking>().Find(booking.Id);
-        savedEntity.Should().NotBeNull("the entity should have been saved to the database.");
+        savedEntity.ShouldNotBeNull("the entity should have been saved to the database.");
     }
 
     [Fact]
     public void Prerequisites_EntityHasRequiredParentsOfTheSameType_PrerequisitesContainBothParents()
     {
-        var seed = new EntitySeed<Facility>();
-        seed.Repository = new EntityFrameworkCoreSeedableRepository(_context);
+        var seed = new EntitySeed<Facility>
+        {
+            Repository = new EntityFrameworkCoreSeedableRepository(_context)
+        };
 
         var prerequisites = seed.Prerequisites().ToList();
 
-        using (new AssertionScope())
-        {
-            prerequisites.Should().Contain(
-                p => p.PropertyInfo.Name == nameof(Facility.Manager) && p.EntityType == typeof(Employee),
-                $"one of the prerequisites should be for the {nameof(Facility.Manager)}");
-            prerequisites.Should().Contain(
-                p => p.PropertyInfo.Name == nameof(Facility.Owner) && p.EntityType == typeof(Employee),
-                $"one of the prerequisites should be for the {nameof(Facility.Owner)}");
-        }
+        prerequisites.ShouldSatisfyAllConditions(
+            p => p.Any(r => r.PropertyInfo.Name == nameof(Facility.Manager) && r.EntityType == typeof(Employee))
+                .ShouldBeTrue($"one of the prerequisites should be for the {nameof(Facility.Manager)}"),
+            p => p.Any(r => r.PropertyInfo.Name == nameof(Facility.Owner) && r.EntityType == typeof(Employee))
+                .ShouldBeTrue($"one of the prerequisites should be for the {nameof(Facility.Owner)}"));
     }
 
     [Fact]
@@ -64,7 +61,7 @@ public sealed class EntitySeedTests : IDisposable
 
         var seededEntity = _context.Seed(seed);
 
-        seededEntity.Id.Should().BeGreaterThan(0, "we should be able to seed entities without a dedicated class");
+        seededEntity.Id.ShouldBeGreaterThan(0, "we should be able to seed entities without a dedicated class");
     }
 
     [Fact]
@@ -76,8 +73,8 @@ public sealed class EntitySeedTests : IDisposable
 
         var seededEntity = _context.Seed(seed);
 
-        var member = await _context.Set<Member>().SingleOrDefaultAsync(m => m.Id == seededEntity.MemberId);
-        member.Should().NotBeNull("we should be able to seed required parents without the need for a dedicated class");
+        var member = await _context.Set<Member>().SingleOrDefaultAsync(m => m.Id == seededEntity.MemberId, TestContext.Current.CancellationToken);
+        member.ShouldNotBeNull("we should be able to seed required parents without the need for a dedicated class");
     }
 
     [Fact]
@@ -87,8 +84,7 @@ public sealed class EntitySeedTests : IDisposable
 
         var seededEntity = _context.Seed(seed);
 
-        seededEntity.Name.Should()
-            .NotBeNull($"we should use the constructor of {nameof(Coupon)} that populates the {nameof(Coupon.Name)}");
+        seededEntity.Name.ShouldNotBeNull($"we should use the constructor of {nameof(Coupon)} that populates the {nameof(Coupon.Name)}");
     }
 
     [Fact]
@@ -98,8 +94,7 @@ public sealed class EntitySeedTests : IDisposable
 
         var seededEntity = _context.Seed(seed);
 
-        seededEntity.RoomId.Should()
-            .BeNull("optional parents should not be seeded");
+        seededEntity.RoomId.ShouldBeNull("optional parents should not be seeded");
     }
 
     [Fact]
@@ -108,7 +103,7 @@ public sealed class EntitySeedTests : IDisposable
         var act = () => new EntitySeed<Booking>()
             .WithNew(_ => new Region());
 
-        act.Should().ThrowExactly<DataSeedingException>("we should throw an exception if the getter does not access a property on the entity");
+        act.ShouldThrow<DataSeedingException>("we should throw an exception if the getter does not access a property on the entity");
     }
 
     [Fact]
@@ -122,7 +117,7 @@ public sealed class EntitySeedTests : IDisposable
         _context.SaveChanges();
 
         var anyBookingsSeeded = _context.Set<Booking>().Count();
-        anyBookingsSeeded.Should().Be(amountToCreate);
+        anyBookingsSeeded.ShouldBe(amountToCreate);
     }
 
     [Fact]
@@ -136,7 +131,7 @@ public sealed class EntitySeedTests : IDisposable
         _context.SaveChanges();
 
         var anyBookingsSeeded = _context.Set<Booking>().Count();
-        anyBookingsSeeded.Should().Be(amountToCreate);
+        anyBookingsSeeded.ShouldBe(amountToCreate);
     }
 
     public void Dispose()

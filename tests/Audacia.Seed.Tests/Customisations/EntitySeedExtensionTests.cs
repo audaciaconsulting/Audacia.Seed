@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Audacia.Seed.Customisation;
 using Audacia.Seed.EntityFrameworkCore.Extensions;
 using Audacia.Seed.Exceptions;
@@ -6,10 +5,9 @@ using Audacia.Seed.Tests.ExampleProject.Entities;
 using Audacia.Seed.Tests.ExampleProject.EntityFrameworkCore;
 using Audacia.Seed.Tests.ExampleProject.Seeds;
 using Audacia.Seed.Tests.TestHelpers;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Shouldly;
 using Xunit;
 
 namespace Audacia.Seed.Tests.Customisations;
@@ -39,16 +37,14 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.Seed(seedConfiguration);
 
-        var savedEntity = await _context.Set<Member>().FirstAsync();
-        using (new AssertionScope())
-        {
-            savedEntity.MembershipLevel.Should().Be(
+        var savedEntity = await _context.Set<Member>().FirstAsync(TestContext.Current.CancellationToken);
+        savedEntity.ShouldSatisfyAllConditions(
+            s => s.MembershipLevel.ShouldBe(
                 expectedMembershipLevel,
-                $"we should be able to set the {nameof(Member.MembershipLevel)} on the entity using {nameof(EntitySeedExtensions.With)}");
-            savedEntity.FirstName.Should().Be(
+                $"we should be able to set the {nameof(Member.MembershipLevel)} on the entity using {nameof(EntitySeedExtensions.With)}"),
+            s => s.FirstName.ShouldBe(
                 expectedFirstName,
-                $"we should be able to set the {nameof(Member.FirstName)} on the entity using {nameof(EntitySeedExtensions.With)}");
-        }
+                $"we should be able to set the {nameof(Member.FirstName)} on the entity using {nameof(EntitySeedExtensions.With)}"));
     }
 
     [Fact]
@@ -61,9 +57,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.Seed(seedConfiguration);
 
-        var savedEntity = await _context.Set<Booking>().Include(m => m.Member).FirstAsync();
-        savedEntity.Member.FirstName.Should()
-            .Be(expectedFirstName, "we should be able to set properties on required parents");
+        var savedEntity = await _context.Set<Booking>().Include(m => m.Member).FirstAsync(TestContext.Current.CancellationToken);
+        savedEntity.Member.FirstName.ShouldBe(expectedFirstName, "we should be able to set properties on required parents");
     }
 
     [Fact]
@@ -79,8 +74,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         });
         _context.Seed(seedConfiguration);
 
-        var savedEntity = await _context.Set<Booking>().Include(b => b.Member).FirstAsync();
-        savedEntity.Member.FirstName.Should().Be(
+        var savedEntity = await _context.Set<Booking>().Include(b => b.Member).FirstAsync(TestContext.Current.CancellationToken);
+        savedEntity.Member.FirstName.ShouldBe(
             expectedFirstName,
             "we should be able to override the default parent navigation property using a plain instance of the parent");
     }
@@ -98,16 +93,14 @@ public sealed class EntitySeedExtensionTests : IDisposable
         });
         _context.Seed(seedConfiguration);
 
-        var members = await _context.Set<Member>().ToListAsync();
-        using (new AssertionScope())
-        {
-            members.Should().HaveCount(
+        var members = await _context.Set<Member>().ToListAsync(TestContext.Current.CancellationToken);
+        members.ShouldSatisfyAllConditions(
+            m => m.Count.ShouldBe(
                 1,
-                "overriding a prerequisite should mean the default prerequisite isn't seeded");
-            members.Single().FirstName.Should().Be(
+                "overriding a prerequisite should mean the default prerequisite isn't seeded"),
+            m => m.Single().FirstName.ShouldBe(
                 expectedFirstName,
-                "we should have overridden the prerequisite based on the provided entity");
-        }
+                "we should have overridden the prerequisite based on the provided entity"));
     }
 
     [Fact]
@@ -118,10 +111,10 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var act = () => _context.Seed(seedConfiguration);
 
-        act.Should().ThrowExactly<DataSeedingException>(
+        act.ShouldThrow<DataSeedingException>(
                 "we should show a more useful error message if we catch a null reference exception when applying customisations")
             // Make sure the exception message is helpful to the developer.
-            .WithMessage($"*{nameof(Coupon)}*{nameof(Coupon.Name)}*nullable property*");
+            .Message.ShouldMatch($".*{nameof(Coupon)}.*{nameof(Coupon.Name)}.*nullable property.*");
     }
 
     [Fact]
@@ -132,14 +125,12 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var booking = _context.Seed(seed);
 
-        var coupons = await _context.Set<Coupon>().Include(c => c.Booking).ToListAsync();
-        using (new AssertionScope())
-        {
-            coupons.Should().HaveCount(1, "we should have seeded one coupon");
-            coupons.Single().Booking!.Id.Should().Be(
+        var coupons = await _context.Set<Coupon>().Include(c => c.Booking).ToListAsync(TestContext.Current.CancellationToken);
+        coupons.ShouldSatisfyAllConditions(
+            c => c.Count.ShouldBe(1, "we should have seeded one coupon"),
+            c => c.Single().Booking!.Id.ShouldBe(
                 booking.Id,
-                "we should have set the foreign key on the optional navigation property");
-        }
+                "we should have set the foreign key on the optional navigation property"));
     }
 
     [Fact]
@@ -151,13 +142,11 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var booking = _context.Seed(seed);
 
         var facilities = _context.Set<Facility>().Include(f => f.Bookings).ToList();
-        using (new AssertionScope())
-        {
-            facilities.Should().HaveCount(1, "we should have seeded one facility");
-            facilities.Single().Bookings.Should().ContainSingle(
-                b => b.Id == booking.Id,
-                "we should have set the foreign key on the required navigation property");
-        }
+        facilities.ShouldSatisfyAllConditions(
+            f => f.Count.ShouldBe(1, "we should have seeded one facility"),
+            f => f.Single().Bookings.ShouldSatisfyAllConditions(
+                b => b.Count.ShouldBe(1, "we should have set the foreign key on the required navigation property"),
+                b => b.Single().Id.ShouldBe(booking.Id, "we should have set the foreign key on the required navigation property")));
     }
 
     [Fact]
@@ -169,10 +158,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.Seed(seedConfiguration);
 
-        var savedEntity = await _context.Set<Facility>().Include(b => b.Room).FirstAsync();
-        savedEntity.Room.Should().NotBeNull();
-        savedEntity.Room?.Name.Should()
-            .Be(
+        var savedEntity = await _context.Set<Facility>().Include(b => b.Room).FirstAsync(TestContext.Current.CancellationToken);
+        savedEntity.Room.ShouldNotBeNull();
+        savedEntity.Room?.Name.ShouldBe(
                 roomName,
                 $"it should use the raw entity passed into the {nameof(EntitySeedExtensions.With)} method");
     }
@@ -187,9 +175,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.SeedMany(expectedCount, seedConfiguration);
 
-        var savedEntities = await _context.Set<Facility>().ToListAsync();
-        savedEntities.All(m => m.Name == expectedName).Should()
-            .BeTrue(
+        var savedEntities = await _context.Set<Facility>().ToListAsync(TestContext.Current.CancellationToken);
+        savedEntities.All(m => m.Name == expectedName).ShouldBeTrue(
                 $"{nameof(EntitySeedExtensions.With)} should set the same property value on each entity if only one is specified");
     }
 
@@ -203,8 +190,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         _context.SeedMany(expectedCount, seedConfiguration);
 
         decimal[] expectedDiscounts = [0, 10m, 20m, 30m, 40m];
-        var savedEntities = await _context.Set<Coupon>().ToListAsync();
-        savedEntities.Select(m => m.Discount).Should().BeEquivalentTo(
+        var savedEntities = await _context.Set<Coupon>().ToListAsync(TestContext.Current.CancellationToken);
+        savedEntities.Select(m => m.Discount).ToArray().ShouldBeEquivalentTo(
             expectedDiscounts,
             $"{nameof(EntitySeedExtensions.With)} should use the provided delegate to set the property values based on the index");
     }
@@ -214,13 +201,13 @@ public sealed class EntitySeedExtensionTests : IDisposable
     {
         const int expectedCount = 5;
         var seedConfiguration = new CouponSeed()
-            .With(c => c.Discount, (_, previous) => previous?.Discount * 2 ?? 0.1m);
+            .With(c => c.Discount, (_, previous) => (previous?.Discount * 2) ?? 0.1m);
 
         _context.SeedMany(expectedCount, seedConfiguration);
 
         decimal[] expectedDiscounts = [0.1m, 0.2m, 0.4m, 0.8m, 1.6m];
-        var savedEntities = await _context.Set<Coupon>().ToListAsync();
-        savedEntities.Select(m => m.Discount).Should().BeEquivalentTo(
+        var savedEntities = await _context.Set<Coupon>().ToListAsync(TestContext.Current.CancellationToken);
+        savedEntities.Select(m => m.Discount).ToArray().ShouldBeEquivalentTo(
             expectedDiscounts,
             $"{nameof(EntitySeedExtensions.With)} should use the provided delegate to set the property values based on the previous");
     }
@@ -234,8 +221,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountToCreate = 5;
         _context.SeedMany(amountToCreate, seedConfiguration);
 
-        var savedEntities = await _context.Set<Facility>().ToListAsync();
-        savedEntities.Select(f => f.Name).Should().OnlyHaveUniqueItems(
+        var savedEntities = await _context.Set<Facility>().ToListAsync(TestContext.Current.CancellationToken);
+        savedEntities.Select(f => f.Name).ShouldBeUnique(
             $"{nameof(EntitySeedExtensions.With)} should use the provided delegate to set the property values");
     }
 
@@ -248,8 +235,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.SeedMany(expectedNames.Length, seedConfiguration);
 
-        var savedEntities = await _context.Set<Facility>().ToListAsync();
-        savedEntities.DistinctBy(c => c.Name).Should().HaveCount(
+        var savedEntities = await _context.Set<Facility>().ToListAsync(TestContext.Current.CancellationToken);
+        savedEntities.DistinctBy(c => c.Name).Count().ShouldBe(
             expectedNames.Length,
             $"we should set the properties in the same order as they appear in the {nameof(expectedNames)} array");
     }
@@ -265,10 +252,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var amountToCreate = names.Length + 1;
         var act = () => _context.SeedMany(amountToCreate, seedConfiguration);
 
-        act.Should()
-            .ThrowExactly<DataSeedingException>(
+        act.ShouldThrow<DataSeedingException>(
                 "we should show a developer-friendly message for this as we cannot give a build error for it")
-            .WithMessage($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {names.Length} were provided.");
+            .Message.ShouldBe($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {names.Length} were provided.");
     }
 
     [Fact]
@@ -282,10 +268,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var amountToCreate = names.Length - 1;
         var act = () => _context.SeedMany(amountToCreate, seedConfiguration);
 
-        act.Should()
-            .ThrowExactly<DataSeedingException>(
+        act.ShouldThrow<DataSeedingException>(
                 "we should show a developer-friendly message for this as we cannot give a build error for it")
-            .WithMessage($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {names.Length} were provided.");
+            .Message.ShouldBe($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {names.Length} were provided.");
     }
 
     [Fact]
@@ -298,7 +283,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         _context.Seed(seedConfiguration);
 
         var membershipGroups = _context.Set<MembershipGroup>().ToList();
-        membershipGroups.Should().HaveCount(1, "we should not seed an extra membership group");
+        membershipGroups.Count.ShouldBe(1, "we should not seed an extra membership group");
     }
 
     [Fact]
@@ -311,7 +296,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         _context.Seed(seedConfiguration);
 
         var membershipGroups = _context.Set<MembershipGroup>().ToList();
-        membershipGroups.Should().HaveCount(1, "we should not seed an extra membership group");
+        membershipGroups.Count.ShouldBe(1, "we should not seed an extra membership group");
     }
 
     [Fact]
@@ -324,7 +309,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         _context.SeedMany(2, seedConfiguration);
 
         var membershipGroups = _context.Set<MembershipGroup>().ToList();
-        membershipGroups.Should().HaveCount(2, "we should not seed an extra membership group");
+        membershipGroups.Count.ShouldBe(2, "we should not seed an extra membership group");
     }
 
     [Fact]
@@ -337,7 +322,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         _context.SeedMany(2, seedConfiguration);
 
         var membershipGroups = _context.Set<MembershipGroup>().ToList();
-        membershipGroups.Should().HaveCount(2, "we should not seed an extra membership group");
+        membershipGroups.Count.ShouldBe(2, "we should not seed an extra membership group");
     }
 
     [Fact]
@@ -350,7 +335,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         _context.Seed(seedConfiguration);
 
         var membershipGroups = _context.Set<MembershipGroup>().ToList();
-        membershipGroups.Should().HaveCount(1, "we should not seed an extra member");
+        membershipGroups.Count.ShouldBe(1, "we should not seed an extra member");
     }
 
     [Fact]
@@ -363,7 +348,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         _context.Seed(seedConfiguration);
 
         var membershipGroups = _context.Set<MembershipGroup>().ToList();
-        membershipGroups.Should().HaveCount(1, "we should not seed an extra member");
+        membershipGroups.Count.ShouldBe(1, "we should not seed an extra member");
     }
 
     [Fact]
@@ -376,7 +361,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         _context.Seed(entitySeed);
 
         var membershipGroups = _context.Set<EmployeeAsset>().ToList();
-        membershipGroups.Should().HaveCount(1, "we should not seed an extra employee asset");
+        membershipGroups.Count.ShouldBe(1, "we should not seed an extra employee asset");
     }
 
     [Fact]
@@ -394,12 +379,11 @@ public sealed class EntitySeedExtensionTests : IDisposable
             .Single();
         var singleAssetInTheDatabase = _context.Set<Asset>()
             .Single();
-        using (new AssertionScope())
-        {
-            companyAsset.Asset.Should().BeOfType<EmployeeAsset>();
-            companyAsset.Asset.Should().Be(singleAssetInTheDatabase);
-            ((EmployeeAsset)companyAsset.Asset).Employee.FirstName.Should().Be("John");
-        }
+
+        companyAsset.ShouldSatisfyAllConditions(
+            c => c.Asset.ShouldBeOfType<EmployeeAsset>(),
+            c => c.Asset.ShouldBe(singleAssetInTheDatabase),
+            c => ((EmployeeAsset)c.Asset).Employee.FirstName.ShouldBe("John"));
     }
 
     [Fact]
@@ -413,8 +397,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.Seed(seedConfiguration);
 
-        var savedEntity = await _context.Set<Booking>().Include(b => b.Facility).FirstAsync();
-        savedEntity.Facility.Name.Should().Be(
+        var savedEntity = await _context.Set<Booking>().Include(b => b.Facility).FirstAsync(TestContext.Current.CancellationToken);
+        savedEntity.Facility.Name.ShouldBe(
             expectedName,
             "we should be able to override the default parent navigation property");
     }
@@ -427,9 +411,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.Seed(seedConfiguration);
 
-        var savedEntity = await _context.Set<Facility>().Include(b => b.Room).FirstAsync();
-        savedEntity.Room.Should()
-            .NotBeNull("we should be able to specify a parent for an optional navigation property");
+        var savedEntity = await _context.Set<Facility>().Include(b => b.Room).FirstAsync(TestContext.Current.CancellationToken);
+        savedEntity.Room.ShouldNotBeNull("we should be able to specify a parent for an optional navigation property");
     }
 
     [Fact]
@@ -440,9 +423,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var seededEntity = _context.Seed(seed);
 
-        var room = await _context.Set<Room>().SingleAsync(b => b.Id == seededEntity.RoomId);
-        room.Name.Should()
-            .NotBeNullOrWhiteSpace(
+        var room = await _context.Set<Room>().SingleAsync(b => b.Id == seededEntity.RoomId, TestContext.Current.CancellationToken);
+        room.Name.ShouldNotBeNullOrWhiteSpace(
                 $"we should use the {nameof(RoomSeed)} if it is not provided for the {nameof(EntitySeedExtensions.WithNew)} method");
     }
 
@@ -455,7 +437,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var seededEntity = _context.Seed(seed);
 
-        seededEntity.RegionId.Should().BeGreaterThan(
+        seededEntity.RegionId.ShouldBeGreaterThan(
             0,
             $"we should be able to seed the {nameof(Room.Region)} without a dedicated entity seed class");
     }
@@ -469,16 +451,14 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.Seed(seed);
 
-        var members = await _context.Set<Member>().ToListAsync();
-        using (new AssertionScope())
-        {
-            members.Should().HaveCount(
+        var members = await _context.Set<Member>().ToListAsync(TestContext.Current.CancellationToken);
+        members.ShouldSatisfyAllConditions(
+            m => m.Count.ShouldBe(
                 1,
-                "overriding a prerequisite should mean the default prerequisite isn't seeded");
-            members.Single().FirstName.Should().Be(
+                "overriding a prerequisite should mean the default prerequisite isn't seeded"),
+            m => m.Single().FirstName.ShouldBe(
                 expectedFirstName,
-                "we should have overridden the prerequisite based on the provided entity");
-        }
+                "we should have overridden the prerequisite based on the provided entity"));
     }
 
     [Fact]
@@ -490,16 +470,14 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountToCreate = 2;
         _context.SeedMany(amountToCreate, seed);
 
-        var bookings = await _context.Set<Booking>().ToListAsync();
-        using (new AssertionScope())
-        {
-            bookings.Should().HaveCount(
+        var bookings = await _context.Set<Booking>().ToListAsync(TestContext.Current.CancellationToken);
+        bookings.ShouldSatisfyAllConditions(
+            b => b.Count.ShouldBe(
                 amountToCreate,
-                "overriding a prerequisite should mean the default prerequisite isn't seeded");
-            bookings.Select(m => m.MemberId).Distinct().Should().HaveCount(
+                "overriding a prerequisite should mean the default prerequisite isn't seeded"),
+            b => b.Select(m => m.MemberId).Distinct().Count().ShouldBe(
                 1,
-                "child entities should share a parent even if the seed prerequisite is customised");
-        }
+                "child entities should share a parent even if the seed prerequisite is customised"));
     }
 
     [Fact]
@@ -508,16 +486,14 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountToCreate = 2;
         _context.SeedMany<Booking>(amountToCreate);
 
-        var bookings = await _context.Set<Booking>().ToListAsync();
-        using (new AssertionScope())
-        {
-            bookings.Should().HaveCount(
+        var bookings = await _context.Set<Booking>().ToListAsync(TestContext.Current.CancellationToken);
+        bookings.ShouldSatisfyAllConditions(
+            b => b.Count.ShouldBe(
                 amountToCreate,
-                "we should have seeded the correct number of bookings");
-            bookings.Select(m => m.MemberId).Distinct().Should().HaveCount(
+                "we should have seeded the correct number of bookings"),
+            b => b.Select(m => m.MemberId).Distinct().Count().ShouldBe(
                 1,
-                "child entities should share a parent when using the default seed");
-        }
+                "child entities should share a parent when using the default seed"));
     }
 
     [Fact]
@@ -530,16 +506,14 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountToCreate = 5;
         _context.SeedMany(amountToCreate, seed);
 
-        var bookings = await _context.Set<Booking>().ToListAsync();
-        using (new AssertionScope())
-        {
-            bookings.Should().HaveCount(
+        var bookings = await _context.Set<Booking>().ToListAsync(TestContext.Current.CancellationToken);
+        bookings.ShouldSatisfyAllConditions(
+            b => b.Count.ShouldBe(
                 amountToCreate,
-                "overriding a prerequisite should mean the default prerequisite isn't seeded");
-            bookings.Select(m => m.MemberId).Distinct().Should().HaveCount(
+                "overriding a prerequisite should mean the default prerequisite isn't seeded"),
+            b => b.Select(m => m.MemberId).Distinct().Count().ShouldBe(
                 1,
-                "child entities should share a parent even if the seed prerequisite is customised");
-        }
+                "child entities should share a parent even if the seed prerequisite is customised"));
     }
 
     [Fact]
@@ -558,19 +532,18 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var employees = await _context.Set<Employee>()
             .Include(e => e.FacilitiesOwned)
             .Include(e => e.FacilitiesManaged)
-            .ToListAsync();
-        using (new AssertionScope())
-        {
-            const int expectedNumberOfEmployees = 2;
-            employees.Should().HaveCount(
+            .ToListAsync(TestContext.Current.CancellationToken);
+
+        const int expectedNumberOfEmployees = 2;
+
+        employees.ShouldSatisfyAllConditions(
+            e => e.Count.ShouldBe(
                 expectedNumberOfEmployees,
-                $"we should have seeded two employees for the {nameof(Facility.Owner)} and {nameof(Facility.Manager)} respectively");
-            employees.Single(e => e.FacilitiesOwned.Any()).FirstName.Should()
-                .BeEquivalentTo(expectedOwnerName, "we should have set the name on the owner");
-            employees.Single(e => e.FacilitiesManaged.Any()).FirstName.Should().BeEquivalentTo(
+                $"we should have seeded two employees for the {nameof(Facility.Owner)} and {nameof(Facility.Manager)} respectively"),
+            e => e.Single(e => e.FacilitiesOwned.Any()).FirstName.ShouldBeEquivalentTo(expectedOwnerName, "we should have set the name on the owner"),
+            e => e.Single(e => e.FacilitiesManaged.Any()).FirstName.ShouldBeEquivalentTo(
                 expectedManagerName,
-                "we should have set the name on the manager");
-        }
+                "we should have set the name on the manager"));
     }
 
     [Fact]
@@ -586,9 +559,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.SeedMany(amountToCreate, seedConfiguration);
 
-        string[] expectedRoomNames = ["Room 1", "Room 2", "Room 3"];
-        var roomNames = await _context.Set<Facility>().Select(f => f.Room!.Name).ToListAsync();
-        roomNames.Should().BeEquivalentTo(
+        List<string> expectedRoomNames = ["Room 1", "Room 2", "Room 3"];
+        var roomNames = await _context.Set<Facility>().Select(f => f.Room!.Name).ToListAsync(TestContext.Current.CancellationToken);
+        roomNames.ShouldBeEquivalentTo(
             expectedRoomNames,
             "information from each seed should be used with specifying many prerequisites");
     }
@@ -603,9 +576,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var seededEntity = _context.Seed(seed);
 
-        var room = await _context.Set<Room>().SingleAsync(b => b.Id == seededEntity.RoomId);
-        room.Name.Should()
-            .NotBeNullOrWhiteSpace($"we should have used the {nameof(RoomSeed)} for the Room");
+        var room = await _context.Set<Room>().SingleAsync(b => b.Id == seededEntity.RoomId, TestContext.Current.CancellationToken);
+        room.Name.ShouldNotBeNullOrWhiteSpace($"we should have used the {nameof(RoomSeed)} for the Room");
     }
 
     [Fact]
@@ -617,7 +589,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var seededEntity = _context.Seed(seed);
 
-        seededEntity.RegionId.Should().BeGreaterThan(
+        seededEntity.RegionId.ShouldBeGreaterThan(
             0,
             $"we should be able to seed the {nameof(Room.Region)} without a dedicated entity seed class");
     }
@@ -632,7 +604,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var booking = _context.Set<Booking>().Include(b => b.Facility.Room).Single(b => b.Id == seededEntity.Id);
 
-        booking.Facility.Room.Should().NotBeNull(
+        booking.Facility.Room.ShouldNotBeNull(
             "we should be able to seed grandparents as a prerequisite");
     }
 
@@ -648,14 +620,12 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var bookings = _context.SeedMany(2, seed).ToList();
 
-        using (new AssertionScope())
-        {
-            bookings.All(b => b.MemberId != existingMember.Id).Should().BeTrue(
-                "we should ignore entities in the change tracker when using WithNew and seeding many entities");
-            bookings.Select(b => b.MemberId).Distinct().Should().HaveCount(
+        bookings.ShouldSatisfyAllConditions(
+            b => b.All(bk => bk.MemberId != existingMember.Id).ShouldBeTrue(
+                "we should ignore entities in the change tracker when using WithNew and seeding many entities"),
+            b => b.Select(bk => bk.MemberId).Distinct().Count().ShouldBe(
                 1,
-                "each new booking should have the same new member");
-        }
+                "each new booking should have the same new member"));
     }
 
     [Fact]
@@ -670,7 +640,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var booking = _context.Seed(seed);
 
-        booking.MemberId.Should().NotBe(existingMember.Id, "we should ignore entities in the change tracker when using WithNew");
+        booking.MemberId.ShouldNotBe(existingMember.Id, "we should ignore entities in the change tracker when using WithNew");
     }
 
     [Fact]
@@ -684,7 +654,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var seededEntity = _context.Seed(seed);
 
         var booking = _context.Set<Booking>().Include(b => b.Member).Single(b => b.Id == seededEntity.Id);
-        booking.Member.MembershipGroupId.Should().NotBe(existingGroup.Id, "we should ignore entities in the change tracker when using WithNew");
+        booking.Member.MembershipGroupId.ShouldNotBe(existingGroup.Id, "we should ignore entities in the change tracker when using WithNew");
     }
 
     [Fact]
@@ -698,10 +668,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var amountToCreate = prerequisites.Length + 1;
         var act = () => _context.SeedMany(amountToCreate, seedConfiguration);
 
-        act.Should()
-            .ThrowExactly<DataSeedingException>(
+        act.ShouldThrow<DataSeedingException>(
                 "we should show a developer-friendly message for this as we cannot give a build error for it")
-            .WithMessage($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {prerequisites.Length} were provided.");
+            .Message.ShouldBe($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {prerequisites.Length} were provided.");
     }
 
     [Fact]
@@ -715,10 +684,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var amountToCreate = prerequisites.Length - 1;
         var act = () => _context.SeedMany(amountToCreate, seedConfiguration);
 
-        act.Should()
-            .ThrowExactly<DataSeedingException>(
+        act.ShouldThrow<DataSeedingException>(
                 "we should show a developer-friendly message for this as we cannot give a build error for it")
-            .WithMessage($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {prerequisites.Length} were provided.");
+            .Message.ShouldBe($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {prerequisites.Length} were provided.");
     }
 
     [Fact]
@@ -730,17 +698,16 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var member = _context.Seed(seedConfiguration);
 
-        var countOfParentsSeeded = await _context.Set<Member>().CountAsync();
-        var countOfChildrenSeeded = await _context.Set<Booking>().CountAsync(b => b.MemberId == member.Id);
-        using (new AssertionScope())
-        {
-            countOfParentsSeeded.Should().Be(
-                1,
-                $"{nameof(EntitySeedExtensions.WithChildren)} should only seed one parent entity");
-            countOfChildrenSeeded.Should().Be(
-                numberOfChildren,
-                $"{nameof(EntitySeedExtensions.WithChildren)} should seed the specified number of children for the parent entity");
-        }
+        var countOfParentsSeeded = await _context.Set<Member>().CountAsync(TestContext.Current.CancellationToken);
+        var countOfChildrenSeeded = await _context.Set<Booking>().CountAsync(b => b.MemberId == member.Id, TestContext.Current.CancellationToken);
+
+        countOfParentsSeeded.ShouldBe(
+            1,
+            $"{nameof(EntitySeedExtensions.WithChildren)} should only seed one parent entity");
+
+        countOfChildrenSeeded.ShouldBe(
+            numberOfChildren,
+            $"{nameof(EntitySeedExtensions.WithChildren)} should seed the specified number of children for the parent entity");
     }
 
     [Fact]
@@ -755,13 +722,11 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.Seed(seedConfiguration);
 
-        var childrenSeeded = await _context.Set<Facility>().ToListAsync();
-        using (new AssertionScope())
-        {
-            childrenSeeded.Select(c => c.Name).Should().BeEquivalentTo(
-                new[] { "Facility 1", "Facility 2" },
-                "we should be able to customise children on a per-seed basis");
-        }
+        var childrenSeeded = await _context.Set<Facility>().ToListAsync(TestContext.Current.CancellationToken);
+
+        childrenSeeded.Select(c => c.Name).ToArray().ShouldBeEquivalentTo(
+            new[] { "Facility 1", "Facility 2" },
+            "we should be able to customise children on a per-seed basis");
     }
 
     [Fact]
@@ -773,9 +738,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.Seed(seedConfiguration);
 
-        var savedEntity = await _context.Set<Facility>().Include(f => f.Room).FirstAsync();
-        savedEntity.Room?.Name.Should()
-            .Be(roomName, "it should select an existing Room from the database");
+        var savedEntity = await _context.Set<Facility>().Include(f => f.Room).FirstAsync(TestContext.Current.CancellationToken);
+        savedEntity.Room?.Name.ShouldBe(roomName, "it should select an existing Room from the database");
     }
 
     [Fact]
@@ -791,13 +755,11 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountToSeed = 2;
         _context.SeedMany(amountToSeed, seedConfiguration);
 
-        var childrenSeeded = await _context.Set<Facility>().ToListAsync();
-        using (new AssertionScope())
-        {
-            childrenSeeded.Select(c => c.Name).Should().BeEquivalentTo(
-                new[] { "Facility 1", "Facility 2", "Facility 3", "Facility 1", "Facility 2", "Facility 3" },
-                "we should be able to customise the child seed that each optional parent receives a copy of");
-        }
+        var childrenSeeded = await _context.Set<Facility>().ToListAsync(TestContext.Current.CancellationToken);
+
+        childrenSeeded.Select(c => c.Name).ToArray().ShouldBeEquivalentTo(
+            new[] { "Facility 1", "Facility 2", "Facility 3", "Facility 1", "Facility 2", "Facility 3" },
+            "we should be able to customise the child seed that each optional parent receives a copy of");
     }
 
     [Fact]
@@ -813,13 +775,11 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountToSeed = 2;
         _context.SeedMany(amountToSeed, seedConfiguration);
 
-        var childrenSeeded = await _context.Set<Booking>().ToListAsync();
-        using (new AssertionScope())
-        {
-            childrenSeeded.Select(c => c.Notes).Should().BeEquivalentTo(
-                new[] { "Booking 1", "Booking 2", "Booking 3", "Booking 1", "Booking 2", "Booking 3" },
-                "we should be able to customise the child seed that each required parent receives a copy of");
-        }
+        var childrenSeeded = await _context.Set<Booking>().ToListAsync(TestContext.Current.CancellationToken);
+
+        childrenSeeded.Select(c => c.Notes).ToArray().ShouldBeEquivalentTo(
+            new[] { "Booking 1", "Booking 2", "Booking 3", "Booking 1", "Booking 2", "Booking 3" },
+            "we should be able to customise the child seed that each required parent receives a copy of");
     }
 
     [Fact]
@@ -832,20 +792,19 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountToSeed = 3;
         _context.SeedMany(amountToSeed, seedConfiguration);
 
-        var childrenSeeded = await _context.Set<Facility>().ToListAsync();
-        using (new AssertionScope())
-        {
-            var facilitiesPerRoom = childrenSeeded.GroupBy(c => c.RoomId).ToList();
-            facilitiesPerRoom.Should().HaveCount(
+        var childrenSeeded = await _context.Set<Facility>().ToListAsync(TestContext.Current.CancellationToken);
+        var facilitiesPerRoom = childrenSeeded.GroupBy(c => c.RoomId).ToList();
+
+        facilitiesPerRoom.ShouldSatisfyAllConditions(
+            f => f.Count.ShouldBe(
                 amountToSeed,
-                $"{nameof(DbContextExtensions.SeedMany)} should the number of entities provided");
-            facilitiesPerRoom.All(b => b.Count() == numberOfChildren).Should()
-                .BeTrue(
-                    $"{nameof(EntitySeedExtensions.WithChildren)} should seed the specified number of children for each parent entity");
-            childrenSeeded.Should().HaveCount(
-                numberOfChildren * amountToSeed,
-                $"{nameof(EntitySeedExtensions.WithChildren)} should seed the specified number of children for the parent entity");
-        }
+                $"{nameof(DbContextExtensions.SeedMany)} should the number of entities provided"),
+            f => f.All(b => b.Count() == numberOfChildren).ShouldBeTrue(
+                    $"{nameof(EntitySeedExtensions.WithChildren)} should seed the specified number of children for each parent entity"));
+
+        childrenSeeded.Count.ShouldBe(
+            numberOfChildren * amountToSeed,
+            $"{nameof(EntitySeedExtensions.WithChildren)} should seed the specified number of children for the parent entity");
     }
 
     [Fact]
@@ -860,19 +819,18 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int roomsToSeed = 2;
         _context.SeedMany(roomsToSeed, seed);
 
-        var facilities = await _context.Set<Facility>().ToListAsync();
-        using (new AssertionScope())
+        var facilities = await _context.Set<Facility>().ToListAsync(TestContext.Current.CancellationToken);
+        var facilitiesPerRoom = facilities.GroupBy(b => b.RoomId).ToList();
+
+        facilitiesPerRoom.Count.ShouldBe(
+            roomsToSeed,
+            "we should have seeded the correct number of rooms");
+
+        foreach (var facilitiesForBooking in facilitiesPerRoom)
         {
-            var facilitiesPerRoom = facilities.GroupBy(b => b.RoomId).ToList();
-            facilitiesPerRoom.Should().HaveCount(
-                roomsToSeed,
-                "we should have seeded the correct number of rooms");
-            foreach (var facilitiesForBooking in facilitiesPerRoom)
-            {
-                facilitiesForBooking.Select(f => f.Name).Should().BeEquivalentTo(
-                    facilityNames,
-                    "each child should have the correct name");
-            }
+            facilitiesForBooking.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(
+                facilityNames,
+                "each child should have the correct name");
         }
     }
 
@@ -887,9 +845,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.Seed(seedConfiguration);
 
-        var savedEntity = await _context.Set<Facility>().Include(f => f.Room).FirstAsync();
-        savedEntity.Room?.Name.Should()
-            .Be(expectedRoomName, "it should select the correct Room from the database");
+        var savedEntity = await _context.Set<Facility>().Include(f => f.Room).FirstAsync(TestContext.Current.CancellationToken);
+        savedEntity.Room?.Name.ShouldBe(expectedRoomName, "it should select the correct Room from the database");
     }
 
     [Fact]
@@ -901,8 +858,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.Seed(seedConfiguration);
 
-        var savedEntity = await _context.Set<Facility>().Include(f => f.Room).FirstAsync();
-        savedEntity.Room!.Name.Should().Be(roomName, "it should select the Room from the database");
+        var savedEntity = await _context.Set<Facility>().Include(f => f.Room).FirstAsync(TestContext.Current.CancellationToken);
+        savedEntity.Room!.Name.ShouldBe(roomName, "it should select the Room from the database");
     }
 
     [Fact]
@@ -914,16 +871,15 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.Seed(seed);
 
-        var members = await _context.Set<Member>().ToListAsync();
-        using (new AssertionScope())
-        {
-            members.Should().HaveCount(
+        var members = await _context.Set<Member>().ToListAsync(TestContext.Current.CancellationToken);
+
+        members.ShouldSatisfyAllConditions(
+            m => m.Count.ShouldBe(
                 1,
-                "overriding a prerequisite should mean the default prerequisite isn't seeded");
-            members.Single().FirstName.Should().Be(
+                "overriding a prerequisite should mean the default prerequisite isn't seeded"),
+            m => m.Single().FirstName.ShouldBe(
                 expectedMemberName,
-                "we should have overridden the prerequisite based on the provided entity");
-        }
+                "we should have overridden the prerequisite based on the provided entity"));
     }
 
     [Fact]
@@ -936,9 +892,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         _context.SeedMany(amountToCreate, seedConfiguration);
 
         const int expectedCount = amountToCreate;
-        var savedEntities = await _context.Set<Booking>().ToListAsync();
-        savedEntities.DistinctBy(b => b.MemberId).Should()
-            .HaveCount(
+        var savedEntities = await _context.Set<Booking>().ToListAsync(TestContext.Current.CancellationToken);
+        savedEntities.DistinctBy(b => b.MemberId).Count().ShouldBe(
                 expectedCount,
                 $"{nameof(EntitySeedExtensions.WithDifferent)} should give each child its own parent");
     }
@@ -955,9 +910,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var roomNames = await _context.Set<Facility>()
             .Select(f => f.Room!.Name)
-            .ToListAsync();
-        roomNames.Should().BeEquivalentTo(
-            ["First name", "Second name", "Third name"],
+            .ToListAsync(TestContext.Current.CancellationToken);
+        roomNames.ShouldBeEquivalentTo(
+            new List<string>() { "First name", "Second name", "Third name" },
             "we should be able to set different values for each parent");
     }
 
@@ -976,23 +931,24 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var bookings = await _context.Set<Booking>()
             .Include(b => b.Member.MembershipGroup)
-            .ToListAsync();
-        using (new AssertionScope())
-        {
-            bookings.Should().HaveCount(amountToCreate, $"we should have seeded {amountToCreate} {nameof(Booking)}s");
-            bookings.Select(b => b.MemberId).Distinct().Should().HaveCount(
+            .ToListAsync(TestContext.Current.CancellationToken);
+
+        bookings.ShouldSatisfyAllConditions(
+            b => b.Count.ShouldBe(amountToCreate, $"we should have seeded {amountToCreate} {nameof(Booking)}s"),
+            b => b.Select(bk => bk.MemberId).Distinct().Count().ShouldBe(
                 amountToCreate,
-                $"we should have seeded {amountToCreate} {nameof(Member)}s");
-            bookings.Select(b => b.Member.MembershipGroupId).Distinct().Should().HaveCount(
-                amountToCreate,
-                $"we should have seeded {amountToCreate} {nameof(MembershipGroup)}s");
-            bookings.Select(b => b.Member.MembershipGroup.RegionId).Distinct().Should().HaveCount(
-                amountToCreate,
-                $"we should have seeded {amountToCreate} {nameof(Region)}s");
-            _context.Set<Member>().Should().HaveCount(amountToCreate);
-            _context.Set<MembershipGroup>().Should().HaveCount(amountToCreate);
-            _context.Set<Region>().Should().HaveCount(amountToCreate);
-        }
+                $"we should have seeded {amountToCreate} {nameof(Member)}s"),
+            b => b.Select(bk => bk.Member.MembershipGroupId).Distinct().Count().ShouldBe(
+                    amountToCreate,
+                    $"we should have seeded {amountToCreate} {nameof(MembershipGroup)}s"),
+            b => b.Select(bk => bk.Member.MembershipGroup.RegionId).Distinct().Count().ShouldBe(
+                    amountToCreate,
+                    $"we should have seeded {amountToCreate} {nameof(Region)}s"));
+
+        _context.ShouldSatisfyAllConditions(
+            c => c.Set<Member>().Count().ShouldBe(amountToCreate),
+            c => c.Set<MembershipGroup>().Count().ShouldBe(amountToCreate),
+            c => c.Set<Region>().Count().ShouldBe(amountToCreate));
     }
 
     // It's easy to unintentionally change (i.e break) the behaviour depending on the amount being created, so test a few values to make sure this hasn't happened.
@@ -1010,19 +966,20 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var bookings = await _context.Set<Booking>()
             .Include(b => b.Member.MembershipGroup)
-            .ToListAsync();
-        using (new AssertionScope())
-        {
-            bookings.Should().HaveCount(amountToCreate, $"we should have seeded {amountToCreate} {nameof(Booking)}s");
-            bookings.Select(b => b.MemberId).Distinct().Should().HaveCount(
+            .ToListAsync(TestContext.Current.CancellationToken);
+
+        bookings.ShouldSatisfyAllConditions(
+            b => b.Count.ShouldBe(amountToCreate, $"we should have seeded {amountToCreate} {nameof(Booking)}s"),
+            b => b.Select(booking => booking.MemberId).Distinct().Count().ShouldBe(
                 amountToCreate,
-                $"we should have seeded {amountToCreate} {nameof(Member)}s");
-            bookings.Select(b => b.Member.MembershipGroupId).Distinct().Should().HaveCount(
+                $"we should have seeded {amountToCreate} {nameof(Member)}s"),
+            b => b.Select(booking => booking.Member.MembershipGroupId).Distinct().Count().ShouldBe(
                 amountToCreate,
-                $"we should have seeded {amountToCreate} {nameof(MembershipGroup)}s");
-            _context.Set<Member>().Should().HaveCount(amountToCreate);
-            _context.Set<MembershipGroup>().Should().HaveCount(amountToCreate);
-        }
+                $"we should have seeded {amountToCreate} {nameof(MembershipGroup)}s"));
+
+        _context.ShouldSatisfyAllConditions(
+            c => c.Set<Member>().Count().ShouldBe(amountToCreate),
+            c => c.Set<MembershipGroup>().Count().ShouldBe(amountToCreate));
     }
 
     [Fact]
@@ -1033,8 +990,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         _context.Seed(seedConfiguration);
 
-        var savedEntities = await _context.Set<Booking>().SingleAsync();
-        savedEntities.Notes.Should().BeNull($"{nameof(EntitySeedExtensions.Without)} should null out the property");
+        var savedEntities = await _context.Set<Booking>().SingleAsync(TestContext.Current.CancellationToken);
+        savedEntities.Notes.ShouldBeNull($"{nameof(EntitySeedExtensions.Without)} should null out the property");
     }
 
     [Fact]
@@ -1045,8 +1002,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var act = () => _context.Seed(seed);
 
-        act.Should()
-            .ThrowExactly<DataSeedingException>("we should not be able to set the incorrect type for the primary key");
+        act.ShouldThrow<DataSeedingException>("we should not be able to set the incorrect type for the primary key");
     }
 
     [Fact]
@@ -1057,8 +1013,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var act = () => _context.Seed(seed);
 
-        act.Should()
-            .ThrowExactly<DataSeedingException>("we should not be able to do this for entities with composite keys");
+        act.ShouldThrow<DataSeedingException>("we should not be able to do this for entities with composite keys");
     }
 
     [Fact]
@@ -1076,11 +1031,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
             .WithPrimaryKey(secondPrimaryKeyValue);
         var secondBooking = _context.Seed(secondSeed);
 
-        using (new AssertionScope())
-        {
-            firstBooking.Id.Should().Be(firstPimaryKeyValue);
-            secondBooking.Id.Should().Be(secondPrimaryKeyValue);
-        }
+        firstBooking.Id.ShouldBe(firstPimaryKeyValue);
+        secondBooking.Id.ShouldBe(secondPrimaryKeyValue);
     }
 
     [Fact]
@@ -1093,10 +1045,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var bookings = _context.SeedMany(3, firstSeed);
 
-        using (new AssertionScope())
-        {
-            bookings.Select(b => b.Id).Should().BeEquivalentTo(primaryKeyValues);
-        }
+        bookings.Select(b => b.Id).ToArray().ShouldBeEquivalentTo(primaryKeyValues);
     }
 
     [Fact]
@@ -1110,10 +1059,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int bookingsToSeed = 3;
         var bookings = _context.SeedMany(bookingsToSeed, seed).ToList();
 
-        bookings.Select(b => b.FacilityId).Distinct().Should().HaveCount(bookingsToSeed);
-        var roomIds = bookings.ConvertAll(b => b.Facility.RoomId);
-        roomIds.Should()
-            .BeEquivalentTo(
+        bookings.Select(b => b.FacilityId).Distinct().Count().ShouldBe(bookingsToSeed);
+        var roomIds = bookings.ConvertAll(b => b.Facility.RoomId).ToArray();
+        roomIds.ShouldBeEquivalentTo(
                 new int?[] { room.Id, null, room.Id },
                 "we should be able to seed different rooms for each facility");
     }
@@ -1128,15 +1076,13 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int bookingsToSeed = 3;
         _context.SeedMany(bookingsToSeed, seed);
 
-        var facilities = await _context.Set<Facility>().Include(f => f.Bookings).ToListAsync();
-        using (new AssertionScope())
-        {
-            facilities.Should().HaveCount(2, "we should have seeded two facilities");
-            facilities.Count(f => f.Bookings.Count == 1).Should()
-                .Be(1, "we should have seeded a facility with a single booking");
-            facilities.Count(f => f.Bookings.Count == 2).Should()
-                .Be(1, "we should have seeded a facility with two bookings");
-        }
+        var facilities = await _context.Set<Facility>().Include(f => f.Bookings).ToListAsync(TestContext.Current.CancellationToken);
+        facilities.ShouldSatisfyAllConditions(
+            f => f.Count.ShouldBe(2, "we should have seeded two facilities"),
+            f => f.Count(facility => facility.Bookings.Count == 1)
+                .ShouldBe(1, "we should have seeded a facility with a single booking"),
+            f => f.Count(facility => facility.Bookings.Count == 2)
+                .ShouldBe(1, "we should have seeded a facility with two bookings"));
     }
 
     [Fact]
@@ -1152,10 +1098,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountToCreate = 2;
         var bookings = _context.SeedMany(amountToCreate, seed).ToList();
 
-        bookings.Select(b => b.FacilityId).Distinct().Should()
-            .HaveCount(amountToCreate, "the bookings should be for different facilities");
-        bookings.Select(b => b.Facility.RoomId).Distinct().Should()
-            .HaveCount(amountToCreate, "the facilities should be in different rooms");
+        bookings.Select(b => b.FacilityId).Distinct().Count().ShouldBe(amountToCreate, "the bookings should be for different facilities");
+        bookings.Select(b => b.Facility.RoomId).Distinct().Count().ShouldBe(amountToCreate, "the facilities should be in different rooms");
     }
 
     [Fact]
@@ -1176,16 +1120,18 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var employees = await _context.Set<Employee>()
             .Include(e => e.FacilitiesManaged)
             .Include(e => e.FacilitiesOwned)
-            .ToListAsync();
+            .ToListAsync(TestContext.Current.CancellationToken);
+
         var employeeA = employees.Single(e => e.FirstName == "A");
         var employeeB = employees.Single(e => e.FirstName == "B");
-        using (new AssertionScope())
-        {
-            employeeA.FacilitiesManaged.Select(f => f.Name).Should().BeEquivalentTo("A");
-            employeeA.FacilitiesOwned.Select(f => f.Name).Should().BeEquivalentTo("B");
-            employeeB.FacilitiesManaged.Select(f => f.Name).Should().BeEquivalentTo("B");
-            employeeB.FacilitiesOwned.Select(f => f.Name).Should().BeEquivalentTo("A");
-        }
+
+        employeeA.ShouldSatisfyAllConditions(
+            e => e.FacilitiesManaged.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "A" }),
+            e => e.FacilitiesOwned.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "B" }));
+
+        employeeB.ShouldSatisfyAllConditions(
+            e => e.FacilitiesManaged.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "B" }),
+            e => e.FacilitiesOwned.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "A" }));
     }
 
     [Fact]
@@ -1208,19 +1154,23 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var employees = await _context.Set<Employee>()
             .Include(e => e.FacilitiesManaged)
             .Include(e => e.FacilitiesOwned)
-            .ToListAsync();
+            .ToListAsync(TestContext.Current.CancellationToken);
+
         var employeeA = employees.Single(e => e.FirstName == "A");
         var employeeB = employees.Single(e => e.FirstName == "B");
         var employeeC = employees.Single(e => e.FirstName == "C");
-        using (new AssertionScope())
-        {
-            employeeA.FacilitiesManaged.Select(f => f.Name).Should().BeEquivalentTo("A", "B");
-            employeeA.FacilitiesOwned.Select(f => f.Name).Should().BeEmpty();
-            employeeB.FacilitiesManaged.Select(f => f.Name).Should().BeEquivalentTo("C");
-            employeeB.FacilitiesOwned.Select(f => f.Name).Should().BeEquivalentTo("A");
-            employeeC.FacilitiesManaged.Select(f => f.Name).Should().BeEmpty();
-            employeeC.FacilitiesOwned.Select(f => f.Name).Should().BeEquivalentTo("B", "C");
-        }
+
+        employeeA.ShouldSatisfyAllConditions(
+            e => e.FacilitiesManaged.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "A", "B" }),
+            e => e.FacilitiesOwned.Select(f => f.Name).ToArray().ShouldBeEmpty());
+
+        employeeB.ShouldSatisfyAllConditions(
+            e => e.FacilitiesManaged.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "C" }),
+            e => e.FacilitiesOwned.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "A" }));
+
+        employeeC.ShouldSatisfyAllConditions(
+            e => e.FacilitiesManaged.Select(f => f.Name).ToArray().ShouldBeEmpty(),
+            e => e.FacilitiesOwned.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "C", "B" }));
     }
 
     [Fact]
@@ -1233,15 +1183,12 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountOfMembers = 2;
         _context.SeedMany(amountOfMembers, seed);
 
-        var members = await _context.Set<Member>().ToListAsync();
-        var bookings = await _context.Set<Booking>().ToListAsync();
-        using (new AssertionScope())
+        var members = await _context.Set<Member>().ToListAsync(TestContext.Current.CancellationToken);
+        var bookings = await _context.Set<Booking>().ToListAsync(TestContext.Current.CancellationToken);
+        members.Count.ShouldBe(amountOfMembers, "we should have seeded two members");
+        foreach (var bookingsForMember in bookings.GroupBy(b => b.MemberId))
         {
-            members.Should().HaveCount(amountOfMembers, "we should have seeded two members");
-            foreach (var bookingsForMember in bookings.GroupBy(b => b.MemberId))
-            {
-                bookingsForMember.Should().HaveCount(bookingsPerMember, "each member should have 2 bookings");
-            }
+            bookingsForMember.Count().ShouldBe(bookingsPerMember, "each member should have 2 bookings");
         }
     }
 
@@ -1261,21 +1208,17 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var bookings = await _context.Set<Booking>()
             .Include(b => b.Facility)
-            .ToListAsync();
+            .ToListAsync(TestContext.Current.CancellationToken);
         const int expectedCount = 2;
-        using (new AssertionScope())
-        {
-            bookings.Should().HaveCount(expectedCount);
-            bookings.Count(b => b.Facility is { PoolId: not null, RoomId: null }).Should()
-                .Be(1, "one of the bookings should be in a pool");
-            bookings.Count(b => b.Facility is { PoolId: null, RoomId: not null }).Should()
-                .Be(1, "one of the bookings should be in a room");
-        }
+        bookings.ShouldSatisfyAllConditions(
+            b => b.Count.ShouldBe(expectedCount),
+            b => b.Count(booking => booking.Facility is { PoolId: not null, RoomId: null })
+                .ShouldBe(1, "one of the bookings should be in a pool"),
+            b => b.Count(booking => booking.Facility is { PoolId: null, RoomId: not null })
+                .ShouldBe(1, "one of the bookings should be in a room"));
     }
 
     [Fact]
-    [SuppressMessage("Maintainability", "ACL1002: Methods should not exceed a predefined number of statements",
-        Justification = "We are testing a complicated data setup & need to perform many asserts as a result.")]
     public void MultipleWithDifferentSpecified_IsNotOverwritten()
     {
         var entitySeed = new BookingSeed()
@@ -1300,22 +1243,18 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var owners = _context.Set<Employee>().Where(e => e.FacilitiesOwned.Any()).ToList();
         var pools = _context.Set<Pool>().ToList();
 
-        using (new AssertionScope())
-        {
-            ownerIds.Should().HaveCount(bookingsToCreate, "each booking should have a different owner");
-            poolIds.Should().HaveCount(bookingsToCreate, "each booking should have a different pool");
-            membershipGroupIds.Should().HaveCount(
-                bookingsToCreate,
-                "each booking's member should be in a distinct membership group");
-            members.Should().HaveCount(bookingsToCreate, "each booking should have a different member");
-            membershipGroups.Should()
-                .HaveCount(bookingsToCreate, "there should be two membership groups in the database");
-            facilities.Should().HaveCount(bookingsToCreate, "there should be two facilities in the database");
-            owners.Should().HaveCount(
-                bookingsToCreate,
-                "there should be two owners (excluding managers) in the database");
-            pools.Should().HaveCount(bookingsToCreate, "there should be two pools in the database");
-        }
+        ownerIds.Count.ShouldBe(bookingsToCreate, "each booking should have a different owner");
+        poolIds.Count.ShouldBe(bookingsToCreate, "each booking should have a different pool");
+        membershipGroupIds.Count.ShouldBe(
+            bookingsToCreate,
+            "each booking's member should be in a distinct membership group");
+        members.Count.ShouldBe(bookingsToCreate, "each booking should have a different member");
+        membershipGroups.Count.ShouldBe(bookingsToCreate, "there should be two membership groups in the database");
+        facilities.Count.ShouldBe(bookingsToCreate, "there should be two facilities in the database");
+        owners.Count.ShouldBe(
+            bookingsToCreate,
+            "there should be two owners (excluding managers) in the database");
+        pools.Count.ShouldBe(bookingsToCreate, "there should be two pools in the database");
     }
 
     [Fact]
@@ -1337,12 +1276,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var managerIds = bookingAfterSave.ConvertAll(b => b.Facility.ManagerId).Distinct().ToList();
         var facilityIds = bookingAfterSave.ConvertAll(b => b.FacilityId).Distinct().ToList();
         var roomIds = bookingAfterSave.ConvertAll(b => b.Facility.RoomId).Distinct().ToList();
-        using (new AssertionScope())
-        {
-            managerIds.Should().HaveCount(1);
-            facilityIds.Should().HaveCount(2);
-            roomIds.Should().HaveCount(2);
-        }
+        managerIds.Count.ShouldBe(1);
+        facilityIds.Count.ShouldBe(2);
+        roomIds.Count.ShouldBe(2);
     }
 
     [Fact]
@@ -1353,11 +1289,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountToCreate = 2;
         var couponIssuers = _context.SeedMany(amountToCreate, entitySeed).ToList();
 
-        using (new AssertionScope())
-        {
-            couponIssuers.Select(ci => ci.CouponId).Distinct().Should().HaveCount(amountToCreate);
-            couponIssuers.Select(ci => ci.IssuerId).Distinct().Should().HaveCount(amountToCreate);
-        }
+        couponIssuers.ShouldSatisfyAllConditions(
+            ci => ci.Select(couponIssuer => couponIssuer.CouponId).Distinct().Count().ShouldBe(amountToCreate),
+            ci => ci.Select(couponIssuer => couponIssuer.IssuerId).Distinct().Count().ShouldBe(amountToCreate));
     }
 
     [Fact]
@@ -1372,11 +1306,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var couponIssuers = _context.SeedMany(amountToCreate, entitySeed).ToList();
 
-        using (new AssertionScope())
-        {
-            couponIssuers.Select(ci => ci.CouponId).Should().ContainInOrder(coupons[0].Id, coupons[1].Id);
-            couponIssuers.Select(ci => ci.IssuerId).Should().ContainInOrder(employees[0].Id, employees[1].Id);
-        }
+        couponIssuers.ShouldSatisfyAllConditions(
+            ci => ci.Select(couponIssuer => couponIssuer.CouponId).ShouldBe([coupons[0].Id, coupons[1].Id]),
+            ci => ci.Select(couponIssuer => couponIssuer.IssuerId).ShouldBe([employees[0].Id, employees[1].Id]));
     }
 
     [Fact]
@@ -1391,7 +1323,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountToCreate = 2;
         var act = () => _context.SeedMany(amountToCreate, entitySeed).ToList();
 
-        act.Should().Throw<Exception>("we should not be able to seed multiple entities with the same composite key");
+        act.ShouldThrow<Exception>("we should not be able to seed multiple entities with the same composite key");
     }
 
     [Fact]
@@ -1404,7 +1336,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var booking = _context.Seed(bookingSeed);
 
-        booking.FacilityId.Should().Be(facility.Id);
+        booking.FacilityId.ShouldBe(facility.Id);
     }
 
     [Fact]
@@ -1419,14 +1351,10 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var allBookings = _context.Set<Booking>().Include(b => b.Facility).ToList();
         var allManagers = _context.Set<Employee>().Where(e => e.FacilitiesManaged.Any()).ToList();
-        using (new AssertionScope())
-        {
-            allBookings.Select(b => b.Facility.ManagerId).Should()
-                .BeEquivalentTo(
-                    [allManagers[0].Id, allManagers[0].Id, allManagers[1].Id],
-                    "the Manager Ids should be set as specified in the seed configuration.");
-            allManagers.Should().HaveCount(managersNeeded, "we should not have seeded more employees");
-        }
+        allBookings.Select(b => b.Facility.ManagerId).ToArray().ShouldBeEquivalentTo(
+            new[] { allManagers[0].Id, allManagers[0].Id, allManagers[1].Id },
+            "the Manager Ids should be set as specified in the seed configuration.");
+        allManagers.Count.ShouldBe(managersNeeded, "we should not have seeded more employees");
     }
 
     [Fact]
@@ -1439,13 +1367,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
         _context.SeedMany(3, bookingSeed);
 
         var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
-        using (new AssertionScope())
-        {
-            bookingsAfterSave.Select(b => b.Member.MembershipGroup.ParentId).Should()
-                .BeEquivalentTo(
-                    [groups[0].Id, groups[0].Id, groups[1].Id],
-                    "the Membership Group Ids should be set as specified in the seed configuration.");
-        }
+        bookingsAfterSave.Select(b => b.Member.MembershipGroup.ParentId).ToArray().ShouldBeEquivalentTo(
+            new int?[] { groups[0].Id, groups[0].Id, groups[1].Id },
+            "the Membership Group Ids should be set as specified in the seed configuration.");
     }
 
     [Fact]
@@ -1457,16 +1381,13 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountToCreate = 2;
         _context.SeedMany(amountToCreate, bookingSeed);
 
-        using (new AssertionScope())
-        {
-            var members = _context.Set<Member>().ToList();
-            members.Should().HaveCount(
-                amountToCreate,
-                "we should overwrite the default seed doing a WithDifferent explicitly");
-            var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member).ToList();
-            bookingsAfterSave.Select(b => b.Member.FirstName).Should()
-                .BeEquivalentTo(["John", "Jane"]);
-        }
+        var members = _context.Set<Member>().ToList();
+        members.Count.ShouldBe(
+            amountToCreate,
+            "we should overwrite the default seed doing a WithDifferent explicitly");
+
+        var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member).ToList();
+        bookingsAfterSave.Select(b => b.Member.FirstName).ToArray().ShouldBeEquivalentTo(new[] { "John", "Jane" });
     }
 
     [Fact]
@@ -1478,20 +1399,18 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountToCreate = 2;
         _context.SeedMany(amountToCreate, bookingSeed);
 
-        using (new AssertionScope())
-        {
-            var members = _context.Set<Member>().ToList();
-            members.Should().HaveCount(
-                amountToCreate,
-                "we should overwrite the default seed doing a WithDifferent explicitly");
-            var groups = _context.Set<MembershipGroup>().ToList();
-            groups.Should().HaveCount(
-                amountToCreate,
-                "we should overwrite the default seed doing a WithDifferent explicitly");
-            var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
-            bookingsAfterSave.Select(b => b.Member.MembershipGroup.Name).Should()
-                .BeEquivalentTo(["Group 1", "Group 2"]);
-        }
+        var members = _context.Set<Member>().ToList();
+        members.Count.ShouldBe(
+            amountToCreate,
+            "we should overwrite the default seed doing a WithDifferent explicitly");
+
+        var groups = _context.Set<MembershipGroup>().ToList();
+        groups.Count.ShouldBe(
+            amountToCreate,
+            "we should overwrite the default seed doing a WithDifferent explicitly");
+
+        var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
+        bookingsAfterSave.Select(b => b.Member.MembershipGroup.Name).ToArray().ShouldBeEquivalentTo(new[] { "Group 1", "Group 2" });
     }
 
     [Fact]
@@ -1504,17 +1423,17 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountToCreate = 2;
         _context.SeedMany(amountToCreate, bookingSeed);
 
-        using (new AssertionScope())
-        {
-            var members = _context.Set<Member>().ToList();
-            members.Should().HaveCount(1);
-            var groups = _context.Set<MembershipGroup>().ToList();
-            groups.Should().HaveCount(1);
-            var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
-            bookingsAfterSave.Should().HaveCount(2);
-            bookingsAfterSave.Select(b => b.Member.MembershipGroupId).Should()
-                .BeEquivalentTo([membershipGroup.Id, membershipGroup.Id]);
-        }
+        var members = _context.Set<Member>().ToList();
+        members.Count.ShouldBe(1);
+
+        var groups = _context.Set<MembershipGroup>().ToList();
+        groups.Count.ShouldBe(1);
+
+        var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
+        bookingsAfterSave.ShouldSatisfyAllConditions(
+            b => b.Count.ShouldBe(2),
+            b => b.Select(booking => booking.Member.MembershipGroupId).ToArray()
+                .ShouldBeEquivalentTo(new[] { membershipGroup.Id, membershipGroup.Id }));
     }
 
     [Fact]
@@ -1527,17 +1446,17 @@ public sealed class EntitySeedExtensionTests : IDisposable
         const int amountToCreate = 2;
         _context.SeedMany(amountToCreate, bookingSeed);
 
-        using (new AssertionScope())
-        {
-            var members = _context.Set<Member>().ToList();
-            members.Should().HaveCount(1);
-            var groups = _context.Set<MembershipGroup>().ToList();
-            groups.Should().HaveCount(1);
-            var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
-            bookingsAfterSave.Should().HaveCount(2);
-            bookingsAfterSave.Select(b => b.Member.MembershipGroupId).Should()
-                .BeEquivalentTo([membershipGroup.Id, membershipGroup.Id]);
-        }
+        var members = _context.Set<Member>().ToList();
+        members.Count.ShouldBe(1);
+
+        var groups = _context.Set<MembershipGroup>().ToList();
+        groups.Count.ShouldBe(1);
+
+        var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
+        bookingsAfterSave.ShouldSatisfyAllConditions(
+            b => b.Count.ShouldBe(2),
+            b => b.Select(booking => booking.Member.MembershipGroupId).ToArray()
+                .ShouldBeEquivalentTo(new[] { membershipGroup.Id, membershipGroup.Id }));
     }
 
     [Fact]
@@ -1554,14 +1473,12 @@ public sealed class EntitySeedExtensionTests : IDisposable
             .WithNew(ca => ca.Asset, seeds);
         _context.SeedMany(3, seed);
 
-        using (new AssertionScope())
-        {
-            var savedAssets = _context.Set<Asset>().ToList();
-            savedAssets.Should().HaveCount(3, "we should have seeded three assets of different types");
-            savedAssets.OfType<EmployeeAsset>().Should().HaveCount(1, $"one of the assets should be of type {nameof(EmployeeAsset)}");
-            savedAssets.OfType<PoolAsset>().Should().HaveCount(1, $"one of the assets should be of type {nameof(PoolAsset)}");
-            savedAssets.OfType<RoomAsset>().Should().HaveCount(1, $"one of the assets should be of type {nameof(RoomAsset)}");
-        }
+        var savedAssets = _context.Set<Asset>().ToList();
+        savedAssets.ShouldSatisfyAllConditions(
+            s => s.Count.ShouldBe(3, "we should have seeded three assets of different types"),
+            s => s.OfType<EmployeeAsset>().Count().ShouldBe(1, $"one of the assets should be of type {nameof(EmployeeAsset)}"),
+            s => s.OfType<PoolAsset>().Count().ShouldBe(1, $"one of the assets should be of type {nameof(PoolAsset)}"),
+            s => s.OfType<RoomAsset>().Count().ShouldBe(1, $"one of the assets should be of type {nameof(RoomAsset)}"));
     }
 
     [Fact]
@@ -1575,15 +1492,15 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var bookings = _context.Set<Booking>().ToList();
         var members = _context.Set<Member>().ToList();
         var membershipGroups = _context.Set<MembershipGroup>().ToList();
-        using (new AssertionScope())
-        {
-            bookings.Should().HaveCount(2);
-            members.Should().HaveCount(2);
-            membershipGroups.Should().HaveCount(2);
+        bookings.Count.ShouldBe(2);
 
-            members.All(m => m.Bookings.Count == 1).Should().BeTrue();
-            membershipGroups.All(m => m.Members.Count == 1).Should().BeTrue();
-        }
+        members.ShouldSatisfyAllConditions(
+            m => m.Count.ShouldBe(2),
+            m => m.All(member => member.Bookings.Count == 1).ShouldBeTrue());
+
+        membershipGroups.ShouldSatisfyAllConditions(
+            m => m.Count.ShouldBe(2),
+            m => m.All(membershipGroup => membershipGroup.Members.Count == 1).ShouldBeTrue());
     }
 
     [Fact]
@@ -1596,15 +1513,15 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var bookings = _context.Set<Booking>().ToList();
         var members = _context.Set<Member>().ToList();
         var membershipGroups = _context.Set<MembershipGroup>().ToList();
-        using (new AssertionScope())
-        {
-            bookings.Should().HaveCount(2);
-            members.Should().HaveCount(2);
-            membershipGroups.Should().HaveCount(2);
+        bookings.Count.ShouldBe(2);
 
-            members.All(m => m.Bookings.Count == 1).Should().BeTrue();
-            membershipGroups.All(m => m.Members.Count == 1).Should().BeTrue();
-        }
+        members.ShouldSatisfyAllConditions(
+            m => m.Count.ShouldBe(2),
+            m => m.All(member => member.Bookings.Count == 1).ShouldBeTrue());
+
+        membershipGroups.ShouldSatisfyAllConditions(
+            m => m.Count.ShouldBe(2),
+            m => m.All(membershipGroup => membershipGroup.Members.Count == 1).ShouldBeTrue());
     }
 
     public void Dispose()

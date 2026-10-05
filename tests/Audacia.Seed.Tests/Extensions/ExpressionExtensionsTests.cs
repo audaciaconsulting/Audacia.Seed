@@ -1,10 +1,8 @@
 using System.Linq.Expressions;
-using Audacia.Core.Extensions;
-using Audacia.Seed.Tests.ExampleProject.Entities;
-using Xunit;
 using Audacia.Seed.Extensions;
-using FluentAssertions;
-using FluentAssertions.Execution;
+using Audacia.Seed.Tests.ExampleProject.Entities;
+using Shouldly;
+using Xunit;
 
 namespace Audacia.Seed.Tests.Extensions;
 
@@ -20,10 +18,10 @@ public class ExpressionExtensionsTests
 
         const int numberOfParentAccesses = 6;
         Expression<Func<MembershipGroup, MembershipGroup>> expected = x => x.Parent!;
-        using (new AssertionScope())
+        result.Count.ShouldBe(numberOfParentAccesses, "we should have an expression for each member access");
+        foreach (var expressionInChain in result)
         {
-            result.Should().HaveCount(numberOfParentAccesses, "we should have an expression for each member access");
-            result.Should().AllBeEquivalentTo(
+            expressionInChain.ShouldBeEquivalentTo(
                 expected,
                 "each returned item should be a single-level member access to its parent");
         }
@@ -40,13 +38,11 @@ public class ExpressionExtensionsTests
         Expression<Func<Booking, Facility>> expectedFirst = x => x.Facility;
         Expression<Func<Facility, Room>> expectedSecond = x => x.Room!;
         Expression<Func<Room, Region>> expectedThird = x => x.Region;
-        using (new AssertionScope())
-        {
-            result.Should().HaveCount(numberOfMemberAccesses, "we should have an expression for each member access");
-            result[0].Should().BeEquivalentTo(expectedFirst, $"the first item returned should be the {nameof(Booking)} accessing its {nameof(Booking.Facility)}");
-            result[1].Should().BeEquivalentTo(expectedSecond, $"the second item returned should be the {nameof(Facility)} accessing its {nameof(Facility.Room)}");
-            result[2].Should().BeEquivalentTo(expectedThird, $"the third item returned should be the {nameof(Room)} accessing its {nameof(Room.Region)}");
-        }
+        result.ShouldSatisfyAllConditions(
+            r => r.Length.ShouldBe(numberOfMemberAccesses, "we should have an expression for each member access"),
+            r => r[0].ShouldBeEquivalentTo(expectedFirst, $"the first item returned should be the {nameof(Booking)} accessing its {nameof(Booking.Facility)}"),
+            r => r[1].ShouldBeEquivalentTo(expectedSecond, $"the second item returned should be the {nameof(Facility)} accessing its {nameof(Facility.Room)}"),
+            r => r[2].ShouldBeEquivalentTo(expectedThird, $"the third item returned should be the {nameof(Room)} accessing its {nameof(Room.Region)}"));
     }
 
     [Fact]
@@ -60,13 +56,11 @@ public class ExpressionExtensionsTests
         Expression<Func<CompanyAssetValue, CompanyAsset>> expectedFirst = x => x.CompanyAsset;
         Expression<Func<CompanyAsset, EmployeeAsset>> expectedSecond = x => (EmployeeAsset)x.Asset;
         Expression<Func<EmployeeAsset, Employee>> expectedThird = x => x.Employee;
-        using (new AssertionScope())
-        {
-            result.Should().HaveCount(numberOfMemberAccesses, "we should have an expression for each member access");
-            result[0].Should().BeEquivalentTo(expectedFirst, $"the first item returned should be the {nameof(CompanyAssetValue)} accessing its {nameof(CompanyAssetValue.CompanyAsset)}");
-            result[1].Should().BeEquivalentTo(expectedSecond, $"the second item returned should be the {nameof(CompanyAsset)} accessing its {nameof(CompanyAsset.Asset)}, casted to {nameof(EmployeeAsset)}");
-            result[2].Should().BeEquivalentTo(expectedThird, $"the second item returned should be the {nameof(EmployeeAsset)} accessing its {nameof(EmployeeAsset.Employee)}");
-        }
+        result.ShouldSatisfyAllConditions(
+            r => r.Length.ShouldBe(numberOfMemberAccesses, "we should have an expression for each member access"),
+            r => r[0].ShouldBeEquivalentTo(expectedFirst, $"the first item returned should be the {nameof(CompanyAssetValue)} accessing its {nameof(CompanyAssetValue.CompanyAsset)}"),
+            r => r[1].ShouldBeEquivalentTo(expectedSecond, $"the second item returned should be the {nameof(CompanyAsset)} accessing its {nameof(CompanyAsset.Asset)}, casted to {nameof(EmployeeAsset)}"),
+            r => r[2].ShouldBeEquivalentTo(expectedThird, $"the second item returned should be the {nameof(EmployeeAsset)} accessing its {nameof(EmployeeAsset.Employee)}"));
     }
 
     [Fact]
@@ -82,7 +76,7 @@ public class ExpressionExtensionsTests
 
         Expression<Func<CompanyAssetValue, Employee>> expected = x => ((EmployeeAsset)x.CompanyAsset.Asset).Employee;
 
-        result.Should().BeEquivalentTo(expected, "we should join up the lambdas to form a single expression containing the cast");
+        result.ShouldBeEquivalentTo(expected, "we should join up the lambdas to form a single expression containing the cast");
     }
 
     [Fact]
@@ -97,7 +91,7 @@ public class ExpressionExtensionsTests
 
         Expression<Func<CompanyAsset, Employee>> expected = x => ((EmployeeAsset)x.Asset).Employee;
 
-        result.Should().BeEquivalentTo(expected, "we should join up the lambdas to form a single expression containing the cast");
+        result.ShouldBeEquivalentTo(expected, "we should join up the lambdas to form a single expression containing the cast");
     }
 
     [Fact]
@@ -112,7 +106,7 @@ public class ExpressionExtensionsTests
         var result = target.JoinMemberAccessChain();
 
         Expression<Func<Booking, Region>> expected = b => b.Facility.Room!.Region;
-        result.Should().BeEquivalentTo(expected, "we should join up the lambdas to form a single expression");
+        result.ShouldBeEquivalentTo(expected, "we should join up the lambdas to form a single expression");
     }
 
     [Fact]
@@ -128,6 +122,6 @@ public class ExpressionExtensionsTests
 
         // This isn't a handled exception as it's not a mistake a developer can make, but an internal error.
         // I just want to assert that the code throws an exception in this scenario.
-        act.Should().Throw<ArgumentException>();
+        act.ShouldThrow<ArgumentException>();
     }
 }
