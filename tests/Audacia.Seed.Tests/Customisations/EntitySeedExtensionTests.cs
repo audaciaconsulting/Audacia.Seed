@@ -621,9 +621,9 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var bookings = _context.SeedMany(2, seed).ToList();
 
         bookings.ShouldSatisfyAllConditions(
-            b => b.All(bk => bk.MemberId != existingMember.Id).ShouldBeTrue(
+            b => b.All(booking => booking.MemberId != existingMember.Id).ShouldBeTrue(
                 "we should ignore entities in the change tracker when using WithNew and seeding many entities"),
-            b => b.Select(bk => bk.MemberId).Distinct().Count().ShouldBe(
+            b => b.Select(booking => booking.MemberId).Distinct().Count().ShouldBe(
                 1,
                 "each new booking should have the same new member"));
     }
@@ -935,13 +935,13 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         bookings.ShouldSatisfyAllConditions(
             b => b.Count.ShouldBe(amountToCreate, $"we should have seeded {amountToCreate} {nameof(Booking)}s"),
-            b => b.Select(bk => bk.MemberId).Distinct().Count().ShouldBe(
+            b => b.Select(booking => booking.MemberId).Distinct().Count().ShouldBe(
                 amountToCreate,
                 $"we should have seeded {amountToCreate} {nameof(Member)}s"),
-            b => b.Select(bk => bk.Member.MembershipGroupId).Distinct().Count().ShouldBe(
+            b => b.Select(booking => booking.Member.MembershipGroupId).Distinct().Count().ShouldBe(
                     amountToCreate,
                     $"we should have seeded {amountToCreate} {nameof(MembershipGroup)}s"),
-            b => b.Select(bk => bk.Member.MembershipGroup.RegionId).Distinct().Count().ShouldBe(
+            b => b.Select(booking => booking.Member.MembershipGroup.RegionId).Distinct().Count().ShouldBe(
                     amountToCreate,
                     $"we should have seeded {amountToCreate} {nameof(Region)}s"));
 
@@ -1290,8 +1290,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var couponIssuers = _context.SeedMany(amountToCreate, entitySeed).ToList();
 
         couponIssuers.ShouldSatisfyAllConditions(
-            ci => ci.Select(couponIssuer => couponIssuer.CouponId).Distinct().Count().ShouldBe(amountToCreate),
-            ci => ci.Select(couponIssuer => couponIssuer.IssuerId).Distinct().Count().ShouldBe(amountToCreate));
+            c => c.Select(couponIssuer => couponIssuer.CouponId).Distinct().Count().ShouldBe(amountToCreate),
+            c => c.Select(couponIssuer => couponIssuer.IssuerId).Distinct().Count().ShouldBe(amountToCreate));
     }
 
     [Fact]
@@ -1301,14 +1301,14 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var coupons = _context.SeedMany<Coupon>(amountToCreate).ToList();
         var employees = _context.SeedMany<Employee>(amountToCreate).ToList();
         var entitySeed = new EntitySeed<CouponIssuer>()
-            .With(ci => ci.CouponId, coupons[0].Id, coupons[1].Id)
-            .With(ci => ci.IssuerId, employees[0].Id, employees[1].Id);
+            .With(c => c.CouponId, coupons[0].Id, coupons[1].Id)
+            .With(c => c.IssuerId, employees[0].Id, employees[1].Id);
 
         var couponIssuers = _context.SeedMany(amountToCreate, entitySeed).ToList();
 
         couponIssuers.ShouldSatisfyAllConditions(
-            ci => ci.Select(couponIssuer => couponIssuer.CouponId).ShouldBe([coupons[0].Id, coupons[1].Id]),
-            ci => ci.Select(couponIssuer => couponIssuer.IssuerId).ShouldBe([employees[0].Id, employees[1].Id]));
+            c => c.Select(couponIssuer => couponIssuer.CouponId).ShouldBe([coupons[0].Id, coupons[1].Id]),
+            c => c.Select(couponIssuer => couponIssuer.IssuerId).ShouldBe([employees[0].Id, employees[1].Id]));
     }
 
     [Fact]
@@ -1317,8 +1317,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var coupon = _context.Seed<Coupon>();
         var employee = _context.Seed<Employee>();
         var entitySeed = new EntitySeed<CouponIssuer>()
-            .With(ci => ci.CouponId, coupon.Id)
-            .With(ci => ci.IssuerId, employee.Id);
+            .With(c => c.CouponId, coupon.Id)
+            .With(c => c.IssuerId, employee.Id);
 
         const int amountToCreate = 2;
         var act = () => _context.SeedMany(amountToCreate, entitySeed).ToList();
