@@ -387,6 +387,23 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
+    public void With_MultipleValuesForPropertyBehindCastOnGrandparent_DoesNotThrow()
+    {
+        const int amountToCreate = 2;
+
+        var act = () => _context.SeedMany(amountToCreate, new EntitySeed<CompanyAssetValue>()
+            .With(cav => cav.Name, "Serial number")
+            .With(cav => cav.Value, "ABC-123")
+            .WithNew(cav => cav.CompanyAsset, new EntitySeed<CompanyAsset>()
+                .WithNew(ca => ca.Asset, new EntitySeed<EmployeeAsset>()
+                .WithNew(ea => ea.Employee)))
+            .With(cav => ((EmployeeAsset)cav.CompanyAsset.Asset).Employee.FirstName, "Jane", "John"));
+
+        act.ShouldNotThrow("we should be able to provide multiple values for a property accessed via a cast part-way along the getter");
+        _context.Set<CompanyAssetValue>().Count().ShouldBe(amountToCreate);
+    }
+
+    [Fact]
     public async Task WithNew_SpecifiesNewSeedForNavigationProperty_OverridesDefaultSeededData()
     {
         const string expectedName = "Squash court 2";

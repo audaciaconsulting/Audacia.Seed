@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.2 - 2026-10-06
+### Fixed
+- Bug Fix: Fixed expression-chain composition losing preceding member accesses when a cast occurs mid-chain (#214579).
+
+### Changed
+- Replaced FluentAssertions with Shouldly in the test project. (#214579).
+
 ## 3.0.1 - 2026-05-28
 ### Changed
 - Updated Audacia Dependecies to .NET 10.0 compatible versions

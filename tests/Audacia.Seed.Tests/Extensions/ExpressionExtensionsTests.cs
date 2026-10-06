@@ -63,20 +63,68 @@ public class ExpressionExtensionsTests
             r => r[2].ShouldBeEquivalentTo(expectedThird, $"the second item returned should be the {nameof(EmployeeAsset)} accessing its {nameof(EmployeeAsset.Employee)}"));
     }
 
+    /// <summary>
+    /// This failed after switching from FluentAssertions to Shouldly. FluentAssertions' default 'BeEquivalentTo' didn't compare the expression tree
+    /// deeply enough to notice that JoinMemberAccessChain was dropping the member access before a cast in the middle of the chain.
+    /// JoinMemberAccessChain was fixed so the full chain is kept.
+    /// </summary>
     [Fact]
     public void JoinMemberAccessChain_MiddleExpressionContainsExplicitCast_JoinedExpressionPreservesTheCast()
     {
-        Expression<Func<CompanyAssetValue, CompanyAsset>> first = x => x.CompanyAsset;
-        Expression<Func<CompanyAsset, EmployeeAsset>> second = x => (EmployeeAsset)x.Asset;
-        Expression<Func<EmployeeAsset, Employee>> third = x => x.Employee;
-
-        IEnumerable<LambdaExpression> target = [first, second, third];
-
-        var result = target.JoinMemberAccessChain();
-
+        var result = JoinCompanyAssetValueToEmployeeViaCast();
         Expression<Func<CompanyAssetValue, Employee>> expected = x => ((EmployeeAsset)x.CompanyAsset.Asset).Employee;
-
         result.ShouldBeEquivalentTo(expected, "we should join up the lambdas to form a single expression containing the cast");
+    }
+
+    /// <summary>
+    /// This essentially covers the same outcome as <see cref="JoinMemberAccessChain_MiddleExpressionContainsExplicitCast_JoinedExpressionPreservesTheCast"/>
+    /// but it's easier to follow, as the logic is not buried in the 'ShouldBeEquivalentTo' comparison, and it checks the expression tree structure directly.
+    /// </summary>
+    [Fact]
+    public void JoinMemberAccessChain_MiddleExpressionContainsExplicitCast_JoinedExpressionKeepsEveryMemberAccess()
+    {
+        var result = JoinCompanyAssetValueToEmployeeViaCast();
+
+        // Expected: x => ((EmployeeAsset)x.CompanyAsset.Asset).Employee, checked from the outside in.
+        var employeeAccess = result.Body.ShouldBeAssignableTo<MemberExpression>();
+        employeeAccess.Member.Name.ShouldBe(nameof(EmployeeAsset.Employee));
+
+        var cast = employeeAccess.Expression.ShouldBeOfType<UnaryExpression>();
+        cast.NodeType.ShouldBe(ExpressionType.Convert);
+        cast.Type.ShouldBe(typeof(EmployeeAsset));
+
+        var assetAccess = cast.Operand.ShouldBeAssignableTo<MemberExpression>();
+        assetAccess.Member.Name.ShouldBe(nameof(CompanyAsset.Asset));
+
+        var companyAssetAccess = assetAccess.Expression.ShouldBeAssignableTo<MemberExpression>(
+            $"the {nameof(CompanyAssetValue.CompanyAsset)} access before the cast should not be lost");
+
+        companyAssetAccess!.Member.Name.ShouldBe(nameof(CompanyAssetValue.CompanyAsset));
+        companyAssetAccess.Expression!.ShouldBeSameAs(
+            result.Parameters[0],
+            "the chain should start from the joined lambda's own parameter");
+    }
+
+    /// <summary>
+    /// This provides a realistic test of the joined expression, ensuring it can be compiled and invoked to navigate through the casted member access
+    /// chain, and retrieve the expected employee.
+    /// </summary>
+    [Fact]
+    public void JoinMemberAccessChain_MiddleExpressionContainsExplicitCast_JoinedExpressionCanBeCompiledAndInvoked()
+    {
+        var employee = new Employee { FirstName = "John", LastName = "Smith" };
+        var companyAssetValue = new CompanyAssetValue
+        {
+            CompanyAsset = new CompanyAsset { Asset = new EmployeeAsset("Laptop") { Employee = employee } }
+        };
+
+        var result = JoinCompanyAssetValueToEmployeeViaCast();
+        var compiled = result.Compile();
+        Employee? invoked = compiled.DynamicInvoke(companyAssetValue) as Employee;
+
+        invoked.ShouldBeSameAs(
+            employee,
+            "the joined expression should navigate from the value, through the cast asset, to its employee");
     }
 
     [Fact]
@@ -123,5 +171,16 @@ public class ExpressionExtensionsTests
         // This isn't a handled exception as it's not a mistake a developer can make, but an internal error.
         // I just want to assert that the code throws an exception in this scenario.
         act.ShouldThrow<ArgumentException>();
+    }
+
+    private static LambdaExpression JoinCompanyAssetValueToEmployeeViaCast()
+    {
+        Expression<Func<CompanyAssetValue, CompanyAsset>> first = x => x.CompanyAsset;
+        Expression<Func<CompanyAsset, EmployeeAsset>> second = x => (EmployeeAsset)x.Asset;
+        Expression<Func<EmployeeAsset, Employee>> third = x => x.Employee;
+
+        IEnumerable<LambdaExpression> target = [first, second, third];
+
+        return target.JoinMemberAccessChain();
     }
 }
