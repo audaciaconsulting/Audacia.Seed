@@ -1,35 +1,38 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>CS1591</NoWarn>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Title>Audacia.Seed.EntityFrameworkCore</Title>
+		<Authors>Audacia</Authors>
+		<Description>Entity Framework Core integration for Audacia.Seed.</Description>
+		<Copyright>Copyright © Audacia $([System.DateTime]::Now.Year)</Copyright>
+		<PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' != 'Debug'">
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <NoWarn>CS1591</NoWarn>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Title>Audacia.Seed.EntityFrameworkCore</Title>
-        <Authors>Audacia</Authors>
-        <Description>Entity Framework Core integration for Audacia.Seed.</Description>
-        <Copyright>Copyright © Audacia $([System.DateTime]::Now.Year)</Copyright>
-        <PackageIcon>audacia-logo-circle-blue.png</PackageIcon>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    </PropertyGroup>
+	</PropertyGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\Audacia.Seed\Audacia.Seed.csproj" />
-    </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Audacia.Seed\Audacia.Seed.csproj" />
+	</ItemGroup>
 
-    <ItemGroup>
-        <None Include="..\..\audacia-logo-circle-blue.png" Pack="true" PackagePath="\" />
-    </ItemGroup>
+	<ItemGroup>
+		<None Include="..\..\audacia-logo-circle-blue.png" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Audacia.CodeAnalysis" Version="1.12.1">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
-    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Audacia.CodeAnalysis" Version="1.12.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
+	</ItemGroup>
 
 </Project>
