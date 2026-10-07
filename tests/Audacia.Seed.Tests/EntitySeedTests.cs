@@ -103,7 +103,7 @@ public sealed class EntitySeedTests : IDisposable
         var act = () => new EntitySeed<Booking>()
             .WithNew(_ => new Region());
 
-        act.ShouldThrow<DataSeedingException>("we should throw an exception if the getter does not access a property on the entity");
+        act.ShouldThrow(typeof(DataSeedingException), "we should throw an exception if the getter does not access a property on the entity");
     }
 
     [Fact]

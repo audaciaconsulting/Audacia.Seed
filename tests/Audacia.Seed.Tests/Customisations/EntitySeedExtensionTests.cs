@@ -111,7 +111,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var act = () => _context.Seed(seedConfiguration);
 
-        act.ShouldThrow<DataSeedingException>(
+        act.ShouldThrow(
+                typeof(DataSeedingException),
                 "we should show a more useful error message if we catch a null reference exception when applying customisations")
             // Make sure the exception message is helpful to the developer.
             .Message.ShouldMatch($".*{nameof(Coupon)}.*{nameof(Coupon.Name)}.*nullable property.*");
@@ -191,9 +192,10 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         decimal[] expectedDiscounts = [0, 10m, 20m, 30m, 40m];
         var savedEntities = await _context.Set<Coupon>().ToListAsync(TestContext.Current.CancellationToken);
-        savedEntities.Select(m => m.Discount).ToArray().ShouldBeEquivalentTo(
+        savedEntities.Select(m => m.Discount).ShouldBe(
             expectedDiscounts,
-            $"{nameof(EntitySeedExtensions.With)} should use the provided delegate to set the property values based on the index");
+            ignoreOrder: true,
+            customMessage: $"{nameof(EntitySeedExtensions.With)} should use the provided delegate to set the property values based on the index");
     }
 
     [Fact]
@@ -207,9 +209,10 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         decimal[] expectedDiscounts = [0.1m, 0.2m, 0.4m, 0.8m, 1.6m];
         var savedEntities = await _context.Set<Coupon>().ToListAsync(TestContext.Current.CancellationToken);
-        savedEntities.Select(m => m.Discount).ToArray().ShouldBeEquivalentTo(
+        savedEntities.Select(m => m.Discount).ShouldBe(
             expectedDiscounts,
-            $"{nameof(EntitySeedExtensions.With)} should use the provided delegate to set the property values based on the previous");
+            ignoreOrder: true,
+            customMessage: $"{nameof(EntitySeedExtensions.With)} should use the provided delegate to set the property values based on the previous");
     }
 
     [Fact]
@@ -252,7 +255,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var amountToCreate = names.Length + 1;
         var act = () => _context.SeedMany(amountToCreate, seedConfiguration);
 
-        act.ShouldThrow<DataSeedingException>(
+        act.ShouldThrow(
+                typeof(DataSeedingException),
                 "we should show a developer-friendly message for this as we cannot give a build error for it")
             .Message.ShouldBe($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {names.Length} were provided.");
     }
@@ -268,7 +272,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var amountToCreate = names.Length - 1;
         var act = () => _context.SeedMany(amountToCreate, seedConfiguration);
 
-        act.ShouldThrow<DataSeedingException>(
+        act.ShouldThrow(
+                typeof(DataSeedingException),
                 "we should show a developer-friendly message for this as we cannot give a build error for it")
             .Message.ShouldBe($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {names.Length} were provided.");
     }
@@ -578,9 +583,10 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         List<string> expectedRoomNames = ["Room 1", "Room 2", "Room 3"];
         var roomNames = await _context.Set<Facility>().Select(f => f.Room!.Name).ToListAsync(TestContext.Current.CancellationToken);
-        roomNames.ShouldBeEquivalentTo(
+        roomNames.ShouldBe(
             expectedRoomNames,
-            "information from each seed should be used with specifying many prerequisites");
+            ignoreOrder: true,
+            customMessage: "information from each seed should be used with specifying many prerequisites");
     }
 
     [Fact]
@@ -685,7 +691,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var amountToCreate = prerequisites.Length + 1;
         var act = () => _context.SeedMany(amountToCreate, seedConfiguration);
 
-        act.ShouldThrow<DataSeedingException>(
+        act.ShouldThrow(
+                typeof(DataSeedingException),
                 "we should show a developer-friendly message for this as we cannot give a build error for it")
             .Message.ShouldBe($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {prerequisites.Length} were provided.");
     }
@@ -701,7 +708,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var amountToCreate = prerequisites.Length - 1;
         var act = () => _context.SeedMany(amountToCreate, seedConfiguration);
 
-        act.ShouldThrow<DataSeedingException>(
+        act.ShouldThrow(
+                typeof(DataSeedingException),
                 "we should show a developer-friendly message for this as we cannot give a build error for it")
             .Message.ShouldBe($"We are building {amountToCreate} entities of type {nameof(Facility)}, but {prerequisites.Length} were provided.");
     }
@@ -741,9 +749,10 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var childrenSeeded = await _context.Set<Facility>().ToListAsync(TestContext.Current.CancellationToken);
 
-        childrenSeeded.Select(c => c.Name).ToArray().ShouldBeEquivalentTo(
-            new[] { "Facility 1", "Facility 2" },
-            "we should be able to customise children on a per-seed basis");
+        childrenSeeded.Select(c => c.Name).ShouldBe(
+            ["Facility 1", "Facility 2"],
+            ignoreOrder: true,
+            customMessage: "we should be able to customise children on a per-seed basis");
     }
 
     [Fact]
@@ -774,9 +783,10 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var childrenSeeded = await _context.Set<Facility>().ToListAsync(TestContext.Current.CancellationToken);
 
-        childrenSeeded.Select(c => c.Name).ToArray().ShouldBeEquivalentTo(
-            new[] { "Facility 1", "Facility 2", "Facility 3", "Facility 1", "Facility 2", "Facility 3" },
-            "we should be able to customise the child seed that each optional parent receives a copy of");
+        childrenSeeded.Select(c => c.Name).ShouldBe(
+            ["Facility 1", "Facility 2", "Facility 3", "Facility 1", "Facility 2", "Facility 3"],
+            ignoreOrder: true,
+            customMessage: "we should be able to customise the child seed that each optional parent receives a copy of");
     }
 
     [Fact]
@@ -794,9 +804,10 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var childrenSeeded = await _context.Set<Booking>().ToListAsync(TestContext.Current.CancellationToken);
 
-        childrenSeeded.Select(c => c.Notes).ToArray().ShouldBeEquivalentTo(
-            new[] { "Booking 1", "Booking 2", "Booking 3", "Booking 1", "Booking 2", "Booking 3" },
-            "we should be able to customise the child seed that each required parent receives a copy of");
+        childrenSeeded.Select(c => c.Notes).ShouldBe(
+            ["Booking 1", "Booking 2", "Booking 3", "Booking 1", "Booking 2", "Booking 3"],
+            ignoreOrder: true,
+            customMessage: "we should be able to customise the child seed that each required parent receives a copy of");
     }
 
     [Fact]
@@ -845,9 +856,10 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         foreach (var facilitiesForBooking in facilitiesPerRoom)
         {
-            facilitiesForBooking.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(
+            facilitiesForBooking.Select(f => f.Name).ShouldBe(
                 facilityNames,
-                "each child should have the correct name");
+                ignoreOrder: true,
+                customMessage: "each child should have the correct name");
         }
     }
 
@@ -928,9 +940,10 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var roomNames = await _context.Set<Facility>()
             .Select(f => f.Room!.Name)
             .ToListAsync(TestContext.Current.CancellationToken);
-        roomNames.ShouldBeEquivalentTo(
-            new List<string>() { "First name", "Second name", "Third name" },
-            "we should be able to set different values for each parent");
+        roomNames.ShouldBe(
+            ["First name", "Second name", "Third name"],
+            ignoreOrder: true,
+            customMessage: "we should be able to set different values for each parent");
     }
 
     // It's easy to unintentionally change (i.e break) the behaviour depending on the amount being created, so test a few values to make sure this hasn't happened.
@@ -1019,7 +1032,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var act = () => _context.Seed(seed);
 
-        act.ShouldThrow<DataSeedingException>("we should not be able to set the incorrect type for the primary key");
+        act.ShouldThrow(typeof(DataSeedingException), "we should not be able to set the incorrect type for the primary key");
     }
 
     [Fact]
@@ -1030,7 +1043,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var act = () => _context.Seed(seed);
 
-        act.ShouldThrow<DataSeedingException>("we should not be able to do this for entities with composite keys");
+        act.ShouldThrow(typeof(DataSeedingException), "we should not be able to do this for entities with composite keys");
     }
 
     [Fact]
@@ -1062,7 +1075,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var bookings = _context.SeedMany(3, firstSeed);
 
-        bookings.Select(b => b.Id).ToArray().ShouldBeEquivalentTo(primaryKeyValues);
+        bookings.Select(b => b.Id).ToArray().ShouldBeEquivalentTo(primaryKeyValues); // order matters here because we want to make sure the correct PK is assigned to the correct entity
     }
 
     [Fact]
@@ -1078,9 +1091,10 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         bookings.Select(b => b.FacilityId).Distinct().Count().ShouldBe(bookingsToSeed);
         var roomIds = bookings.ConvertAll(b => b.Facility.RoomId).ToArray();
-        roomIds.ShouldBeEquivalentTo(
-                new int?[] { room.Id, null, room.Id },
-                "we should be able to seed different rooms for each facility");
+        roomIds.ShouldBe(
+                [room.Id, null, room.Id],
+                ignoreOrder: true,
+                customMessage: "we should be able to seed different rooms for each facility");
     }
 
     [Fact]
@@ -1143,12 +1157,12 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var employeeB = employees.Single(e => e.FirstName == "B");
 
         employeeA.ShouldSatisfyAllConditions(
-            e => e.FacilitiesManaged.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "A" }),
-            e => e.FacilitiesOwned.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "B" }));
+            e => e.FacilitiesManaged.Select(f => f.Name).ShouldBe(["A"], ignoreOrder: true),
+            e => e.FacilitiesOwned.Select(f => f.Name).ShouldBe(["B"], ignoreOrder: true));
 
         employeeB.ShouldSatisfyAllConditions(
-            e => e.FacilitiesManaged.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "B" }),
-            e => e.FacilitiesOwned.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "A" }));
+            e => e.FacilitiesManaged.Select(f => f.Name).ShouldBe(["B"], ignoreOrder: true),
+            e => e.FacilitiesOwned.Select(f => f.Name).ShouldBe(["A"], ignoreOrder: true));
     }
 
     [Fact]
@@ -1178,16 +1192,16 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var employeeC = employees.Single(e => e.FirstName == "C");
 
         employeeA.ShouldSatisfyAllConditions(
-            e => e.FacilitiesManaged.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "A", "B" }),
+            e => e.FacilitiesManaged.Select(f => f.Name).ShouldBe(["A", "B"], ignoreOrder: true),
             e => e.FacilitiesOwned.Select(f => f.Name).ToArray().ShouldBeEmpty());
 
         employeeB.ShouldSatisfyAllConditions(
-            e => e.FacilitiesManaged.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "C" }),
-            e => e.FacilitiesOwned.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "A" }));
+            e => e.FacilitiesManaged.Select(f => f.Name).ShouldBe(["C"], ignoreOrder: true),
+            e => e.FacilitiesOwned.Select(f => f.Name).ShouldBe(["A"], ignoreOrder: true));
 
         employeeC.ShouldSatisfyAllConditions(
             e => e.FacilitiesManaged.Select(f => f.Name).ToArray().ShouldBeEmpty(),
-            e => e.FacilitiesOwned.Select(f => f.Name).ToArray().ShouldBeEquivalentTo(new[] { "C", "B" }));
+            e => e.FacilitiesOwned.Select(f => f.Name).ShouldBe(["C", "B"], ignoreOrder: true));
     }
 
     [Fact]
@@ -1368,9 +1382,10 @@ public sealed class EntitySeedExtensionTests : IDisposable
 
         var allBookings = _context.Set<Booking>().Include(b => b.Facility).ToList();
         var allManagers = _context.Set<Employee>().Where(e => e.FacilitiesManaged.Any()).ToList();
-        allBookings.Select(b => b.Facility.ManagerId).ToArray().ShouldBeEquivalentTo(
-            new[] { allManagers[0].Id, allManagers[0].Id, allManagers[1].Id },
-            "the Manager Ids should be set as specified in the seed configuration.");
+        allBookings.Select(b => b.Facility.ManagerId).ShouldBe(
+            [allManagers[0].Id, allManagers[0].Id, allManagers[1].Id],
+            ignoreOrder: true,
+            customMessage: "the Manager Ids should be set as specified in the seed configuration.");
         allManagers.Count.ShouldBe(managersNeeded, "we should not have seeded more employees");
     }
 
@@ -1384,9 +1399,10 @@ public sealed class EntitySeedExtensionTests : IDisposable
         _context.SeedMany(3, bookingSeed);
 
         var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
-        bookingsAfterSave.Select(b => b.Member.MembershipGroup.ParentId).ToArray().ShouldBeEquivalentTo(
-            new int?[] { groups[0].Id, groups[0].Id, groups[1].Id },
-            "the Membership Group Ids should be set as specified in the seed configuration.");
+        bookingsAfterSave.Select(b => b.Member.MembershipGroup.ParentId).ShouldBe(
+            [groups[0].Id, groups[0].Id, groups[1].Id],
+            ignoreOrder: true,
+            customMessage: "the Membership Group Ids should be set as specified in the seed configuration.");
     }
 
     [Fact]
@@ -1404,7 +1420,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
             "we should overwrite the default seed doing a WithDifferent explicitly");
 
         var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member).ToList();
-        bookingsAfterSave.Select(b => b.Member.FirstName).ToArray().ShouldBeEquivalentTo(new[] { "John", "Jane" });
+        bookingsAfterSave.Select(b => b.Member.FirstName).ShouldBe(["John", "Jane"], ignoreOrder: true);
     }
 
     [Fact]
@@ -1427,7 +1443,7 @@ public sealed class EntitySeedExtensionTests : IDisposable
             "we should overwrite the default seed doing a WithDifferent explicitly");
 
         var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
-        bookingsAfterSave.Select(b => b.Member.MembershipGroup.Name).ToArray().ShouldBeEquivalentTo(new[] { "Group 1", "Group 2" });
+        bookingsAfterSave.Select(b => b.Member.MembershipGroup.Name).ShouldBe(["Group 1", "Group 2"], ignoreOrder: true);
     }
 
     [Fact]
@@ -1449,8 +1465,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
         bookingsAfterSave.ShouldSatisfyAllConditions(
             b => b.Count.ShouldBe(2),
-            b => b.Select(booking => booking.Member.MembershipGroupId).ToArray()
-                .ShouldBeEquivalentTo(new[] { membershipGroup.Id, membershipGroup.Id }));
+            b => b.Select(booking => booking.Member.MembershipGroupId)
+                .ShouldBe([membershipGroup.Id, membershipGroup.Id], ignoreOrder: true));
     }
 
     [Fact]
@@ -1472,8 +1488,8 @@ public sealed class EntitySeedExtensionTests : IDisposable
         var bookingsAfterSave = _context.Set<Booking>().Include(b => b.Member.MembershipGroup).ToList();
         bookingsAfterSave.ShouldSatisfyAllConditions(
             b => b.Count.ShouldBe(2),
-            b => b.Select(booking => booking.Member.MembershipGroupId).ToArray()
-                .ShouldBeEquivalentTo(new[] { membershipGroup.Id, membershipGroup.Id }));
+            b => b.Select(booking => booking.Member.MembershipGroupId)
+                .ShouldBe([membershipGroup.Id, membershipGroup.Id], ignoreOrder: true));
     }
 
     [Fact]
