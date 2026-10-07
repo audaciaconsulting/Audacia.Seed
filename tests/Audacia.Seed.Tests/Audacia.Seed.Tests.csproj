@@ -2,7 +2,6 @@
 
     <PropertyGroup>
         <Authors>Audacia</Authors>
-        <Version>3.0.2</Version>
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
