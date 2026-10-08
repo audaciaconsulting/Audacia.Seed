@@ -2,7 +2,7 @@ using Audacia.Seed.Customisation;
 using Audacia.Seed.InMemory;
 using Audacia.Seed.Tests.ExampleProject.Entities;
 using Audacia.Seed.Tests.ExampleProject.Seeds;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace Audacia.Seed.Tests.InMemory;
@@ -15,10 +15,10 @@ public class EntityBuilderTests
         var booking = new EntityBuilder()
             .Build<Booking>();
 
-        booking.Member.Should().NotBeNull();
-        booking.Facility.Should().NotBeNull();
-        booking.Facility.Owner.Should().NotBeNull();
-        booking.Facility.Manager.Should().NotBeNull();
+        booking.Member.ShouldNotBeNull();
+        booking.Facility.ShouldNotBeNull();
+        booking.Facility.Owner.ShouldNotBeNull();
+        booking.Facility.Manager.ShouldNotBeNull();
     }
 
     [Fact]
@@ -27,7 +27,7 @@ public class EntityBuilderTests
         var booking = new EntityBuilder()
             .Build<Booking>();
 
-        booking.Coupon.Should().BeNull();
+        booking.Coupon.ShouldBeNull();
     }
 
     [Fact]
@@ -36,10 +36,10 @@ public class EntityBuilderTests
         var booking = new EntityBuilder()
             .Build(new BookingSeed());
 
-        booking.Member.Should().NotBeNull();
-        booking.Facility.Should().NotBeNull();
-        booking.Facility.Owner.Should().NotBeNull();
-        booking.Facility.Manager.Should().NotBeNull();
+        booking.Member.ShouldNotBeNull();
+        booking.Facility.ShouldNotBeNull();
+        booking.Facility.Owner.ShouldNotBeNull();
+        booking.Facility.Manager.ShouldNotBeNull();
     }
 
     [Fact]
@@ -48,9 +48,9 @@ public class EntityBuilderTests
         var (firstBooking, secondBooking) = new EntityBuilder()
             .Build(new BookingSeed(), new BookingSeed());
 
-        firstBooking.Should().NotBe(secondBooking);
-        firstBooking.Facility.Should().Be(secondBooking.Facility);
-        firstBooking.Member.Should().Be(secondBooking.Member);
+        firstBooking.ShouldNotBe(secondBooking);
+        firstBooking.Facility.ShouldBe(secondBooking.Facility);
+        firstBooking.Member.ShouldBe(secondBooking.Member);
     }
 
     [Fact]
@@ -60,9 +60,9 @@ public class EntityBuilderTests
         var firstBooking = builder.Build<Booking>();
         var secondBooking = builder.Build<Booking>();
 
-        firstBooking.Should().NotBe(secondBooking);
-        firstBooking.Facility.Should().Be(secondBooking.Facility);
-        firstBooking.Member.Should().Be(secondBooking.Member);
+        firstBooking.ShouldNotBe(secondBooking);
+        firstBooking.Facility.ShouldBe(secondBooking.Facility);
+        firstBooking.Member.ShouldBe(secondBooking.Member);
     }
 
     [Fact]
@@ -74,8 +74,8 @@ public class EntityBuilderTests
         var booking = builder.Build(new BookingSeed()
             .WithExisting(b => b.Facility, f => f.Name == facilityName));
 
-        booking.Facility.Name.Should().Be(facilityName);
-        booking.Facility.Should().Be(facility);
+        booking.Facility.Name.ShouldBe(facilityName);
+        booking.Facility.ShouldBe(facility);
     }
 
     [Fact]
@@ -84,8 +84,8 @@ public class EntityBuilderTests
         const int amountToCreate = 5;
         var bookings = new EntityBuilder().BuildMany(amountToCreate, new BookingSeed()).ToList();
 
-        bookings.Distinct().Should().HaveCount(amountToCreate);
-        bookings.Select(b => b.Facility).Distinct().Should().HaveCount(1);
+        bookings.Distinct().Count().ShouldBe(amountToCreate);
+        bookings.Select(b => b.Facility).Distinct().Count().ShouldBe(1);
     }
 
     [Fact]
@@ -94,6 +94,6 @@ public class EntityBuilderTests
         var firstCoupon = new EntityBuilder().Build(new CouponSeed());
         var secondCoupon = new EntityBuilder().Build(new CouponSeed());
 
-        firstCoupon.Should().NotBe(secondCoupon);
+        firstCoupon.ShouldNotBe(secondCoupon);
     }
 }

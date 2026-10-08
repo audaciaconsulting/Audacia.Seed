@@ -29,3 +29,9 @@ dotnet_diagnostic.CA1707.severity = none
 
 # [NAMING] Asynchronous method name should end with 'Async' ** Suppress as we don't want to suffix test methods ***
 dotnet_diagnostic.RCS1046.severity = none
+
+# [STYLE] Remove unused expression value *** Suppress as test methods may contain unused expressions for assertion purposes ***
+dotnet_diagnostic.IDE0058.severity = none
+
+# [MAINTAINABILITY] Write code that is easy to debug *** Suppress as test methods may contain complex logic for setup and assertions ***
+dotnet_diagnostic.AV1580.severity = none

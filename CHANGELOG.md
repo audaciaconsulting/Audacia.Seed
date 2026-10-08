@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.0.3 - 2026-10-07
+
+### Fixed
+
+- Bug Fix: Fixed expression-chain composition losing preceding member accesses when a cast occurs mid-chain (#214579).
+
+### Changed
+
+- Replaced FluentAssertions with Shouldly in the test project. (#214579).
+
 ## 3.0.2 - 2026-10-05
 
 ### Changed

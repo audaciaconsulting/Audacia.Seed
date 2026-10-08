@@ -5,10 +5,9 @@ using Audacia.Seed.Tests.ExampleProject.Entities.Enums;
 using Audacia.Seed.Tests.ExampleProject.EntityFrameworkCore;
 using Audacia.Seed.Tests.ExampleProject.Seeds;
 using Audacia.Seed.Tests.TestHelpers;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Shouldly;
 using Xunit;
 
 namespace Audacia.Seed.Tests.EntityFrameworkCore.Extensions;
@@ -34,8 +33,9 @@ public sealed class DbContextExtensionsTests : IDisposable
 
         _context.SeedMany(amountToCreate, seedConfiguration);
 
-        var count = await _context.Set<Facility>().CountAsync();
-        count.Should().Be(amountToCreate, $"{nameof(amountToCreate)} should create the specified number of entities.");
+        var count = await _context.Set<Facility>().CountAsync(TestContext.Current.CancellationToken);
+
+        count.ShouldBe(amountToCreate, $"{nameof(amountToCreate)} should create the specified number of entities.");
     }
 
     [Fact]
@@ -47,9 +47,8 @@ public sealed class DbContextExtensionsTests : IDisposable
         _context.SeedMany(amountToCreate, seedConfiguration);
 
         const int expectedCount = 1;
-        var savedEntities = await _context.Set<Booking>().ToListAsync();
-        savedEntities.DistinctBy(b => b.MemberId).Should()
-            .HaveCount(expectedCount, "child entities should share parents by default");
+        var savedEntities = await _context.Set<Booking>().ToListAsync(TestContext.Current.CancellationToken);
+        savedEntities.DistinctBy(b => b.MemberId).Count().ShouldBe(expectedCount, "child entities should share parents by default");
     }
 
     [Fact]
@@ -58,10 +57,9 @@ public sealed class DbContextExtensionsTests : IDisposable
         _context.Seed(new BookingSeed(), new BookingSeed(), new BookingSeed());
 
         const int expectedCount = 3;
-        var savedEntities = await _context.Set<Booking>().ToListAsync();
+        var savedEntities = await _context.Set<Booking>().ToListAsync(TestContext.Current.CancellationToken);
         savedEntities
-            .Should()
-            .HaveCount(expectedCount, "the seed params method should seed each booking");
+            .Count.ShouldBe(expectedCount, "the seed params method should seed each booking");
     }
 
     [Fact]
@@ -72,10 +70,9 @@ public sealed class DbContextExtensionsTests : IDisposable
         _context.Seed(new FacilitySeed());
 
         const int expectedCount = 3;
-        var savedEntities = await _context.Set<Facility>().ToListAsync();
+        var savedEntities = await _context.Set<Facility>().ToListAsync(TestContext.Current.CancellationToken);
         savedEntities
-            .Should()
-            .HaveCount(expectedCount, "the seed method should seed an entity every time");
+            .Count.ShouldBe(expectedCount, "the seed method should seed an entity every time");
     }
 
     [Fact]
@@ -86,10 +83,9 @@ public sealed class DbContextExtensionsTests : IDisposable
         _context.Seed(new FacilityTypeEntitySeed());
 
         const int expectedCount = 1;
-        var savedEntities = await _context.Set<FacilityTypeEntity>().ToListAsync();
+        var savedEntities = await _context.Set<FacilityTypeEntity>().ToListAsync(TestContext.Current.CancellationToken);
         savedEntities
-            .Should()
-            .HaveCount(expectedCount, "the seed method should not seed duplicate if we must find existing");
+            .Count.ShouldBe(expectedCount, "the seed method should not seed duplicate if we must find existing");
     }
 
     [Fact]
@@ -98,10 +94,9 @@ public sealed class DbContextExtensionsTests : IDisposable
         var expectedCount = Enum.GetValues<FacilityType>().Length;
         _context.SeedMany(expectedCount, new FacilityTypeEntitySeed());
 
-        var savedEntities = await _context.Set<FacilityTypeEntity>().ToListAsync();
+        var savedEntities = await _context.Set<FacilityTypeEntity>().ToListAsync(TestContext.Current.CancellationToken);
         savedEntities
-            .Should()
-            .HaveCount(expectedCount, "we should be able to seed multiple entities with must find existing");
+            .Count.ShouldBe(expectedCount, "we should be able to seed multiple entities with must find existing");
     }
 
     [Fact]
@@ -113,13 +108,13 @@ public sealed class DbContextExtensionsTests : IDisposable
         _context.SeedMany(expectedCount, new FacilityTypeEntitySeed());
         _context.Seed(new FacilityTypeEntitySeed());
 
-        var savedEntities = await _context.Set<FacilityTypeEntity>().ToListAsync();
-        using (new AssertionScope())
-        {
-            savedEntities.Should().HaveCount(expectedCount, "we should not seed duplicates");
-            savedEntities.Select(se => se.Type).Distinct().Should()
-                .HaveCount(expectedCount, "each facility type should have a unique type");
-        }
+        var savedEntities = await _context.Set<FacilityTypeEntity>().ToListAsync(TestContext.Current.CancellationToken);
+        savedEntities.ShouldSatisfyAllConditions(
+            se => se.Count.ShouldBe(expectedCount, "we should not seed duplicates"),
+            se => se.Select(e => e.Type)
+                .Distinct()
+                .Count()
+                .ShouldBe(expectedCount, "each facility type should have a unique type"));
     }
 
     [Fact]
@@ -129,14 +124,12 @@ public sealed class DbContextExtensionsTests : IDisposable
             .With(f => f.Type, FacilityType.TennisCourt)
             .Without(f => f.Description));
 
-        var savedEntities = await _context.Set<FacilityTypeEntity>().ToListAsync();
+        var savedEntities = await _context.Set<FacilityTypeEntity>().ToListAsync(TestContext.Current.CancellationToken);
 
-        using (new AssertionScope())
-        {
-            savedEntities.Should().HaveCount(1, "we should only seed one entity");
-            savedEntities.First().Type.Should().Be(FacilityType.TennisCourt, "the seeded entity should have the correct type");
-            savedEntities.First().Description.Should().BeNull("the seeded entity should not have a description");
-        }
+        savedEntities.ShouldSatisfyAllConditions(
+            se => se.Count.ShouldBe(1, "we should only seed one entity"),
+            se => se.First().Type.ShouldBe(FacilityType.TennisCourt, "the seeded entity should have the correct type"),
+            se => se.First().Description.ShouldBeNull("the seeded entity should not have a description"));
     }
 
     public void Dispose()
