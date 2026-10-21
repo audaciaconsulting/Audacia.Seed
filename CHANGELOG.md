@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.0.4 - 2026-10-21
+
+### Fixed
+
+- Bug Fix:`.With()` ignored multiple values when the property was reached through a cast (#214683).
+- Bug Fix: multiple supplied navigation seeds were not preserved (#214683).
+- Bug Fix: Exact-type matching discarded derived seeds (#214683).
+
 ## 3.0.3 - 2026-10-07
 
 ### Fixed
