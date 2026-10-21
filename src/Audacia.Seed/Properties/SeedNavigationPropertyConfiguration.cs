@@ -14,7 +14,7 @@ namespace Audacia.Seed.Properties;
 internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     Expression<Func<TEntity, TNavigation?>> getter,
     IEntitySeed<TNavigation> seedConfiguration)
-    : ISeedCustomisation<TEntity>
+    : ISeedCustomisation<TEntity>, INavigationSeedConfiguration
     where TEntity : class
     where TNavigation : class
 {
@@ -26,6 +26,9 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
 
     /// <inheritdoc />
     public IEntitySeed Seed => SeedConfiguration;
+
+    /// <inheritdoc />
+    public IReadOnlyList<IEntitySeed> NavigationSeeds => [SeedConfiguration];
 
     /// <inheritdoc/>
     public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
@@ -89,8 +92,8 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
 
         if (value == null)
         {
-            value = navigationSeedAsEntitySeed != null
-                ? navigationSeedAsEntitySeed.GetOrCreateEntity(index, null)
+            value = navigationSeed is IIndexedEntitySeed indexedSeed
+                ? (TNavigation)indexedSeed.GetOrCreateEntity(index)
                 : navigationSeed.Build();
             repository.Add(value);
         }

@@ -17,7 +17,7 @@ namespace Audacia.Seed;
 /// Base class for seeding a specific entity to the database, with utility methods to facilitate customisability.
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity being seeded.</typeparam>
-public class EntitySeed<TEntity> : IEntitySeed<TEntity>
+public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
     where TEntity : class
 {
     /// <inheritdoc />
@@ -284,6 +284,9 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
             }
         }
     }
+
+    /// <inheritdoc />
+    object IIndexedEntitySeed.GetOrCreateEntity(int index) => GetOrCreateEntity(index, null);
 
     /// <summary>
     /// Get a <typeparamref name="TEntity"/> from the repository, or create a new one if it doesn't exist.

@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
+using Audacia.Seed.Constants;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.Customisation;
 using Audacia.Seed.Exceptions;
@@ -17,7 +18,7 @@ namespace Audacia.Seed.Properties;
 internal class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation>(
     Expression<Func<TEntity, TNavigation?>> getter,
     List<IEntitySeed<TNavigation>> seedConfigurations)
-    : ISeedCustomisation<TEntity>
+    : ISeedCustomisation<TEntity>, INavigationSeedConfiguration
     where TEntity : class
     where TNavigation : class
 {
@@ -32,6 +33,24 @@ internal class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigatio
 
     /// <inheritdoc />
     public IEntitySeed? Seed => SeedConfigurations.FirstOrDefault();
+
+    /// <inheritdoc />
+    public IReadOnlyList<IEntitySeed> NavigationSeeds => SeedConfigurations;
+
+    /// <inheritdoc />
+    public int Order => _useDifferentSeeds ? 50 : SeedingConstants.DefaultCustomisationOrder;
+
+    private bool _useDifferentSeeds;
+
+    /// <inheritdoc />
+    public void UseDifferentSeeds()
+    {
+        _useDifferentSeeds = true;
+        foreach (var seed in SeedConfigurations)
+        {
+            seed.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
+        }
+    }
 
     /// <summary>
     /// Gets a lambda to the property to populate.
@@ -69,7 +88,7 @@ internal class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigatio
         var predicate = seedConfigurationAsEntitySeed != null
             ? seedConfigurationAsEntitySeed.ToPredicate(index)
             : _ => true;
-        var value = repository.FindLocal(predicate);
+        var value = _useDifferentSeeds ? null : repository.FindLocal(predicate);
         if (index > 0
             && !ReferenceEquals(SeedConfigurations[index], SeedConfigurations[index - 1])
             // Force a new creation if we've explicitly provided an extra seed, even if it's identical
@@ -82,8 +101,8 @@ internal class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigatio
         if (value == null)
         {
             seedConfiguration.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
-            value = seedConfigurationAsEntitySeed != null
-                ? seedConfigurationAsEntitySeed.GetOrCreateEntity(index, null)
+            value = seedConfiguration is IIndexedEntitySeed indexedSeed
+                ? (TNavigation)indexedSeed.GetOrCreateEntity(index)
                 : seedConfiguration.Build();
             repository.Add(value);
         }

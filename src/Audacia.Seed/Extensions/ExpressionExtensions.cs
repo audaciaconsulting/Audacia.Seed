@@ -279,7 +279,7 @@ internal static class ExpressionExtensions
         ISeedPrerequisite prerequisite)
     {
         var propertyInfo = expression.GetPropertyInfo();
-        if (prerequisite.PropertyInfo == propertyInfo)
+        if (prerequisite.PropertyInfo.IsSameProperty(propertyInfo))
         {
             return LambdaExpressionMatch.Full;
         }
@@ -288,7 +288,7 @@ internal static class ExpressionExtensions
         if (expression.SplitMemberAccessChain().Count() > 1)
         {
             var (left, _) = expression.SplitFirstMemberAccessLayer();
-            if (prerequisite.PropertyInfo == left.GetPropertyInfo())
+            if (prerequisite.PropertyInfo.IsSameProperty(left.GetPropertyInfo()))
             {
                 return LambdaExpressionMatch.Partial;
             }

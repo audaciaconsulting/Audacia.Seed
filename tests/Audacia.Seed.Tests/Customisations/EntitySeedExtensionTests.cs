@@ -407,6 +407,113 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
+    public void WithDifferent_RepeatedAfterNestedWithNew_PreservesNavigationCreationOrder()
+    {
+        var bookings = _context.SeedMany(2, new BookingSeed()
+            .WithDifferent(b => b.Facility)
+            .WithNew(b => b.Facility.Owner, new EmployeeSeed().With(e => e.FirstName, "ExplicitOwner"))
+            .WithDifferent(b => b.Facility));
+
+        bookings.ShouldSatisfyAllConditions(
+            b => b.Select(x => x.Facility.Owner!.FirstName).ShouldBe(["ExplicitOwner", "ExplicitOwner"]),
+            b => b.Select(x => x.Facility).Distinct().Count().ShouldBe(2),
+            _ => _context.Set<Facility>().Count().ShouldBe(2));
+    }
+
+    [Fact]
+    public void With_MultipleValuesAfterNestedWithNew_PreservesNavigationCreationOrder()
+    {
+        var bookings = _context.SeedMany(2, new BookingSeed()
+            .WithDifferent(b => b.Facility)
+            .WithNew(b => b.Facility.Owner, new EmployeeSeed().With(e => e.FirstName, "ExplicitOwner"))
+            .With(b => b.Facility.Name, "FirstFacility", "SecondFacility"));
+
+        bookings.ShouldSatisfyAllConditions(
+            b => b.Select(x => x.Facility.Owner!.FirstName).ShouldBe(["ExplicitOwner", "ExplicitOwner"]),
+            b => b.Select(x => x.Facility.Name).ShouldBe(["FirstFacility", "SecondFacility"]),
+            _ => _context.Set<Facility>().Count().ShouldBe(2));
+    }
+
+    [Fact]
+    public void With_MultipleValuesBehindCast_PreservesRespectiveNavigationSeeds()
+    {
+        var companyAssets = _context.SeedMany(2, new EntitySeed<CompanyAsset>()
+            .WithNew(
+                c => c.Asset,
+                new EntitySeed<EmployeeAsset>().With(a => a.Name, "FirstAsset"),
+                new EntitySeed<EmployeeAsset>().With(a => a.Name, "SecondAsset"))
+            .With(c => ((EmployeeAsset)c.Asset).Employee.FirstName, "Jane", "John"));
+
+        companyAssets.ShouldSatisfyAllConditions(
+            c => c.ShouldAllBe(x => x.Asset is EmployeeAsset),
+            c => c.Select(x => x.Asset.Name).ShouldBe(["FirstAsset", "SecondAsset"]),
+            c => c.Select(x => ((EmployeeAsset)x.Asset).Employee.FirstName).ShouldBe(["Jane", "John"]),
+            c => c.Select(x => x.Asset).Distinct().Count().ShouldBe(2),
+            c => c.Select(x => ((EmployeeAsset)x.Asset).Employee).Distinct().Count().ShouldBe(2),
+            _ => _context.Set<Asset>().Count().ShouldBe(2),
+            _ => _context.Set<EmployeeAsset>().Count().ShouldBe(2),
+            _ => _context.Set<Employee>().Count().ShouldBe(2));
+    }
+
+    [Fact]
+    public void With_MultipleBasePropertyValues_PreservesDerivedNavigationSeed()
+    {
+        var companyAssets = _context.SeedMany(2, new EntitySeed<CompanyAsset>()
+            .WithNew(c => c.Asset, new EntitySeed<EmployeeAsset>())
+            .With(c => c.Asset.Name, "FirstAsset", "SecondAsset"));
+
+        companyAssets.ShouldSatisfyAllConditions(
+            c => c.ShouldAllBe(x => x.Asset is EmployeeAsset),
+            c => c.Select(x => x.Asset.Name).ShouldBe(["FirstAsset", "SecondAsset"]),
+            c => c.Select(x => x.Asset).Distinct().Count().ShouldBe(2),
+            _ => _context.Set<Asset>().Count().ShouldBe(2),
+            _ => _context.Set<EmployeeAsset>().Count().ShouldBe(2));
+    }
+
+    [Fact]
+    public void With_MultipleValuesForRespectiveDerivedSeeds_PreservesRepeatedSeedsWithoutSharingAssets()
+    {
+        var firstSeed = new EntitySeed<EmployeeAsset>()
+            .WithNew(a => a.Employee, new EmployeeSeed().With(e => e.FirstName, "FirstEmployee"));
+        var repeatedSeed = new EntitySeed<EmployeeAsset>()
+            .WithNew(a => a.Employee, new EmployeeSeed().With(e => e.FirstName, "RepeatedEmployee"));
+
+        var companyAssets = _context.SeedMany(3, new EntitySeed<CompanyAsset>()
+            .WithNew(c => c.Asset, firstSeed, repeatedSeed, repeatedSeed)
+            .With(c => c.Asset.Name, "FirstAsset", "SecondAsset", "ThirdAsset")
+            .WithDifferent(c => c.Asset));
+
+        companyAssets.ShouldSatisfyAllConditions(
+            c => c.ShouldAllBe(x => x.Asset is EmployeeAsset),
+            c => c.Select(x => x.Asset.Name).ShouldBe(["FirstAsset", "SecondAsset", "ThirdAsset"]),
+            c => c.Select(x => ((EmployeeAsset)x.Asset).Employee.FirstName).ShouldBe(["FirstEmployee", "RepeatedEmployee", "RepeatedEmployee"]),
+            c => c.Select(x => x.Asset).Distinct().Count().ShouldBe(3),
+            _ => _context.Set<Asset>().Count().ShouldBe(3));
+    }
+
+    [Theory]
+    [InlineData(2)]
+    [InlineData(3)]
+    public void With_MultipleValuesOnInheritedNavigation_PreservesDerivedSeedAndEntityIndex(int amountToCreate)
+    {
+        var expectedAssetNames = Enumerable.Range(0, amountToCreate).Select(i => $"Asset {i}").ToArray();
+        var expectedAssetTypeNames = Enumerable.Range(0, amountToCreate).Select(i => $"Asset type {i}").ToArray();
+
+        var companyAssets = _context.SeedMany(amountToCreate, new EntitySeed<CompanyAsset>()
+            .WithNew(c => c.Asset, new EntitySeed<EmployeeAsset>()
+                .With(a => a.Name, (index, _) => $"Asset {index}"))
+            .With(c => c.Asset.AssetType.Name, expectedAssetTypeNames));
+
+        companyAssets.ShouldSatisfyAllConditions(
+            c => c.ShouldAllBe(x => x.Asset is EmployeeAsset),
+            c => c.Select(x => x.Asset.Name).ShouldBe(expectedAssetNames),
+            c => c.Select(x => x.Asset.AssetType.Name).ShouldBe(expectedAssetTypeNames),
+            c => c.Select(x => x.Asset.AssetType).Distinct().Count().ShouldBe(amountToCreate),
+            _ => _context.Set<Asset>().Count().ShouldBe(amountToCreate),
+            _ => _context.Set<AssetType>().Count().ShouldBe(amountToCreate));
+    }
+
+    [Fact]
     public void With_MultipleValuesForPropertyOnParentSpecifiedWithNew_DoesNotSeedOrphanedParent()
     {
         const int amountToCreate = 2;

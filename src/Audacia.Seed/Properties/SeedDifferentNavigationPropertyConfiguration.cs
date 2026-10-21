@@ -15,7 +15,7 @@ namespace Audacia.Seed.Properties;
 internal class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
     Expression<Func<TEntity, TNavigation?>> getter,
     EntitySeed<TNavigation> seedConfiguration)
-    : ISeedCustomisation<TEntity>
+    : ISeedCustomisation<TEntity>, INavigationSeedConfiguration
     where TEntity : class
     where TNavigation : class
 {
@@ -24,6 +24,9 @@ internal class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation
 
     /// <inheritdoc />
     public IEntitySeed Seed => SeedConfiguration;
+
+    /// <inheritdoc />
+    public IReadOnlyList<IEntitySeed> NavigationSeeds => [SeedConfiguration];
 
     /// <inheritdoc/>
     public int Order => 50;
