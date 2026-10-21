@@ -287,9 +287,13 @@ public static class EntitySeedExtensions
         }
         else
         {
+            // Just using seedConfiguration would mean that if WithNew/WithDifferent was already called for this property, it is ignored and replaced with the default seedConfiguration.
+            var seedToUse = TakeOverExistingNavigationSeed(entitySeed, getter) as EntitySeed<TNavigation> ?? seedConfiguration;
+            seedToUse.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
+
             entitySeed.AddCustomisation(new SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
                 getter,
-                seedConfiguration));
+                seedToUse));
         }
 
         return entitySeed;
@@ -575,15 +579,53 @@ public static class EntitySeedExtensions
         int amountToCreate)
         where TEntity : class
     {
-        // Augment the seed in the existing customisation if we've already added a WithDifferent for this property.
-        var existingSeed = entitySeed.Customisations.Select(c => c.FindSeedForGetter(left))
-            .FirstOrDefault(s => s != null);
+        // Augment the seed in the existing customisation if we've already added a WithNew or WithDifferent for this property.
+        var existingSeed = TakeOverExistingNavigationSeed(entitySeed, left)
+                           ?? entitySeed.Customisations.Select(c => c.FindSeedForGetter(left)).FirstOrDefault(s => s != null);
         var seed = existingSeed ?? EntryPointAssembly.Load().FindSeed(left.Body.Type);
 
         seed.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
         seed.Options.AmountToCreate = amountToCreate;
 
         return seed;
+    }
+
+    /// <summary>
+    /// Find an existing WithNew or WithDifferent customisation for the navigation property in the <paramref name="getter"/>,
+    /// remove it and return its seed, so the WithDifferent customisation about to be added replaces it.
+    /// <br/>
+    /// Otherwise both customisations would be applied: the first would create a navigation property that the second immediately overwrites,
+    /// leaving an orphaned entity in the database.
+    /// </summary>
+    /// <param name="entitySeed">The seed that may contain an existing customisation for the navigation property.</param>
+    /// <param name="getter">A lambda to the navigation property, which may include a cast, e.g. <c>x => (EmployeeAsset)x.Asset</c>.</param>
+    /// <typeparam name="TEntity">The type of the entity being seeded.</typeparam>
+    /// <returns>The seed from the existing customisation, or null if there isn't one with a seed for the same type.</returns>
+    private static IEntitySeed? TakeOverExistingNavigationSeed<TEntity>(
+        EntitySeed<TEntity> entitySeed,
+        LambdaExpression getter)
+        where TEntity : class
+    {
+        var property = getter.GetPropertyInfo();
+        var existing = entitySeed.Customisations.Find(c =>
+            c.IsSeedNavigationPropertyConfiguration()
+            && c.Seed?.EntityType == getter.Body.Type
+            && c.GetterLambda?.GetPropertyInfo() == property);
+
+        if (existing == null)
+        {
+            return null;
+        }
+
+        entitySeed.Customisations.Remove(existing);
+        return existing.Seed;
+    }
+
+    private static bool IsSeedNavigationPropertyConfiguration<TEntity>(this ISeedCustomisation<TEntity> customisation) where TEntity : class
+    {
+        return customisation.GetType().IsGenericType
+            && (customisation.GetType().GetGenericTypeDefinition() == typeof(SeedNavigationPropertyConfiguration<,>)
+                || customisation.GetType().GetGenericTypeDefinition() == typeof(SeedDifferentNavigationPropertyConfiguration<,>));
     }
 
     private static void AddWithDifferentForNavigationProperty<TEntity>(

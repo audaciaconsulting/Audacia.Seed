@@ -392,11 +392,41 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
-    public void With_MultipleValuesForPropertyBehindCastOnGrandparent_DoesNotThrow()
+    public void With_ExplicitlyCastingToCorrectType_HandlesMultipleValues()
+    {
+        var companyAssets = _context.SeedMany(2, new EntitySeed<CompanyAsset>()
+            .WithNew(ca => ca.Asset, new EntitySeed<EmployeeAsset>())
+            .With(ca => ((EmployeeAsset)ca.Asset).Employee.FirstName, "Jane", "John"));
+
+        companyAssets.ShouldSatisfyAllConditions(
+            c => c.ShouldAllBe(x => x.Asset is EmployeeAsset),
+            c => c.Select(x => ((EmployeeAsset)x.Asset).Employee.FirstName).ShouldBe(["Jane", "John"]),
+            c => c.Select(x => ((EmployeeAsset)x.Asset).Employee).Distinct().Count().ShouldBe(2, "each company asset should have its own employee"),
+            _ => _context.Set<EmployeeAsset>().Count().ShouldBe(2, "we should not seed an extra, orphaned asset"),
+            _ => _context.Set<Employee>().Count().ShouldBe(2, "we should not seed an extra, orphaned employee"));
+    }
+
+    [Fact]
+    public void With_MultipleValuesForPropertyOnParentSpecifiedWithNew_DoesNotSeedOrphanedParent()
     {
         const int amountToCreate = 2;
 
-        var act = () => _context.SeedMany(amountToCreate, new EntitySeed<CompanyAssetValue>()
+        _context.SeedMany(amountToCreate, new BookingSeed()
+            .WithNew(b => b.Facility, new FacilitySeed())
+            .With(b => b.Facility.Name, "Squash court", "Tennis court"));
+
+        var facilities = _context.Set<Facility>().ToList();
+        facilities.ShouldSatisfyAllConditions(
+            f => f.Count.ShouldBe(amountToCreate, "we should not seed an extra facility that no booking uses"),
+            f => f.Select(x => x.Name).Order().ShouldBe(["Squash court", "Tennis court"]));
+    }
+
+    [Fact]
+    public void With_MultipleValuesForPropertyBehindCastOnGrandparent_UsesDistinctEmployeesWithoutOrphans()
+    {
+        const int amountToCreate = 2;
+
+        var companyAssetValues = _context.SeedMany(amountToCreate, new EntitySeed<CompanyAssetValue>()
             .With(cav => cav.Name, "Serial number")
             .With(cav => cav.Value, "ABC-123")
             .WithNew(cav => cav.CompanyAsset, new EntitySeed<CompanyAsset>()
@@ -404,8 +434,13 @@ public sealed class EntitySeedExtensionTests : IDisposable
                 .WithNew(ea => ea.Employee)))
             .With(cav => ((EmployeeAsset)cav.CompanyAsset.Asset).Employee.FirstName, "Jane", "John"));
 
-        act.ShouldNotThrow("we should be able to provide multiple values for a property accessed via a cast part-way along the getter");
-        _context.Set<CompanyAssetValue>().Count().ShouldBe(amountToCreate);
+        companyAssetValues.ShouldSatisfyAllConditions(
+            values => values.Select(v => ((EmployeeAsset)v.CompanyAsset.Asset).Employee.FirstName).ShouldBe(["Jane", "John"]),
+            values => values.Select(v => ((EmployeeAsset)v.CompanyAsset.Asset).Employee).Distinct().Count().ShouldBe(amountToCreate),
+            _ => _context.Set<CompanyAssetValue>().Count().ShouldBe(amountToCreate),
+            _ => _context.Set<CompanyAsset>().Count().ShouldBe(amountToCreate, "we should not seed an orphaned company asset"),
+            _ => _context.Set<EmployeeAsset>().Count().ShouldBe(amountToCreate, "we should not seed an orphaned employee asset"),
+            _ => _context.Set<Employee>().Count().ShouldBe(amountToCreate, "we should not seed an orphaned employee"));
     }
 
     [Fact]

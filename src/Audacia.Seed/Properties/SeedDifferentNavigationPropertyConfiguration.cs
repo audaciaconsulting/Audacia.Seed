@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using System.Reflection;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.Customisation;
 using Audacia.Seed.Exceptions;
@@ -67,11 +66,9 @@ internal class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation
 
         var obj = Getter.GetPropertyOwner(entity);
 
-        if (Getter.Body is MemberExpression memberSelectorExpression)
-        {
-            var property = (PropertyInfo)memberSelectorExpression.Member;
-            property.SetValue(obj, value, null);
-        }
+        // The getter may be a cast to a derived type, e.g. x => (EmployeeAsset)x.Asset, so get the property from inside any cast.
+        var property = Getter.GetPropertyInfo();
+        property.SetValue(obj, value, null);
     }
 
     private TNavigation GetValueToSet(ISeedableRepository repository, int index, TEntity? previous)
