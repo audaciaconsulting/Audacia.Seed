@@ -399,7 +399,16 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
         var fullMatches = Customisations
             .Where(c => c.MatchToPrerequisite(prerequisite) == LambdaExpressionMatch.Full).ToList();
 
-        foreach (var fullMatchSeed in fullMatches.Select(c => c.Seed).OfType<IEntitySeed>())
+        // A navigation configuration may hold a seed per entity (e.g. WithNew(x => x.Asset, firstSeed, secondSeed)),
+        // so every one of them needs the customisation, not just the first.
+        var fullMatchSeeds = fullMatches
+            .SelectMany(c => c is INavigationSeedConfiguration navigation
+                ? navigation.NavigationSeeds
+                : c.Seed is { } seed ? [seed] : [])
+            .Distinct(ReferenceEqualityComparer.Instance)
+            .Cast<IEntitySeed>();
+
+        foreach (var fullMatchSeed in fullMatchSeeds)
         {
             // The seed for a full match may be for a derived type, e.g. WithNew(x => x.Asset, new EntitySeed<EmployeeAsset>()),
             // so create the customisation for that seed's type, otherwise it would be ignored and the prerequisite orphaned.

@@ -454,6 +454,22 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
+    public void With_ForeignKeyOnCastNavigationWithMultipleDistinctSeeds_DoesNotSeedOrphanedPrerequisites()
+    {
+        var employee = _context.Seed(new EmployeeSeed());
+
+        var companyAssets = _context.SeedMany(2, new EntitySeed<CompanyAsset>()
+            .WithNew(ca => ca.Asset, new EntitySeed<EmployeeAsset>(), new EntitySeed<EmployeeAsset>())
+            .With(ca => ((EmployeeAsset)ca.Asset).EmployeeId, employee.Id));
+
+        companyAssets.ShouldSatisfyAllConditions(
+            c => c.ShouldAllBe(x => ((EmployeeAsset)x.Asset).EmployeeId == employee.Id),
+            c => c.Select(x => x.Asset).Distinct().Count().ShouldBe(2, "each company asset should have its own asset"),
+            _ => _context.Set<EmployeeAsset>().Count().ShouldBe(2, "we should not seed an extra, orphaned asset"),
+            _ => _context.Set<Employee>().Count().ShouldBe(1, "we should not seed an extra, orphaned employee"));
+    }
+
+    [Fact]
     public void With_MultipleValuesForNestedNavigation_DoesNotSeedOrphanedPrerequisites()
     {
         var employees = _context.SeedMany(2, new EmployeeSeed()).ToList();
