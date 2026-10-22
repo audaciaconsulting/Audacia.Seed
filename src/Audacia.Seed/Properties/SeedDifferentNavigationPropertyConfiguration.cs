@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using Audacia.Seed.Contracts;
-using Audacia.Seed.Customisation;
 using Audacia.Seed.Extensions;
 using Audacia.Seed.Options;
 
@@ -29,6 +28,12 @@ internal class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation
 
     /// <inheritdoc/>
     public int Order => 50;
+
+    /// <inheritdoc />
+    public void UseDifferentSeeds()
+    {
+        // This configuration always creates a new navigation entity.
+    }
 
     /// <inheritdoc/>
     public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
@@ -67,19 +72,8 @@ internal class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation
 
     private TNavigation GetValueToSet(ISeedableRepository repository, int index)
     {
-        TNavigation? value = null;
-        if (SeedConfiguration.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew)
-        {
-            value = repository.FindLocal(SeedConfiguration.ToPredicate(index));
-        }
-
-        if (value == null)
-        {
-            SeedConfiguration.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
-            value = SeedConfiguration.GetOrCreateEntity(index, null);
-            repository.Add(value);
-        }
-
+        var value = (TNavigation)((IIndexedEntitySeed)SeedConfiguration).CreateEntity(index);
+        repository.Add(value);
         return value;
     }
 

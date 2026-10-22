@@ -16,14 +16,10 @@ internal interface INavigationSeedConfiguration
 
     /// <summary>
     /// Ensure each entity receives a new navigation entity.
+    /// <br/>
+    /// This must not change the options of the <see cref="NavigationSeeds"/>, as they may be shared with other navigation properties.
     /// </summary>
-    void UseDifferentSeeds()
-    {
-        foreach (var seed in NavigationSeeds)
-        {
-            seed.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
-        }
-    }
+    void UseDifferentSeeds();
 
     /// <summary>
     /// Protect against using `WithDifferent` when you're only creating one entity.
@@ -37,7 +33,9 @@ internal interface INavigationSeedConfiguration
         ArgumentNullException.ThrowIfNull(entitySeed);
 
         // As `TryFindNew` is the default, this is what the seed options would look like in this scenario.
-        if (entitySeed.Options is { AmountToCreate: 1, InsertionBehavior: SeedingInsertionBehaviour.TryFindNew })
+        // A parent created for a different navigation is part of the outer batch, even if its own amount is one.
+        if (!entitySeed.IsCreatingDifferentEntity
+            && entitySeed.Options is { AmountToCreate: 1, InsertionBehavior: SeedingInsertionBehaviour.TryFindNew })
         {
             throw new DataSeedingException($"`{nameof(EntitySeedExtensions.WithDifferent)} was specified, but we're only building 1 {typeof(TEntity).Name}.");
         }

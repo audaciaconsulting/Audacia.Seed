@@ -2,6 +2,7 @@ using Audacia.Seed.Customisation;
 using Audacia.Seed.EntityFrameworkCore.Extensions;
 using Audacia.Seed.Exceptions;
 using Audacia.Seed.InMemory;
+using Audacia.Seed.Options;
 using Audacia.Seed.Tests.ExampleProject.Entities;
 using Audacia.Seed.Tests.ExampleProject.EntityFrameworkCore;
 using Audacia.Seed.Tests.ExampleProject.Seeds;
@@ -499,6 +500,24 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
+    public void WithDifferent_AfterWithNewSharingSeedWithAnotherNavigation_OnlySelectedNavigationIsDifferent()
+    {
+        var employeeSeed = new EmployeeSeed();
+
+        var facilities = _context.SeedMany(3, new FacilitySeed()
+            .WithNew(f => f.Owner, employeeSeed)
+            .WithNew(f => f.Manager, employeeSeed)
+            .WithDifferent(f => f.Owner));
+
+        facilities.ShouldSatisfyAllConditions(
+            f => f.Select(x => x.Owner).Distinct().Count().ShouldBe(3, "each facility should have its own owner"),
+            f => f.Select(x => x.Manager).Distinct().Count().ShouldBe(1, "managers should still be reused as they were not specified as different"),
+            _ => employeeSeed.Options.InsertionBehavior.ShouldNotBe(
+                SeedingInsertionBehaviour.AddNew,
+                "the shared seed's options should not be changed by WithDifferent on one navigation"));
+    }
+
+    [Fact]
     public void WithDifferent_AfterWithNewWhenBuildingOne_ThrowsException()
     {
         var seedConfiguration = new BookingSeed()
@@ -511,6 +530,56 @@ public sealed class EntitySeedExtensionTests : IDisposable
                 typeof(DataSeedingException),
                 "reusing the existing navigation configuration should still validate the WithDifferent request")
             .Message.ShouldBe($"`{nameof(EntitySeedExtensions.WithDifferent)} was specified, but we're only building 1 {nameof(Booking)}.");
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(3)]
+    public void WithDifferent_NestedAfterWithNewSharingSeed_PreservesSharedSeedReuse(int seedCount)
+    {
+        var facilitySeed = new FacilitySeed();
+        var insertionBehavior = facilitySeed.Options.InsertionBehavior;
+        var bookingSeed = seedCount > 1
+            ? new BookingSeed().WithNew(b => b.Facility, facilitySeed, facilitySeed, facilitySeed)
+            : new BookingSeed().WithNew(b => b.Facility, facilitySeed);
+
+        bookingSeed.WithDifferent(b => b.Facility.Owner);
+        facilitySeed.Options.InsertionBehavior.ShouldBe(insertionBehavior);
+
+        // Keep the repository between builds; EF seeding clears its change tracker between calls.
+        var builder = new EntityBuilder();
+        var bookings = builder.BuildMany(3, bookingSeed).ToList();
+        var reusedFacility = builder.Build(new BookingSeed().WithNew(b => b.Facility, facilitySeed)).Facility;
+
+        bookings.ShouldSatisfyAllConditions(
+            b => b.Select(x => x.Facility).Distinct().Count().ShouldBe(3),
+            b => b.Select(x => x.Facility.Owner).Distinct().Count().ShouldBe(3),
+            _ => reusedFacility.ShouldBeSameAs(bookings[0].Facility),
+            _ => facilitySeed.Options.InsertionBehavior.ShouldBe(insertionBehavior));
+    }
+
+    [Fact]
+    public void WithDifferent_RecursiveAfterWithNewSharingSeeds_PreservesSharedSeedReuse()
+    {
+        var groupSeed = new MembershipGroupSeed();
+        var memberSeed = new MemberSeed().WithNew(m => m.MembershipGroup, groupSeed);
+        var memberInsertionBehavior = memberSeed.Options.InsertionBehavior;
+        var groupInsertionBehavior = groupSeed.Options.InsertionBehavior;
+        var bookingSeed = new BookingSeed()
+            .WithNew(b => b.Member, memberSeed)
+            .WithDifferent(b => b.Member.MembershipGroup.Region);
+
+        var builder = new EntityBuilder();
+        var bookings = builder.BuildMany(3, bookingSeed).ToList();
+        var reusedMember = builder.Build(new BookingSeed().WithNew(b => b.Member, memberSeed)).Member;
+
+        bookings.ShouldSatisfyAllConditions(
+            b => b.Select(x => x.Member).Distinct().Count().ShouldBe(3),
+            b => b.Select(x => x.Member.MembershipGroup).Distinct().Count().ShouldBe(3),
+            b => b.Select(x => x.Member.MembershipGroup.Region).Distinct().Count().ShouldBe(3),
+            _ => reusedMember.ShouldBeSameAs(bookings[0].Member),
+            _ => memberSeed.Options.InsertionBehavior.ShouldBe(memberInsertionBehavior),
+            _ => groupSeed.Options.InsertionBehavior.ShouldBe(groupInsertionBehavior));
     }
 
     [Fact]

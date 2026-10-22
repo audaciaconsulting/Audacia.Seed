@@ -35,8 +35,8 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     /// <inheritdoc />
     public void UseDifferentSeeds()
     {
+        // Don't change the seed's options, as the seed may be shared with other navigation properties.
         _useDifferentSeeds = true;
-        SeedConfiguration.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
     }
 
     /// <inheritdoc/>
@@ -66,6 +66,7 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
         SeedConfiguration.Repository ??= repository;
 
         var value = (previous != null
+                     && !_useDifferentSeeds
                      && SeedConfiguration.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindNew
                         ? Getter.Compile().Invoke(previous)
                         : null)
@@ -77,11 +78,12 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
         property.SetValue(obj, value, null);
     }
 
-    private static TNavigation GetValueToSet(ISeedableRepository repository, int index,
+    private TNavigation GetValueToSet(ISeedableRepository repository, int index,
         IEntitySeed<TNavigation> navigationSeed)
     {
         TNavigation? value = null;
-        if ((navigationSeed.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindExisting ||
+        if (!_useDifferentSeeds
+            && (navigationSeed.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindExisting ||
              (navigationSeed.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew &&
              !navigationSeed.HasCustomisations))
             && navigationSeed is EntitySeed<TNavigation> navigationSeedAsEntitySeed)
@@ -91,9 +93,12 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
 
         if (value == null)
         {
-            value = navigationSeed is IIndexedEntitySeed indexedSeed
-                ? (TNavigation)indexedSeed.GetOrCreateEntity(index)
-                : navigationSeed.Build();
+            value = navigationSeed switch
+            {
+                IIndexedEntitySeed indexedSeed when _useDifferentSeeds => (TNavigation)indexedSeed.CreateEntity(index),
+                IIndexedEntitySeed indexedSeed => (TNavigation)indexedSeed.GetOrCreateEntity(index),
+                _ => navigationSeed.Build()
+            };
             repository.Add(value);
         }
 

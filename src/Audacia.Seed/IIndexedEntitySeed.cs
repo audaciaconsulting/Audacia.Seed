@@ -11,4 +11,11 @@ internal interface IIndexedEntitySeed
     /// <param name="index">The index of the entity being created.</param>
     /// <returns>The seeded entity.</returns>
     object GetOrCreateEntity(int index);
+
+    /// <summary>
+    /// Create a new entity for the specified index, without trying to find an existing one.
+    /// </summary>
+    /// <param name="index">The index of the entity being created.</param>
+    /// <returns>The seeded entity.</returns>
+    object CreateEntity(int index);
 }

@@ -1,10 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Reflection;
 using Audacia.Core.Extensions;
 using Audacia.Seed.Exceptions;
 using Audacia.Seed.Extensions;
 using Audacia.Seed.Helpers;
-using Audacia.Seed.Options;
 using Audacia.Seed.Properties;
 
 namespace Audacia.Seed.Customisation;
@@ -286,8 +286,6 @@ public static class EntitySeedExtensions
                 $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.")
         };
 
-        seedConfiguration.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
-
         // Check the getter passed in is setting a nested property or not
         // E.g x => x.Parent.GrandParent is nested, but x => x.Parent is not.
         if (member.Expression?.Type != typeof(TEntity))
@@ -298,6 +296,7 @@ public static class EntitySeedExtensions
         else
         {
             // Retain the existing configuration's position and all explicitly supplied seeds.
+            // Only this configuration is made different, as its seeds may be shared with other navigation properties.
             var existing = FindExistingNavigationSeeds(entitySeed, getter);
             if (existing != null)
             {
@@ -605,7 +604,6 @@ public static class EntitySeedExtensions
         var seed = entitySeed.Customisations.Select(c => c.FindSeedForGetter(left)).FirstOrDefault(s => s != null)
                    ?? EntryPointAssembly.Load().FindSeed(left.Body.Type);
 
-        seed.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
         seed.Options.AmountToCreate = amountToCreate;
 
         AddWithDifferentForNavigationProperty(entitySeed, left, seed);
@@ -638,23 +636,26 @@ public static class EntitySeedExtensions
     {
         var property = getter.GetPropertyInfo();
         return entitySeed.Customisations
-            .Where(c =>
-            {
-                if (c.GetterLambda is not { } existingGetter
-                    || !existingGetter.GetPropertyInfo().IsSameProperty(property))
-                {
-                    return false;
-                }
-
-                var existingPath = existingGetter.SplitMemberAccessChain().ToList();
-                var requestedPath = getter.SplitMemberAccessChain().ToList();
-                return existingPath.Count == requestedPath.Count
-                    && existingPath.Zip(requestedPath, (left, right) =>
-                        left.GetPropertyInfo().IsSameProperty(right.GetPropertyInfo())).All(match => match);
-            })
+            .Where(c => MatchesNavigationPath(getter, c, property))
             .OfType<INavigationSeedConfiguration>()
             .FirstOrDefault(c => c.NavigationSeeds.Count > 0
                 && c.NavigationSeeds.All(seed => getter.Body.Type.IsAssignableFrom(seed.EntityType)));
+    }
+
+    private static bool MatchesNavigationPath<TEntity>(LambdaExpression getter, ISeedCustomisation<TEntity> customisation, PropertyInfo property)
+        where TEntity : class
+    {
+        if (customisation.GetterLambda is not { } existingGetter || !existingGetter.GetPropertyInfo().IsSameProperty(property))
+        {
+            return false;
+        }
+
+        var existingPath = existingGetter.SplitMemberAccessChain().ToList();
+        var requestedPath = getter.SplitMemberAccessChain().ToList();
+
+        return existingPath.Count == requestedPath.Count
+            && existingPath.Zip(requestedPath, (left, right) =>
+                left.GetPropertyInfo().IsSameProperty(right.GetPropertyInfo())).All(match => match);
     }
 
     private sealed class NavigationParameterVisitor(ParameterExpression source, ParameterExpression destination) : ExpressionVisitor

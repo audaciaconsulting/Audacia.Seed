@@ -45,11 +45,8 @@ internal class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigatio
     /// <inheritdoc />
     public void UseDifferentSeeds()
     {
+        // Don't change the seeds' options, as the seeds may be shared with other navigation properties.
         _useDifferentSeeds = true;
-        foreach (var seed in SeedConfigurations)
-        {
-            seed.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
-        }
     }
 
     /// <summary>
@@ -100,14 +97,25 @@ internal class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigatio
 
         if (value == null)
         {
-            seedConfiguration.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
-            value = seedConfiguration is IIndexedEntitySeed indexedSeed
-                ? (TNavigation)indexedSeed.GetOrCreateEntity(index)
-                : seedConfiguration.Build();
+            value = CreateValue(index, seedConfiguration);
             repository.Add(value);
         }
 
         return value;
+    }
+
+    private TNavigation CreateValue(int index, IEntitySeed<TNavigation> seedConfiguration)
+    {
+        if (_useDifferentSeeds && seedConfiguration is IIndexedEntitySeed differentSeed)
+        {
+            // Create the entity without changing the seed's options, as the seed may be shared with other navigation properties.
+            return (TNavigation)differentSeed.CreateEntity(index);
+        }
+
+        seedConfiguration.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
+        return seedConfiguration is IIndexedEntitySeed indexedSeed
+            ? (TNavigation)indexedSeed.GetOrCreateEntity(index)
+            : seedConfiguration.Build();
     }
 
     /// <inheritdoc/>

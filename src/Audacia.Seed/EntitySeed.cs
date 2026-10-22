@@ -312,17 +312,52 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
         };
 
         // If we didn't find an existing entity, we need to create a new one.
-        if (entity == null)
+        return entity ?? CreateEntity(index, previous);
+    }
+
+    /// <inheritdoc />
+    object IIndexedEntitySeed.CreateEntity(int index)
+    {
+        var wasCreatingDifferentEntity = IsCreatingDifferentEntity;
+        try
         {
-            entity = GetDefault(index, previous);
-
-            PopulatePrerequisites(entity);
-
-            // The entity is considered valid at this point, so we can add it to the repository.
-            Repository.Add(entity);
-
-            PopulateCustomisations(index, previous, entity);
+            IsCreatingDifferentEntity = true;
+            return CreateEntity(index, null);
         }
+        finally
+        {
+            IsCreatingDifferentEntity = wasCreatingDifferentEntity;
+        }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the current navigation explicitly requires a new entity.
+    /// This creation context does not change the options of a potentially shared seed.
+    /// </summary>
+    internal bool IsCreatingDifferentEntity { get; private set; }
+
+    /// <summary>
+    /// Create a new <typeparamref name="TEntity"/>, regardless of the <see cref="EntitySeedOptions.InsertionBehavior"/>.
+    /// </summary>
+    /// <param name="index">The current index. This will be greater than zero if creating many.</param>
+    /// <param name="previous">The entity seeded previously. This will not be null if creating many.</param>
+    /// <returns>A new entity.</returns>
+    /// <exception cref="DataSeedingException">If we don't have a <see cref="Repository"/> set.</exception>
+    internal TEntity CreateEntity(int index, TEntity? previous)
+    {
+        if (Repository == null)
+        {
+            throw new DataSeedingException("Cannot build entities as there is no repository set.");
+        }
+
+        var entity = GetDefault(index, previous);
+
+        PopulatePrerequisites(entity);
+
+        // The entity is considered valid at this point, so we can add it to the repository.
+        Repository.Add(entity);
+
+        PopulateCustomisations(index, previous, entity);
 
         return entity;
     }
