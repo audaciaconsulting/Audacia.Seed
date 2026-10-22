@@ -277,17 +277,20 @@ public static class EntitySeedExtensions
         ArgumentNullException.ThrowIfNull(seedConfiguration);
         ArgumentNullException.ThrowIfNull(getter);
 
-        if (getter.Body is not MemberExpression)
+        // The getter may be a cast to a derived type, e.g. x => (EmployeeAsset)x.Asset, so validate the property inside any cast.
+        var member = getter.Body switch
         {
-            throw new DataSeedingException(
-                $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.");
-        }
+            MemberExpression memberExpression => memberExpression,
+            UnaryExpression { NodeType: ExpressionType.Convert, Operand: MemberExpression operand } => operand,
+            _ => throw new DataSeedingException(
+                $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.")
+        };
 
         seedConfiguration.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
 
         // Check the getter passed in is setting a nested property or not
         // E.g x => x.Parent.GrandParent is nested, but x => x.Parent is not.
-        if (getter.Body is MemberExpression m && m.Expression?.Type != typeof(TEntity))
+        if (member.Expression?.Type != typeof(TEntity))
         {
             // Add a WithDifferent for the next level, which will recursively do the same until we reach the end.
             WithDifferentRecursive(entitySeed, getter);

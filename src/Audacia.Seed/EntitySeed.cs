@@ -394,14 +394,22 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
     private void AddVoidCustomisation(ISeedCustomisation<TEntity> customisation, IEntitySeed seed, ISeedPrerequisite prerequisite)
     {
         var (_, right) = customisation.GetterLambda!.SplitFirstMemberAccessLayer();
-        var genericType = typeof(SeedVoidConfiguration<>).MakeGenericType(seed.EntityType);
-        var customisationToAdd = (ISeedCustomisation)Activator.CreateInstance(genericType, right)!;
-        seed.AddCustomisation(customisationToAdd);
+        seed.AddCustomisation(CreateVoidCustomisation(seed, right));
+
         var fullMatches = Customisations
             .Where(c => c.MatchToPrerequisite(prerequisite) == LambdaExpressionMatch.Full).ToList();
-        foreach (var fullMatch in fullMatches)
+
+        foreach (var fullMatchSeed in fullMatches.Select(c => c.Seed).OfType<IEntitySeed>())
         {
-            fullMatch.Seed?.AddCustomisation(customisationToAdd);
+            // The seed for a full match may be for a derived type, e.g. WithNew(x => x.Asset, new EntitySeed<EmployeeAsset>()),
+            // so create the customisation for that seed's type, otherwise it would be ignored and the prerequisite orphaned.
+            fullMatchSeed.AddCustomisation(CreateVoidCustomisation(fullMatchSeed, right));
         }
+    }
+
+    private static ISeedCustomisation CreateVoidCustomisation(IEntitySeed seed, LambdaExpression getter)
+    {
+        var genericType = typeof(SeedVoidConfiguration<>).MakeGenericType(seed.EntityType);
+        return (ISeedCustomisation)Activator.CreateInstance(genericType, getter)!;
     }
 }

@@ -408,6 +408,67 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
+    public void With_ExplicitlyCastingToCorrectTypeForPropertyOnCastNavigationWithoutWithNew_HandlesMultipleValues()
+    {
+        var employees = _context.SeedMany(2, new EmployeeSeed()).ToList();
+
+        var companyAssets = _context.SeedMany(2, new EntitySeed<CompanyAsset>()
+            .With(ca => ((EmployeeAsset)ca.Asset).Employee, employees[0], employees[1]));
+
+        companyAssets.ShouldSatisfyAllConditions(
+            c => c.ShouldAllBe(x => x.Asset is EmployeeAsset),
+            c => c.Select(x => ((EmployeeAsset)x.Asset).Employee).ShouldBe(employees),
+            c => c.Select(x => x.Asset).Distinct().Count().ShouldBe(2, "each company asset should have its own asset"),
+            _ => _context.Set<Employee>().Count().ShouldBe(2, "we should not seed an extra, orphaned employee"));
+    }
+
+    [Fact]
+    public void With_ExplicitlyCastingToCorrectTypeForPropertyOnCastNavigation_HandlesMultipleValues()
+    {
+        var employees = _context.SeedMany(2, new EmployeeSeed()).ToList();
+
+        var companyAssets = _context.SeedMany(2, new EntitySeed<CompanyAsset>()
+            .WithNew(ca => ca.Asset, new EntitySeed<EmployeeAsset>())
+            .With(ca => ((EmployeeAsset)ca.Asset).Employee, employees[0], employees[1]));
+
+        companyAssets.ShouldSatisfyAllConditions(
+            c => c.ShouldAllBe(x => x.Asset is EmployeeAsset),
+            c => c.Select(x => ((EmployeeAsset)x.Asset).Employee).ShouldBe(employees),
+            c => c.Select(x => x.Asset).Distinct().Count().ShouldBe(2, "each company asset should have its own asset"),
+            _ => _context.Set<EmployeeAsset>().Count().ShouldBe(2, "we should not seed an extra, orphaned asset"),
+            _ => _context.Set<Employee>().Count().ShouldBe(2, "we should not seed an extra, orphaned employee"));
+    }
+
+    [Fact]
+    public void With_ExplicitlyCastingToCorrectTypeForPropertyOnCastNavigation_DoesNotSeedOrphanedPrerequisite()
+    {
+        var employee = _context.Seed(new EmployeeSeed());
+
+        var companyAsset = _context.Seed(new EntitySeed<CompanyAsset>()
+            .WithNew(ca => ca.Asset, new EntitySeed<EmployeeAsset>())
+            .With(ca => ((EmployeeAsset)ca.Asset).Employee, employee));
+
+        companyAsset.ShouldSatisfyAllConditions(
+            c => ((EmployeeAsset)c.Asset).Employee.ShouldBe(employee),
+            _ => _context.Set<Employee>().Count().ShouldBe(1, "we should not seed an extra, orphaned employee"));
+    }
+
+    [Fact]
+    public void With_MultipleValuesForNestedNavigation_DoesNotSeedOrphanedPrerequisites()
+    {
+        var employees = _context.SeedMany(2, new EmployeeSeed()).ToList();
+
+        var bookings = _context.SeedMany(2, new BookingSeed()
+            .With(b => b.Facility.Owner, employees[0], employees[1])
+            .With(b => b.Facility.Manager, employees[1], employees[0]));
+
+        bookings.ShouldSatisfyAllConditions(
+            b => b.Select(x => x.Facility.Owner).ShouldBe(employees),
+            b => b.Select(x => x.Facility.Manager).ShouldBe([employees[1], employees[0]]),
+            _ => _context.Set<Employee>().Count().ShouldBe(2, "we should not seed an extra, orphaned employee"));
+    }
+
+    [Fact]
     public void WithDifferent_RepeatedAfterNestedWithNew_PreservesNavigationCreationOrder()
     {
         var bookings = _context.SeedMany(2, new BookingSeed()
