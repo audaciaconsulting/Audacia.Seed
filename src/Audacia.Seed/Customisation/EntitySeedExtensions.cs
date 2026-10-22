@@ -638,7 +638,20 @@ public static class EntitySeedExtensions
     {
         var property = getter.GetPropertyInfo();
         return entitySeed.Customisations
-            .Where(c => c.GetterLambda?.GetPropertyInfo().IsSameProperty(property) == true)
+            .Where(c =>
+            {
+                if (c.GetterLambda is not { } existingGetter
+                    || !existingGetter.GetPropertyInfo().IsSameProperty(property))
+                {
+                    return false;
+                }
+
+                var existingPath = existingGetter.SplitMemberAccessChain().ToList();
+                var requestedPath = getter.SplitMemberAccessChain().ToList();
+                return existingPath.Count == requestedPath.Count
+                    && existingPath.Zip(requestedPath, (left, right) =>
+                        left.GetPropertyInfo().IsSameProperty(right.GetPropertyInfo())).All(match => match);
+            })
             .OfType<INavigationSeedConfiguration>()
             .FirstOrDefault(c => c.NavigationSeeds.Count > 0
                 && c.NavigationSeeds.All(seed => getter.Body.Type.IsAssignableFrom(seed.EntityType)));
