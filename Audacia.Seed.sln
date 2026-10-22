@@ -4,8 +4,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 18.3.11520.95
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EFDBC9CE-1221-4429-8EC2-291EBF2F9EC2}"
+	ProjectSection(SolutionItems) = preProject
+		src\.editorconfig = src\.editorconfig
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{077D6AAF-8CB3-4C0C-B4D7-AE1463B3458E}"
+	ProjectSection(SolutionItems) = preProject
+		tests\.editorconfig = tests\.editorconfig
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audacia.Seed", "src\Audacia.Seed\Audacia.Seed.csproj", "{316E2E31-C83B-47F5-BE39-DEECF0AA3899}"
 EndProject
@@ -21,6 +27,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audacia.Seed.Tests.ExampleP
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build Items", "Build Items", "{FE3C800E-F125-481E-B77E-827F5222D961}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		build.yaml = build.yaml
 		CHANGELOG.md = CHANGELOG.md
 		dependency-track.pipeline.yaml = dependency-track.pipeline.yaml
@@ -65,5 +72,8 @@ Global
 		{E3DC7701-D78F-4AEA-8C06-82444D66A80F} = {077D6AAF-8CB3-4C0C-B4D7-AE1463B3458E}
 		{F08CA66E-172E-4687-8F83-FAA09A182463} = {077D6AAF-8CB3-4C0C-B4D7-AE1463B3458E}
 		{A25B90D1-6AA5-4071-8C75-C2B84093AB3A} = {F08CA66E-172E-4687-8F83-FAA09A182463}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {32146373-39F2-4853-B60E-99D3F46E0C50}
 	EndGlobalSection
 EndGlobal

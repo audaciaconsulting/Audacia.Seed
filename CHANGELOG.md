@@ -1,6 +1,13 @@
 # Changelog
 
-## 3.0.4 - 2026-10-21
+## 3.0.4 - 2026-10-22
+
+### Changed
+
+- Enabled TreatWarningsAsErrors on all projects, to ensure all warnings are handled immediately. (#183182).
+- Refactored to remove warnings in the codebase, avoiding warnings that will present as errors. (#183182).
+- Updated Audacia.CodeAnalysis to version 2.1.0, to get the latest code analysis rules and fixes. (#183182).
+- Moved common project tags to Directory.Build.props, in line with other public multiple-package solutions.
 
 ### Fixed
 

@@ -85,7 +85,9 @@ internal static class TypeExtensions
             string genericArguments = type.GetGenericArguments()
                 .Select(x => x.Name)
                 .Aggregate((first, second) => $"{first}, {second}");
-            return $"{type.Name.Substring(0, type.Name.IndexOf("`", StringComparison.Ordinal))}<{genericArguments}>";
+
+            string typeName = type.Name[..type.Name.IndexOf("`", StringComparison.Ordinal)];
+            return $"{typeName}<{genericArguments}>";
         }
 
         return type.Name;

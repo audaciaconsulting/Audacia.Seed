@@ -36,17 +36,9 @@ internal class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation
     {
         ArgumentNullException.ThrowIfNull(getter);
 
-        if (getter.Parameters[0].Type != typeof(TNavigation))
-        {
-            return null;
-        }
-
-        if (getter.GetPropertyInfo() != Getter.GetPropertyInfo())
-        {
-            return null;
-        }
-
-        return SeedConfiguration;
+        return getter.Parameters[0].Type != typeof(TNavigation) || getter.GetPropertyInfo() != Getter.GetPropertyInfo()
+            ? null
+            : SeedConfiguration;
     }
 
     /// <summary>
@@ -65,7 +57,7 @@ internal class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation
         ArgumentNullException.ThrowIfNull(repository);
         SeedConfiguration.Repository ??= repository;
 
-        var value = GetValueToSet(repository, index, previous);
+        var value = GetValueToSet(repository, index);
 
         var obj = Getter.GetPropertyOwner(entity);
 
@@ -74,7 +66,7 @@ internal class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation
         property.SetValue(obj, value, null);
     }
 
-    private TNavigation GetValueToSet(ISeedableRepository repository, int index, TEntity? previous)
+    private TNavigation GetValueToSet(ISeedableRepository repository, int index)
     {
         TNavigation? value = null;
         if (SeedConfiguration.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew)

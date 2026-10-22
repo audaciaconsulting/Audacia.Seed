@@ -56,8 +56,7 @@ internal class SeedNullPropertyConfiguration<TEntity, TProperty>(Expression<Func
     public Expression<Func<TEntity, bool>> ToPredicate()
     {
         var comparison = Expression.Equal(Getter.Body, Expression.Constant(default(TProperty)));
-        var lambda = Expression.Lambda<Func<TEntity, bool>>(comparison, Getter.Parameters);
-        return lambda;
+        return Expression.Lambda<Func<TEntity, bool>>(comparison, Getter.Parameters);
     }
 
     /// <inheritdoc/>

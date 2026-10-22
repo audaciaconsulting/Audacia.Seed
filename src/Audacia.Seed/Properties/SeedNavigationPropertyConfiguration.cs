@@ -35,18 +35,9 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     {
         ArgumentNullException.ThrowIfNull(getter);
 
-        if (getter.Body.Type != typeof(TNavigation))
-        {
-            return null;
-        }
-
-        if (getter.GetPropertyInfo() != Getter.GetPropertyInfo())
-        {
-            return null;
-        }
-
-        var seedToReturn = SeedConfiguration as EntitySeed<TNavigation>;
-        return seedToReturn;
+        return getter.Body.Type != typeof(TNavigation) || getter.GetPropertyInfo() != Getter.GetPropertyInfo()
+            ? null
+            : (IEntitySeed?)(SeedConfiguration as EntitySeed<TNavigation>);
     }
 
     /// <summary>
@@ -69,7 +60,7 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
                      && SeedConfiguration.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindNew
                         ? Getter.Compile().Invoke(previous)
                         : null)
-                    ?? GetValueToSet(repository, index, previous, SeedConfiguration);
+                    ?? GetValueToSet(repository, index, SeedConfiguration);
 
         var obj = Getter.GetPropertyOwner(entity);
 
@@ -77,15 +68,14 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
         property.SetValue(obj, value, null);
     }
 
-    private static TNavigation GetValueToSet(ISeedableRepository repository, int index, TEntity? previous,
+    private static TNavigation GetValueToSet(ISeedableRepository repository, int index,
         IEntitySeed<TNavigation> navigationSeed)
     {
-        var navigationSeedAsEntitySeed = navigationSeed as EntitySeed<TNavigation>;
         TNavigation? value = null;
         if ((navigationSeed.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindExisting ||
-             navigationSeed.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew &&
-             !navigationSeed.HasCustomisations)
-            && navigationSeedAsEntitySeed != null)
+             (navigationSeed.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew &&
+             !navigationSeed.HasCustomisations))
+            && navigationSeed is EntitySeed<TNavigation> navigationSeedAsEntitySeed)
         {
             value = repository.FindLocal(navigationSeedAsEntitySeed.ToPredicate(index));
         }
@@ -124,12 +114,8 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     /// <returns>Whether this object equals the <paramref name="obj"/>.</returns>
     public override bool Equals(object? obj)
     {
-        if (obj is SeedNavigationPropertyConfiguration<TEntity, TNavigation> navigationCustomisation)
-        {
-            return Getter.GetPropertyInfo() == navigationCustomisation.Getter.GetPropertyInfo();
-        }
-
-        return false;
+        return obj is SeedNavigationPropertyConfiguration<TEntity, TNavigation> navigationCustomisation
+            && Getter.GetPropertyInfo() == navigationCustomisation.Getter.GetPropertyInfo();
     }
 
     /// <summary>

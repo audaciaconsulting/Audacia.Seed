@@ -147,7 +147,10 @@ public static class EntitySeedExtensions
         ArgumentNullException.ThrowIfNull(getter);
         ArgumentNullException.ThrowIfNull(valueSetter);
 
-        Func<int, TEntity?, TProperty> valueSetterWithEntity = (index, _) => valueSetter(index);
+        TProperty ValueSetterWithEntity(int index, TEntity? entity)
+        {
+            return valueSetter(index);
+        }
 
         if (getter.Body is not MemberExpression)
         {
@@ -156,7 +159,8 @@ public static class EntitySeedExtensions
         }
 
         entitySeed.AddCustomisation(
-            new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, valueSetterWithEntity));
+            new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, ValueSetterWithEntity));
+
         return entitySeed;
     }
 
@@ -180,7 +184,10 @@ public static class EntitySeedExtensions
         ArgumentNullException.ThrowIfNull(getter);
         ArgumentNullException.ThrowIfNull(valueSetter);
 
-        Func<int, TEntity?, TProperty> valueSetterWithEntity = (_, _) => valueSetter();
+        TProperty ValueSetterWithEntity(int index, TEntity? entity)
+        {
+            return valueSetter();
+        }
 
         if (getter.Body is not MemberExpression)
         {
@@ -189,7 +196,7 @@ public static class EntitySeedExtensions
         }
 
         entitySeed.AddCustomisation(
-            new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, valueSetterWithEntity));
+            new SeedDynamicPropertyConfiguration<TEntity, TProperty>(getter, ValueSetterWithEntity));
         return entitySeed;
     }
 
@@ -248,7 +255,7 @@ public static class EntitySeedExtensions
     /// <br/>
     /// To be used if building > 1 entity.
     /// <br/>
-    /// Usage note: if you want to control how the entities are different, use the <see cref="With{TEntity,TProperty}(Audacia.Seed.EntitySeed{TEntity},System.Linq.Expressions.Expression{System.Func{TEntity,TProperty}},TProperty)"/> method subsequently.
+    /// Usage note: if you want to control how the entities are different, use the <see cref="With{TEntity,TProperty}(EntitySeed{TEntity},Expression{Func{TEntity,TProperty}},TProperty)"/> method subsequently.
     /// </summary>
     /// <param name="entitySeed">The seed class.</param>
     /// <param name="getter">A lambda to the property to set.</param>
@@ -368,7 +375,7 @@ public static class EntitySeedExtensions
         {
             entitySeed.AddCustomisation(new SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigation>(
                 getter,
-                seedConfigurations.ToList()));
+                [.. seedConfigurations]));
         }
         else
         {
@@ -537,15 +544,9 @@ public static class EntitySeedExtensions
 
         var predicate = seed.Predicate(index);
 
-        if (!seed.HasCustomisations)
-        {
-            return predicate;
-        }
-
-        var combinedFilter = predicate.And(seed.Customisations.Select(c => c.ToPredicate())
-            .Aggregate((first, second) => first.And(second)));
-
-        return combinedFilter;
+        return !seed.HasCustomisations
+            ? predicate
+            : predicate.And(seed.Customisations.Select(c => c.ToPredicate()).Aggregate((first, second) => first.And(second)));
     }
 
     private static void WithDifferentRecursive<TEntity, TNavigation>(
@@ -557,9 +558,7 @@ public static class EntitySeedExtensions
         var (left, right) = getter.SplitFirstMemberAccessLayer();
 
         // For a x => x.Parent.GrandParent, get a EntitySeed<Parent>, with WithDifferent applied
-        var parentSeeds = GetOrCreateParentSeeds(entitySeed, left, 1);
-
-        foreach (var parentSeed in parentSeeds)
+        foreach (var parentSeed in GetOrCreateParentSeeds(entitySeed, left, 1))
         {
             parentSeed.WithDifferentReflection(right, left.Body.Type, typeof(TNavigation));
         }
@@ -644,7 +643,10 @@ public static class EntitySeedExtensions
 
     private sealed class NavigationParameterVisitor(ParameterExpression source, ParameterExpression destination) : ExpressionVisitor
     {
-        protected override Expression VisitParameter(ParameterExpression node) => node == source ? destination : node;
+        protected override Expression VisitParameter(ParameterExpression node)
+        {
+            return node == source ? destination : node;
+        }
     }
 
     private static void AddWithDifferentForNavigationProperty<TEntity>(
@@ -657,7 +659,7 @@ public static class EntitySeedExtensions
             left.Body.Type);
         object[] newArgs = [left, seed];
         var customisation = Activator.CreateInstance(typeInfo, newArgs);
-        entitySeed.GetType().GetMethod(nameof(EntitySeed<TEntity>.AddCustomisation))!
+        entitySeed.GetType().GetMethod(nameof(EntitySeed<>.AddCustomisation))!
             .Invoke(entitySeed, [customisation]);
     }
 }

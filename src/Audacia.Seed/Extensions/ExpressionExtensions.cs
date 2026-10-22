@@ -123,8 +123,7 @@ internal static class ExpressionExtensions
     {
         var param = Expression.Parameter(memberExpression.Expression!.Type, "x");
         var property = Expression.Property(param, memberExpression.Member.Name);
-        var lambdaExpression = Expression.Lambda(property, param);
-        return lambdaExpression;
+        return Expression.Lambda(property, param);
     }
 
     private static LambdaExpression GetLambdaFromConvertedMemberExpression(MemberExpression memberExpression, Type convertTo)
@@ -132,8 +131,7 @@ internal static class ExpressionExtensions
         var param = Expression.Parameter(memberExpression.Expression!.Type, "x");
         var memberAccess = Expression.MakeMemberAccess(param, memberExpression.Member);
         var explicitCast = Expression.Convert(memberAccess, convertTo);
-        var lambdaExpression = Expression.Lambda(explicitCast, param);
-        return lambdaExpression;
+        return Expression.Lambda(explicitCast, param);
     }
 
     /// <summary>

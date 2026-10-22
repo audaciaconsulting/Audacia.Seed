@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -48,14 +47,10 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
     public virtual IEnumerable<ISeedPrerequisite> Prerequisites()
     {
         var modelInformation = Repository!.GetEntityModelInformation<TEntity>();
-        if (!modelInformation.RequiredNavigationProperties.Any())
-        {
-            return [];
-        }
 
-        var prerequisites = GetSeedPrerequisites(modelInformation);
-
-        return prerequisites;
+        return !modelInformation.RequiredNavigationProperties.Any()
+            ? []
+            : (IEnumerable<ISeedPrerequisite>)GetSeedPrerequisites(modelInformation);
     }
 
     private static List<ISeedPrerequisite> GetSeedPrerequisites(IEntityModelInformation modelInformation)
@@ -123,11 +118,11 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
 
         if (Options.AmountToCreate > 1)
         {
-            _ = BuildMany(Options.AmountToCreate).ToList();
+            BuildMany(Options.AmountToCreate);
         }
         else
         {
-            _ = Build();
+            Build();
         }
     }
 
@@ -149,9 +144,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
             .Select(p => p.ParameterType.ExampleValue())
             .ToArray();
 
-        var instance = (TEntity)simplestConstructor.Invoke(valuesForConstructor);
-
-        return instance;
+        return (TEntity)simplestConstructor.Invoke(valuesForConstructor);
     }
 
     /// <summary>
@@ -213,10 +206,11 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
     /// Build the entities that are to be added to the database.
     /// </summary>
     /// <param name="amountToCreate">The amount of entities to create.</param>
-    /// <returns>An enumerable with count <paramref name="amountToCreate"/> of valid entities to seed.</returns>
-    internal IEnumerable<TEntity> BuildMany(int amountToCreate)
+    /// <returns>A list with count <paramref name="amountToCreate"/> of valid entities to seed.</returns>
+    internal List<TEntity> BuildMany(int amountToCreate)
     {
         Options.AmountToCreate = amountToCreate;
+
         if (Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
         {
             Options.InsertionBehavior = amountToCreate > 1
@@ -224,14 +218,16 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
                 : SeedingInsertionBehaviour.TryFindNew;
         }
 
+        var entities = new List<TEntity>(Options.AmountToCreate);
         TEntity? previous = null;
+
         for (var index = 0; index < Options.AmountToCreate; index++)
         {
-            var entity = GetOrCreateEntity(index, previous);
-
-            previous = entity;
-            yield return entity;
+            previous = GetOrCreateEntity(index, previous);
+            entities.Add(previous);
         }
+
+        return entities;
     }
 
     /// <summary>
@@ -240,8 +236,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
     /// <returns>A valid entity to seed.</returns>
     public TEntity Build()
     {
-        var entity = GetOrCreateEntity(0, null);
-        return entity;
+        return GetOrCreateEntity(0, null);
     }
 
     /// <summary>
@@ -286,7 +281,10 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
     }
 
     /// <inheritdoc />
-    object IIndexedEntitySeed.GetOrCreateEntity(int index) => GetOrCreateEntity(index, null);
+    object IIndexedEntitySeed.GetOrCreateEntity(int index)
+    {
+        return GetOrCreateEntity(index, null);
+    }
 
     /// <summary>
     /// Get a <typeparamref name="TEntity"/> from the repository, or create a new one if it doesn't exist.
@@ -303,11 +301,13 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
         }
 
         var predicate = this.ToPredicate(index);
+
         var entity = Options.InsertionBehavior switch
         {
             SeedingInsertionBehaviour.TryFindExisting => Repository.FindLocal(predicate)
                                                          ?? Repository.DbSet<TEntity>().FirstOrDefault(predicate),
             SeedingInsertionBehaviour.TryFindNew => Repository.FindLocal(predicate),
+            SeedingInsertionBehaviour.AddNew => null,
             _ => null
         };
 
@@ -329,8 +329,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
 
     private void PopulateCustomisations(int index, TEntity? previous, TEntity entity)
     {
-        var uniqueCustomisations = Customisations.OrderBy(c => c.Order).Distinct().ToList();
-        foreach (var customisation in uniqueCustomisations)
+        foreach (var customisation in Customisations.OrderBy(c => c.Order).Distinct().ToList())
         {
             customisation.Validate(this);
             customisation.Apply(entity, Repository!, index, previous);
@@ -339,8 +338,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
 
     private void PopulatePrerequisites(TEntity entity)
     {
-        var prerequisites = Prerequisites().ToList();
-        foreach (var prerequisite in prerequisites)
+        foreach (var prerequisite in Prerequisites().ToList())
         {
             // We only want set up a pre-requisite if we haven't overridden it by a customisation
             var shouldPopulatePrerequisite = true;

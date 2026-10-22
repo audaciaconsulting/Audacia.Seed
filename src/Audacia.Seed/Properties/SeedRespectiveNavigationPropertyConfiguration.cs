@@ -70,7 +70,7 @@ internal class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigatio
         var seedConfiguration = SeedConfigurations[index];
         seedConfiguration.Repository ??= repository;
 
-        var value = GetValueToSet(repository, index, previous, seedConfiguration);
+        var value = GetValueToSet(repository, index, seedConfiguration);
 
         var obj = Getter.GetPropertyOwner(entity);
 
@@ -81,14 +81,14 @@ internal class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigatio
         }
     }
 
-    private TNavigation GetValueToSet(ISeedableRepository repository, int index, TEntity? previous,
-        IEntitySeed<TNavigation> seedConfiguration)
+    private TNavigation GetValueToSet(ISeedableRepository repository, int index, IEntitySeed<TNavigation> seedConfiguration)
     {
-        var seedConfigurationAsEntitySeed = seedConfiguration as EntitySeed<TNavigation>;
-        var predicate = seedConfigurationAsEntitySeed != null
+        var predicate = seedConfiguration is EntitySeed<TNavigation> seedConfigurationAsEntitySeed
             ? seedConfigurationAsEntitySeed.ToPredicate(index)
             : _ => true;
+
         var value = _useDifferentSeeds ? null : repository.FindLocal(predicate);
+
         if (index > 0
             && !ReferenceEquals(SeedConfigurations[index], SeedConfigurations[index - 1])
             // Force a new creation if we've explicitly provided an extra seed, even if it's identical
