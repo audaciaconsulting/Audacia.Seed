@@ -25,6 +25,13 @@ internal class InMemorySeedableRepository : ISeedableRepository
     public void Add<TEntity>(TEntity entity) where TEntity : class
     {
         var data = DbSet<TEntity>().ToList();
+
+        // Match Entity Framework, where adding an entity that is already tracked does nothing.
+        if (data.Exists(e => ReferenceEquals(e, entity)))
+        {
+            return;
+        }
+
         data.Add(entity);
         _dbSets[typeof(TEntity)] = data;
     }
