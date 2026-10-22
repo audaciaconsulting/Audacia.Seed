@@ -123,6 +123,11 @@ internal class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigatio
     {
         ArgumentNullException.ThrowIfNull(entitySeed);
 
+        if (_useDifferentSeeds)
+        {
+            INavigationSeedConfiguration.ValidateDifferentSeeds(entitySeed);
+        }
+
         if (entitySeed.Options.AmountToCreate != SeedConfigurations.Count)
         {
             throw new DataSeedingException($"We are building {entitySeed.Options.AmountToCreate} entities of type {typeof(TEntity).Name}, but {SeedConfigurations.Count} were provided.");

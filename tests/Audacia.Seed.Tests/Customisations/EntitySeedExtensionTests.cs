@@ -1,6 +1,7 @@
 using Audacia.Seed.Customisation;
 using Audacia.Seed.EntityFrameworkCore.Extensions;
 using Audacia.Seed.Exceptions;
+using Audacia.Seed.InMemory;
 using Audacia.Seed.Tests.ExampleProject.Entities;
 using Audacia.Seed.Tests.ExampleProject.EntityFrameworkCore;
 using Audacia.Seed.Tests.ExampleProject.Seeds;
@@ -418,6 +419,21 @@ public sealed class EntitySeedExtensionTests : IDisposable
             b => b.Select(x => x.Facility.Owner!.FirstName).ShouldBe(["ExplicitOwner", "ExplicitOwner"]),
             b => b.Select(x => x.Facility).Distinct().Count().ShouldBe(2),
             _ => _context.Set<Facility>().Count().ShouldBe(2));
+    }
+
+    [Fact]
+    public void WithDifferent_AfterWithNewWhenBuildingOne_ThrowsException()
+    {
+        var seedConfiguration = new BookingSeed()
+            .WithNew(b => b.Facility, new FacilitySeed())
+            .WithDifferent(b => b.Facility);
+
+        var act = () => new EntityBuilder().BuildMany(1, seedConfiguration);
+
+        act.ShouldThrow(
+                typeof(DataSeedingException),
+                "reusing the existing navigation configuration should still validate the WithDifferent request")
+            .Message.ShouldBe($"`{nameof(EntitySeedExtensions.WithDifferent)} was specified, but we're only building 1 {nameof(Booking)}.");
     }
 
     [Fact]

@@ -30,6 +30,15 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     /// <inheritdoc />
     public IReadOnlyList<IEntitySeed> NavigationSeeds => [SeedConfiguration];
 
+    private bool _useDifferentSeeds;
+
+    /// <inheritdoc />
+    public void UseDifferentSeeds()
+    {
+        _useDifferentSeeds = true;
+        SeedConfiguration.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
+    }
+
     /// <inheritdoc/>
     public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
     {
@@ -105,6 +114,17 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
         ArgumentNullException.ThrowIfNull(prerequisite);
 
         return Getter.MatchToPrerequisite(prerequisite);
+    }
+
+    /// <inheritdoc/>
+    public void Validate(EntitySeed<TEntity> entitySeed)
+    {
+        ArgumentNullException.ThrowIfNull(entitySeed);
+
+        if (_useDifferentSeeds)
+        {
+            INavigationSeedConfiguration.ValidateDifferentSeeds(entitySeed);
+        }
     }
 
     /// <summary>

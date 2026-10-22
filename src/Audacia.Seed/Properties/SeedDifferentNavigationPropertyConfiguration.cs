@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.Customisation;
-using Audacia.Seed.Exceptions;
 using Audacia.Seed.Extensions;
 using Audacia.Seed.Options;
 
@@ -95,14 +94,7 @@ internal class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation
     /// <inheritdoc/>
     public void Validate(EntitySeed<TEntity> entitySeed)
     {
-        ArgumentNullException.ThrowIfNull(entitySeed);
-
-        // Protect against using `WithDifferent` when you're only creating one entity.
-        // As `TryFindNew` is the default, this is what the seed options would look like in this scenario.
-        if (entitySeed.Options is { AmountToCreate: 1, InsertionBehavior: SeedingInsertionBehaviour.TryFindNew })
-        {
-            throw new DataSeedingException($"`{nameof(EntitySeedExtensions.WithDifferent)} was specified, but we're only building 1 {typeof(TEntity).Name}.");
-        }
+        INavigationSeedConfiguration.ValidateDifferentSeeds(entitySeed);
     }
 
     /// <summary>
