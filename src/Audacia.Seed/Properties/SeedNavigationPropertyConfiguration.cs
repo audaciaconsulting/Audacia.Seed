@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.Customisation;
@@ -65,12 +66,8 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
         ArgumentNullException.ThrowIfNull(repository);
         SeedConfiguration.Repository ??= repository;
 
-        var value = (previous != null
-                     && !_useDifferentSeeds
-                     && SeedConfiguration.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindNew
-                        ? Getter.Compile().Invoke(previous)
-                        : null)
-                    ?? GetValueToSet(repository, index, SeedConfiguration);
+        var value = (UsePrevious(previous) ? Getter.Compile().Invoke(previous) : null)
+            ?? GetValueToSet(repository, index, SeedConfiguration);
 
         var obj = Getter.GetPropertyOwner(entity);
 
@@ -78,14 +75,24 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
         property.SetValue(obj, value, null);
     }
 
+    private bool UsePrevious([NotNullWhen(true)] TEntity? previous)
+    {
+        return previous != null
+            && !_useDifferentSeeds
+            && SeedConfiguration.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindNew;
+    }
+
+    /// <summary>
+    /// Find or create the navigation for this index, always creating one if made different via <c>WithDifferent</c>.
+    /// Uses <see cref="IIndexedEntitySeed"/> so a derived seed, e.g. <c>EntitySeed&lt;EmployeeAsset&gt;</c>, keeps the index.
+    /// </summary>
     private TNavigation GetValueToSet(ISeedableRepository repository, int index,
         IEntitySeed<TNavigation> navigationSeed)
     {
         TNavigation? value = null;
+
         if (!_useDifferentSeeds
-            && (navigationSeed.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindExisting ||
-             (navigationSeed.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew &&
-             !navigationSeed.HasCustomisations))
+            && CanReuseExistingNavigation(navigationSeed)
             && navigationSeed is EntitySeed<TNavigation> navigationSeedAsEntitySeed)
         {
             value = repository.FindLocal(navigationSeedAsEntitySeed.ToPredicate(index));
@@ -103,6 +110,13 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
         }
 
         return value;
+    }
+
+    private static bool CanReuseExistingNavigation(IEntitySeed<TNavigation> navigationSeed)
+    {
+        return navigationSeed.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindExisting ||
+            (navigationSeed.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew &&
+            !navigationSeed.HasCustomisations);
     }
 
     /// <inheritdoc/>

@@ -37,7 +37,10 @@ internal class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigatio
     /// <inheritdoc />
     public IReadOnlyList<IEntitySeed> NavigationSeeds => SeedConfigurations;
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets the order. When made different, this matches <c>WithDifferent</c>, so the new navigation is created
+    /// before customisations of its properties are applied to it.
+    /// </summary>
     public int Order => _useDifferentSeeds ? 50 : SeedingConstants.DefaultCustomisationOrder;
 
     private bool _useDifferentSeeds;
@@ -104,15 +107,19 @@ internal class SeedRespectiveNavigationPropertyConfiguration<TEntity, TNavigatio
         return value;
     }
 
+    /// <summary>
+    /// Create the navigation, without changing the seed's options when made different, as it may be shared with other navigations.
+    /// Uses <see cref="IIndexedEntitySeed"/> so a derived seed, e.g. <c>EntitySeed&lt;EmployeeAsset&gt;</c>, keeps the index.
+    /// </summary>
     private TNavigation CreateValue(int index, IEntitySeed<TNavigation> seedConfiguration)
     {
         if (_useDifferentSeeds && seedConfiguration is IIndexedEntitySeed differentSeed)
         {
-            // Create the entity without changing the seed's options, as the seed may be shared with other navigation properties.
             return (TNavigation)differentSeed.CreateEntity(index);
         }
 
         seedConfiguration.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
+
         return seedConfiguration is IIndexedEntitySeed indexedSeed
             ? (TNavigation)indexedSeed.GetOrCreateEntity(index)
             : seedConfiguration.Build();

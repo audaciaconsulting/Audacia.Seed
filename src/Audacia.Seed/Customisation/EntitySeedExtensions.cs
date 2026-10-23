@@ -277,14 +277,7 @@ public static class EntitySeedExtensions
         ArgumentNullException.ThrowIfNull(seedConfiguration);
         ArgumentNullException.ThrowIfNull(getter);
 
-        // The getter may be a cast to a derived type, e.g. x => (EmployeeAsset)x.Asset, so validate the property inside any cast.
-        var member = getter.Body switch
-        {
-            MemberExpression memberExpression => memberExpression,
-            UnaryExpression { NodeType: ExpressionType.Convert, Operand: MemberExpression operand } => operand,
-            _ => throw new DataSeedingException(
-                $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.")
-        };
+        var member = GetNavigationMember<TEntity>(getter);
 
         // Check the getter passed in is setting a nested property or not
         // E.g x => x.Parent.GrandParent is nested, but x => x.Parent is not.
@@ -298,6 +291,7 @@ public static class EntitySeedExtensions
             // Retain the existing configuration's position and all explicitly supplied seeds.
             // Only this configuration is made different, as its seeds may be shared with other navigation properties.
             var existing = FindExistingNavigationSeeds(entitySeed, getter);
+
             if (existing != null)
             {
                 existing.UseDifferentSeeds();
@@ -462,6 +456,7 @@ public static class EntitySeedExtensions
             getter,
             seedConfiguration,
             amountOfChildren));
+
         return entitySeed;
     }
 
@@ -551,6 +546,24 @@ public static class EntitySeedExtensions
             : predicate.And(seed.Customisations.Select(c => c.ToPredicate()).Aggregate((first, second) => first.And(second)));
     }
 
+    /// <summary>
+    /// Get the property accessed by the <paramref name="getter"/>, looking inside a cast such as <c>x => (EmployeeAsset)x.Asset</c>.
+    /// </summary>
+    /// <param name="getter">A lambda to the navigation property.</param>
+    /// <typeparam name="TEntity">The type of the entity being seeded.</typeparam>
+    /// <returns>The member expression for the navigation property.</returns>
+    /// <exception cref="DataSeedingException">If the <paramref name="getter"/> does not access a property.</exception>
+    private static MemberExpression GetNavigationMember<TEntity>(LambdaExpression getter)
+    {
+        return getter.Body switch
+        {
+            MemberExpression memberExpression => memberExpression,
+            UnaryExpression { NodeType: ExpressionType.Convert, Operand: MemberExpression operand } => operand,
+            _ => throw new DataSeedingException(
+                $"The provided {nameof(getter)} ({getter}) does not access a property on {typeof(TEntity).Name}.")
+        };
+    }
+
     private static void WithDifferentRecursive<TEntity, TNavigation>(
         EntitySeed<TEntity> entitySeed,
         Expression<Func<TEntity, TNavigation?>> getter)
@@ -572,23 +585,37 @@ public static class EntitySeedExtensions
         Type sourceType,
         Type destinationType)
     {
-        // EntitySeed<T> is invariant, even though WithNew accepts covariant IEntitySeed<T>.
-        // Rebind a base-property lambda to the actual seed type before invoking WithDifferent.
         if (sourceType != seed.EntityType)
         {
-            var parameter = Expression.Parameter(seed.EntityType, getter.Parameters[0].Name);
-            var body = new NavigationParameterVisitor(getter.Parameters[0], parameter).Visit(getter.Body)!;
-            getter = Expression.Lambda(body, parameter);
+            getter = RebindToSeedType(getter, seed.EntityType);
             sourceType = seed.EntityType;
         }
 
         var withDifferent = typeof(EntitySeedExtensions).GetMethods()
             .Single(method => method.Name == nameof(WithDifferent) && method.GetParameters().Length == 2)
             .MakeGenericMethod(sourceType, destinationType);
+
         object[] args = [seed, getter];
         withDifferent.Invoke(null, args);
     }
 
+    /// <summary>
+    /// Rebind a base-type lambda to a derived seed's type, e.g. from <c>WithNew(x => x.Asset, new EntitySeed&lt;EmployeeAsset&gt;())</c>,
+    /// because <see cref="EntitySeed{TEntity}"/> is invariant, so <c>WithDifferent</c> can't be invoked with the base type.
+    /// </summary>
+    /// <param name="getter">A lambda whose parameter is the base type.</param>
+    /// <param name="seedType">The derived type of the seed.</param>
+    /// <returns>An equivalent lambda whose parameter is the <paramref name="seedType"/>.</returns>
+    private static LambdaExpression RebindToSeedType(LambdaExpression getter, Type seedType)
+    {
+        var parameter = Expression.Parameter(seedType, getter.Parameters[0].Name);
+        var body = new NavigationParameterVisitor(getter.Parameters[0], parameter).Visit(getter.Body)!;
+        return Expression.Lambda(body, parameter);
+    }
+
+    /// <summary>
+    /// Get the seeds for the parent navigation in <paramref name="left"/>, reusing any supplied via an existing customisation.
+    /// </summary>
     private static IReadOnlyList<IEntitySeed> GetOrCreateParentSeeds<TEntity>(
         EntitySeed<TEntity> entitySeed,
         LambdaExpression left,
@@ -596,6 +623,7 @@ public static class EntitySeedExtensions
         where TEntity : class
     {
         var existing = FindExistingNavigationSeeds(entitySeed, left);
+
         if (existing != null)
         {
             return UseExistingSeedsForDifferent(existing, amountToCreate);
@@ -610,9 +638,13 @@ public static class EntitySeedExtensions
         return [seed];
     }
 
+    /// <summary>
+    /// Make an existing navigation customisation create different entities, keeping all of its supplied seeds.
+    /// </summary>
     private static IReadOnlyList<IEntitySeed> UseExistingSeedsForDifferent(INavigationSeedConfiguration existing, int amountToCreate)
     {
         existing.UseDifferentSeeds();
+
         foreach (var navigationSeed in existing.NavigationSeeds)
         {
             navigationSeed.Options.AmountToCreate = amountToCreate;
@@ -635,6 +667,7 @@ public static class EntitySeedExtensions
         where TEntity : class
     {
         var property = getter.GetPropertyInfo();
+
         return entitySeed.Customisations
             .Where(c => MatchesNavigationPath(getter, c, property))
             .OfType<INavigationSeedConfiguration>()
@@ -642,6 +675,10 @@ public static class EntitySeedExtensions
                 && c.NavigationSeeds.All(seed => getter.Body.Type.IsAssignableFrom(seed.EntityType)));
     }
 
+    /// <summary>
+    /// Whether the customisation's getter accesses the same chain of properties as the <paramref name="getter"/>.
+    /// Properties are compared by declaration, so an inherited property still matches when it's accessed through a cast.
+    /// </summary>
     private static bool MatchesNavigationPath<TEntity>(LambdaExpression getter, ISeedCustomisation<TEntity> customisation, PropertyInfo property)
         where TEntity : class
     {
@@ -658,6 +695,9 @@ public static class EntitySeedExtensions
                 left.GetPropertyInfo().IsSameProperty(right.GetPropertyInfo())).All(match => match);
     }
 
+    /// <summary>
+    /// Replaces a lambda's parameter, so its body can be rebound to a parameter of a different type.
+    /// </summary>
     private sealed class NavigationParameterVisitor(ParameterExpression source, ParameterExpression destination) : ExpressionVisitor
     {
         protected override Expression VisitParameter(ParameterExpression node)
@@ -674,6 +714,7 @@ public static class EntitySeedExtensions
         var typeInfo = typeof(SeedDifferentNavigationPropertyConfiguration<,>).MakeGenericType(
             typeof(TEntity),
             left.Body.Type);
+
         object[] newArgs = [left, seed];
         var customisation = Activator.CreateInstance(typeInfo, newArgs);
         entitySeed.GetType().GetMethod(nameof(EntitySeed<>.AddCustomisation))!

@@ -82,6 +82,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
             typeof(SeedPrerequisite<,>).MakeGenericType(
                 typeof(TEntity),
                 requiredNavigationProperty.NavigationProperty.PropertyType);
+
         var seedPrerequisite = (ISeedPrerequisite)Activator.CreateInstance(
             prerequisiteSeedType,
             lambda,
@@ -187,6 +188,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
         var matchedEntities = query
             .Where(predicate)
             .ToList();
+
         if (!matchedEntities.Any())
         {
             var sb = new StringBuilder($"You must set up at least one {typeof(TNavigation)} ");
@@ -315,10 +317,16 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
         return entity ?? CreateEntity(index, previous);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Create a new entity for a <c>WithDifferent</c> navigation, flagging it so that nested <c>WithDifferent</c>
+    /// validation treats it as part of the outer batch, without changing this (possibly shared) seed's options.
+    /// </summary>
+    /// <param name="index">The index of the entity being created.</param>
+    /// <returns>The seeded entity.</returns>
     object IIndexedEntitySeed.CreateEntity(int index)
     {
         var wasCreatingDifferentEntity = IsCreatingDifferentEntity;
+
         try
         {
             IsCreatingDifferentEntity = true;
@@ -378,6 +386,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
             // We only want set up a pre-requisite if we haven't overridden it by a customisation
             var shouldPopulatePrerequisite = true;
             var seed = prerequisite.Seed;
+
             foreach (var customisation in Customisations)
             {
                 var shouldStillPopulatePrerequisite = MatchToCustomisation(prerequisite, customisation, seed);
@@ -396,6 +405,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
     {
         var match = customisation.MatchToPrerequisite(prerequisite);
         var shouldStillPopulatePrerequisite = true;
+
         if (match == LambdaExpressionMatch.Full)
         {
             shouldStillPopulatePrerequisite = false;
@@ -422,35 +432,45 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
                 .GetType()
                 .GetMethod(nameof(Repository.Add))!
                 .MakeGenericMethod(navigationProperty.GetType());
+
             addMethod.Invoke(Repository, [navigationProperty]);
         }
     }
 
+    /// <summary>
+    /// Stop the prerequisite's seed, and every seed supplied for the same navigation, from also populating the property
+    /// set by the <paramref name="customisation"/>, which would otherwise seed an orphaned prerequisite.
+    /// </summary>
     private void AddVoidCustomisation(ISeedCustomisation<TEntity> customisation, IEntitySeed seed, ISeedPrerequisite prerequisite)
     {
         var (_, right) = customisation.GetterLambda!.SplitFirstMemberAccessLayer();
         seed.AddCustomisation(CreateVoidCustomisation(seed, right));
 
-        var fullMatches = Customisations
-            .Where(c => c.MatchToPrerequisite(prerequisite) == LambdaExpressionMatch.Full).ToList();
+        foreach (var fullMatchSeed in GetFullMatchSeeds(prerequisite))
+        {
+            fullMatchSeed.AddCustomisation(CreateVoidCustomisation(fullMatchSeed, right));
+        }
+    }
 
-        // A navigation configuration may hold a seed per entity (e.g. WithNew(x => x.Asset, firstSeed, secondSeed)),
-        // so every one of them needs the customisation, not just the first.
-        var fullMatchSeeds = fullMatches
+    /// <summary>
+    /// Get every distinct seed supplied for the <paramref name="prerequisite"/>'s navigation,
+    /// including each seed of e.g. <c>WithNew(x => x.Asset, firstSeed, secondSeed)</c>, not just the first.
+    /// </summary>
+    private IEnumerable<IEntitySeed> GetFullMatchSeeds(ISeedPrerequisite prerequisite)
+    {
+        return Customisations
+            .Where(c => c.MatchToPrerequisite(prerequisite) == LambdaExpressionMatch.Full)
             .SelectMany(c => c is INavigationSeedConfiguration navigation
                 ? navigation.NavigationSeeds
                 : c.Seed is { } seed ? [seed] : [])
             .Distinct(ReferenceEqualityComparer.Instance)
             .Cast<IEntitySeed>();
-
-        foreach (var fullMatchSeed in fullMatchSeeds)
-        {
-            // The seed for a full match may be for a derived type, e.g. WithNew(x => x.Asset, new EntitySeed<EmployeeAsset>()),
-            // so create the customisation for that seed's type, otherwise it would be ignored and the prerequisite orphaned.
-            fullMatchSeed.AddCustomisation(CreateVoidCustomisation(fullMatchSeed, right));
-        }
     }
 
+    /// <summary>
+    /// Create the void customisation for the <paramref name="seed"/>'s own type, which may be derived from the navigation's type,
+    /// e.g. <c>WithNew(x => x.Asset, new EntitySeed&lt;EmployeeAsset&gt;())</c>; a customisation for the base type would be ignored.
+    /// </summary>
     private static ISeedCustomisation CreateVoidCustomisation(IEntitySeed seed, LambdaExpression getter)
     {
         var genericType = typeof(SeedVoidConfiguration<>).MakeGenericType(seed.EntityType);

@@ -70,6 +70,9 @@ internal class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation
         property.SetValue(obj, value, null);
     }
 
+    /// <summary>
+    /// Always create a new navigation, without setting the seed's options to <c>AddNew</c>, as it may be shared with other navigations.
+    /// </summary>
     private TNavigation GetValueToSet(ISeedableRepository repository, int index)
     {
         var value = (TNavigation)((IIndexedEntitySeed)SeedConfiguration).CreateEntity(index);
