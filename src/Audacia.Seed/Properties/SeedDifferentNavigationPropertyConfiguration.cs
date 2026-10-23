@@ -1,8 +1,5 @@
 using System.Linq.Expressions;
-using System.Reflection;
 using Audacia.Seed.Contracts;
-using Audacia.Seed.Customisation;
-using Audacia.Seed.Exceptions;
 using Audacia.Seed.Extensions;
 using Audacia.Seed.Options;
 
@@ -16,7 +13,7 @@ namespace Audacia.Seed.Properties;
 internal class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation>(
     Expression<Func<TEntity, TNavigation?>> getter,
     EntitySeed<TNavigation> seedConfiguration)
-    : ISeedCustomisation<TEntity>
+    : ISeedCustomisation<TEntity>, INavigationSeedConfiguration
     where TEntity : class
     where TNavigation : class
 {
@@ -26,25 +23,26 @@ internal class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation
     /// <inheritdoc />
     public IEntitySeed Seed => SeedConfiguration;
 
+    /// <inheritdoc />
+    public IReadOnlyList<IEntitySeed> NavigationSeeds => [SeedConfiguration];
+
     /// <inheritdoc/>
     public int Order => 50;
+
+    /// <inheritdoc />
+    public void UseDifferentSeeds()
+    {
+        // This configuration always creates a new navigation entity.
+    }
 
     /// <inheritdoc/>
     public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
     {
         ArgumentNullException.ThrowIfNull(getter);
 
-        if (getter.Parameters[0].Type != typeof(TNavigation))
-        {
-            return null;
-        }
-
-        if (getter.GetPropertyInfo() != Getter.GetPropertyInfo())
-        {
-            return null;
-        }
-
-        return SeedConfiguration;
+        return getter.Parameters[0].Type != typeof(TNavigation) || getter.GetPropertyInfo() != Getter.GetPropertyInfo()
+            ? null
+            : SeedConfiguration;
     }
 
     /// <summary>
@@ -63,32 +61,22 @@ internal class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation
         ArgumentNullException.ThrowIfNull(repository);
         SeedConfiguration.Repository ??= repository;
 
-        var value = GetValueToSet(repository, index, previous);
+        var value = GetValueToSet(repository, index);
 
         var obj = Getter.GetPropertyOwner(entity);
 
-        if (Getter.Body is MemberExpression memberSelectorExpression)
-        {
-            var property = (PropertyInfo)memberSelectorExpression.Member;
-            property.SetValue(obj, value, null);
-        }
+        // The getter may be a cast to a derived type, e.g. x => (EmployeeAsset)x.Asset, so get the property from inside any cast.
+        var property = Getter.GetPropertyInfo();
+        property.SetValue(obj, value, null);
     }
 
-    private TNavigation GetValueToSet(ISeedableRepository repository, int index, TEntity? previous)
+    /// <summary>
+    /// Always create a new navigation, without setting the seed's options to <c>AddNew</c>, as it may be shared with other navigations.
+    /// </summary>
+    private TNavigation GetValueToSet(ISeedableRepository repository, int index)
     {
-        TNavigation? value = null;
-        if (SeedConfiguration.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew)
-        {
-            value = repository.FindLocal(SeedConfiguration.ToPredicate(index));
-        }
-
-        if (value == null)
-        {
-            SeedConfiguration.Options.InsertionBehavior = SeedingInsertionBehaviour.AddNew;
-            value = SeedConfiguration.GetOrCreateEntity(index, null);
-            repository.Add(value);
-        }
-
+        var value = (TNavigation)((IIndexedEntitySeed)SeedConfiguration).CreateEntity(index);
+        repository.Add(value);
         return value;
     }
 
@@ -103,14 +91,7 @@ internal class SeedDifferentNavigationPropertyConfiguration<TEntity, TNavigation
     /// <inheritdoc/>
     public void Validate(EntitySeed<TEntity> entitySeed)
     {
-        ArgumentNullException.ThrowIfNull(entitySeed);
-
-        // Protect against using `WithDifferent` when you're only creating one entity.
-        // As `TryFindNew` is the default, this is what the seed options would look like in this scenario.
-        if (entitySeed.Options is { AmountToCreate: 1, InsertionBehavior: SeedingInsertionBehaviour.TryFindNew })
-        {
-            throw new DataSeedingException($"`{nameof(EntitySeedExtensions.WithDifferent)} was specified, but we're only building 1 {typeof(TEntity).Name}.");
-        }
+        INavigationSeedConfiguration.ValidateDifferentSeeds(entitySeed);
     }
 
     /// <summary>

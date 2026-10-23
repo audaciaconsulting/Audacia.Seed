@@ -1,5 +1,25 @@
 # Changelog
 
+## 3.0.4 - 2026-10-23
+
+### Changed
+
+- Enabled TreatWarningsAsErrors on all projects, to ensure all warnings are handled immediately. (#183182).
+- Refactored to remove warnings in the codebase, avoiding warnings that will present as errors. (#183182).
+- Updated Audacia.CodeAnalysis to version 2.1.0, to get the latest code analysis rules and fixes. (#183182).
+- Moved common project tags to Directory.Build.props, in line with other public multiple-package solutions. (#183182).
+
+### Fixed
+
+- Bug Fix: `.With()` ignored multiple values for properties reached via a cast, e.g. `x => ((EmployeeAsset)x.Asset).Employee` (#214683).
+- Bug Fix: `.With()` on a property of a navigation supplied via `.WithNew()` seeded an extra, orphaned prerequisite (#215442).
+- Bug Fix: Multiple seeds supplied via `.WithNew()` were not preserved when `.With()` was used on a property of that navigation (#215442).
+- Bug Fix: A derived seed via `.WithNew()`, e.g. `EntitySeed<EmployeeAsset>`, was discarded when `.With()` was used on a property of that navigation (#215442).
+- Bug Fix: A seed supplied via `.WithNew()` didn't populate its own prerequisites when built later, if `.With()` had set a property of that navigation (#215442).
+- Bug Fix: Entities could be added to the in-memory repository multiple times, when using `Build` methods (#215443).
+- Bug Fix: `.WithDifferent()` on a nested navigation changed the seed's options, so it no longer reused entities in other navigations or later builds (#215444).
+- Bug Fix: `.WithDifferent()` on a nested navigation overwrote the batch size of seeds supplied via `.WithNew()`, so multiple values set on those seeds failed validation (#215445).
+
 ## 3.0.3 - 2026-10-07
 
 ### Fixed

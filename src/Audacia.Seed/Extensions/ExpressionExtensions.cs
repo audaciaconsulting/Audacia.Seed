@@ -123,8 +123,7 @@ internal static class ExpressionExtensions
     {
         var param = Expression.Parameter(memberExpression.Expression!.Type, "x");
         var property = Expression.Property(param, memberExpression.Member.Name);
-        var lambdaExpression = Expression.Lambda(property, param);
-        return lambdaExpression;
+        return Expression.Lambda(property, param);
     }
 
     private static LambdaExpression GetLambdaFromConvertedMemberExpression(MemberExpression memberExpression, Type convertTo)
@@ -132,8 +131,7 @@ internal static class ExpressionExtensions
         var param = Expression.Parameter(memberExpression.Expression!.Type, "x");
         var memberAccess = Expression.MakeMemberAccess(param, memberExpression.Member);
         var explicitCast = Expression.Convert(memberAccess, convertTo);
-        var lambdaExpression = Expression.Lambda(explicitCast, param);
-        return lambdaExpression;
+        return Expression.Lambda(explicitCast, param);
     }
 
     /// <summary>
@@ -279,7 +277,7 @@ internal static class ExpressionExtensions
         ISeedPrerequisite prerequisite)
     {
         var propertyInfo = expression.GetPropertyInfo();
-        if (prerequisite.PropertyInfo == propertyInfo)
+        if (prerequisite.PropertyInfo.IsSameProperty(propertyInfo))
         {
             return LambdaExpressionMatch.Full;
         }
@@ -288,7 +286,7 @@ internal static class ExpressionExtensions
         if (expression.SplitMemberAccessChain().Count() > 1)
         {
             var (left, _) = expression.SplitFirstMemberAccessLayer();
-            if (prerequisite.PropertyInfo == left.GetPropertyInfo())
+            if (prerequisite.PropertyInfo.IsSameProperty(left.GetPropertyInfo()))
             {
                 return LambdaExpressionMatch.Partial;
             }

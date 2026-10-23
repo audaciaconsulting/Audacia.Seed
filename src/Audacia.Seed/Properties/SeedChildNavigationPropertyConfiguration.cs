@@ -48,18 +48,9 @@ internal class
     {
         ArgumentNullException.ThrowIfNull(getter);
 
-        if (getter.Parameters[0].Type != typeof(TChildNavigation))
-        {
-            return null;
-        }
-
-        if (getter.GetPropertyInfo() != Getter.GetPropertyInfo())
-        {
-            return null;
-        }
-
-        var seedToReturn = SeedConfiguration as EntitySeed<TChildNavigation>;
-        return seedToReturn;
+        return getter.Parameters[0].Type != typeof(TChildNavigation) || getter.GetPropertyInfo() != Getter.GetPropertyInfo()
+            ? null
+            : SeedConfiguration as EntitySeed<TChildNavigation>;
     }
 
     /// <inheritdoc />
@@ -95,11 +86,7 @@ internal class
 
     private ICollection<TChildNavigation> GetValueToSet()
     {
-        var validEntities = SeedConfiguration.BuildMany(AmountOfChildren).AsQueryable();
-
-        List<TChildNavigation> value = validEntities.ToList();
-
-        return value;
+        return SeedConfiguration.BuildMany(AmountOfChildren);
     }
 
     /// <inheritdoc/>

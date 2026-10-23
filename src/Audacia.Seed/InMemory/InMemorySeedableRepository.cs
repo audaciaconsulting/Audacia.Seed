@@ -12,7 +12,7 @@ namespace Audacia.Seed.InMemory;
 /// </summary>
 internal class InMemorySeedableRepository : ISeedableRepository
 {
-    private readonly Dictionary<Type, IEnumerable> _dbSets = new();
+    private readonly Dictionary<Type, IEnumerable> _dbSets = [];
 
     /// <inheritdoc />
     public IQueryable<TEntity> DbSet<TEntity>() where TEntity : class
@@ -25,8 +25,15 @@ internal class InMemorySeedableRepository : ISeedableRepository
     public void Add<TEntity>(TEntity entity) where TEntity : class
     {
         var data = DbSet<TEntity>().ToList();
+
+        // Match Entity Framework, where adding an entity that is already tracked does nothing.
+        if (data.Exists(e => ReferenceEquals(e, entity)))
+        {
+            return;
+        }
+
         data.Add(entity);
-        this._dbSets[typeof(TEntity)] = data;
+        _dbSets[typeof(TEntity)] = data;
     }
 
     /// <inheritdoc cref="ISeedableRepository.FindLocal{TEntity}"/>

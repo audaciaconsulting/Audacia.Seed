@@ -1,7 +1,6 @@
 using System.Data.Entity;
 using System.Data.Entity.Validation;
 using System.Diagnostics.CodeAnalysis;
-using Audacia.Seed.Customisation;
 using Audacia.Seed.EntityFramework.Repositories;
 using Audacia.Seed.Exceptions;
 using Audacia.Seed.Extensions;
@@ -744,7 +743,7 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed);
 
         seed.Repository = new EntityFrameworkSeedableRepository(context);
-        var entities = seed.BuildMany(amountToCreate).ToList();
+        var entities = seed.BuildMany(amountToCreate);
 
         foreach (var entity in entities)
         {

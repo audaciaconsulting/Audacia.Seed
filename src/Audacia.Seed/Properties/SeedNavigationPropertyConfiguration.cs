@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.Customisation;
@@ -14,7 +15,7 @@ namespace Audacia.Seed.Properties;
 internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     Expression<Func<TEntity, TNavigation?>> getter,
     IEntitySeed<TNavigation> seedConfiguration)
-    : ISeedCustomisation<TEntity>
+    : ISeedCustomisation<TEntity>, INavigationSeedConfiguration
     where TEntity : class
     where TNavigation : class
 {
@@ -27,23 +28,26 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     /// <inheritdoc />
     public IEntitySeed Seed => SeedConfiguration;
 
+    /// <inheritdoc />
+    public IReadOnlyList<IEntitySeed> NavigationSeeds => [SeedConfiguration];
+
+    private bool _useDifferentSeeds;
+
+    /// <inheritdoc />
+    public void UseDifferentSeeds()
+    {
+        // Don't change the seed's options, as the seed may be shared with other navigation properties.
+        _useDifferentSeeds = true;
+    }
+
     /// <inheritdoc/>
     public IEntitySeed? FindSeedForGetter(LambdaExpression getter)
     {
         ArgumentNullException.ThrowIfNull(getter);
 
-        if (getter.Body.Type != typeof(TNavigation))
-        {
-            return null;
-        }
-
-        if (getter.GetPropertyInfo() != Getter.GetPropertyInfo())
-        {
-            return null;
-        }
-
-        var seedToReturn = SeedConfiguration as EntitySeed<TNavigation>;
-        return seedToReturn;
+        return getter.Body.Type != typeof(TNavigation) || getter.GetPropertyInfo() != Getter.GetPropertyInfo()
+            ? null
+            : (IEntitySeed?)(SeedConfiguration as EntitySeed<TNavigation>);
     }
 
     /// <summary>
@@ -62,11 +66,8 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
         ArgumentNullException.ThrowIfNull(repository);
         SeedConfiguration.Repository ??= repository;
 
-        var value = (previous != null
-                     && SeedConfiguration.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindNew
-                        ? Getter.Compile().Invoke(previous)
-                        : null)
-                    ?? GetValueToSet(repository, index, previous, SeedConfiguration);
+        var value = (UsePrevious(previous) ? Getter.Compile().Invoke(previous) : null)
+            ?? GetValueToSet(repository, index, SeedConfiguration);
 
         var obj = Getter.GetPropertyOwner(entity);
 
@@ -74,28 +75,48 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
         property.SetValue(obj, value, null);
     }
 
-    private static TNavigation GetValueToSet(ISeedableRepository repository, int index, TEntity? previous,
+    private bool UsePrevious([NotNullWhen(true)] TEntity? previous)
+    {
+        return previous != null
+            && !_useDifferentSeeds
+            && SeedConfiguration.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindNew;
+    }
+
+    /// <summary>
+    /// Find or create the navigation for this index, always creating one if made different via <c>WithDifferent</c>.
+    /// Uses <see cref="IIndexedEntitySeed"/> so a derived seed, e.g. <c>EntitySeed&lt;EmployeeAsset&gt;</c>, keeps the index.
+    /// </summary>
+    private TNavigation GetValueToSet(ISeedableRepository repository, int index,
         IEntitySeed<TNavigation> navigationSeed)
     {
-        var navigationSeedAsEntitySeed = navigationSeed as EntitySeed<TNavigation>;
         TNavigation? value = null;
-        if ((navigationSeed.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindExisting ||
-             navigationSeed.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew &&
-             !navigationSeed.HasCustomisations)
-            && navigationSeedAsEntitySeed != null)
+
+        if (!_useDifferentSeeds
+            && CanReuseExistingNavigation(navigationSeed)
+            && navigationSeed is EntitySeed<TNavigation> navigationSeedAsEntitySeed)
         {
             value = repository.FindLocal(navigationSeedAsEntitySeed.ToPredicate(index));
         }
 
         if (value == null)
         {
-            value = navigationSeedAsEntitySeed != null
-                ? navigationSeedAsEntitySeed.GetOrCreateEntity(index, null)
-                : navigationSeed.Build();
+            value = navigationSeed switch
+            {
+                IIndexedEntitySeed indexedSeed when _useDifferentSeeds => (TNavigation)indexedSeed.CreateEntity(index),
+                IIndexedEntitySeed indexedSeed => (TNavigation)indexedSeed.GetOrCreateEntity(index),
+                _ => navigationSeed.Build()
+            };
             repository.Add(value);
         }
 
         return value;
+    }
+
+    private static bool CanReuseExistingNavigation(IEntitySeed<TNavigation> navigationSeed)
+    {
+        return navigationSeed.Options.InsertionBehavior == SeedingInsertionBehaviour.TryFindExisting ||
+            (navigationSeed.Options.InsertionBehavior != SeedingInsertionBehaviour.AddNew &&
+            !navigationSeed.HasCustomisations);
     }
 
     /// <inheritdoc/>
@@ -114,6 +135,17 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
         return Getter.MatchToPrerequisite(prerequisite);
     }
 
+    /// <inheritdoc/>
+    public void Validate(EntitySeed<TEntity> entitySeed)
+    {
+        ArgumentNullException.ThrowIfNull(entitySeed);
+
+        if (_useDifferentSeeds)
+        {
+            INavigationSeedConfiguration.ValidateDifferentSeeds(entitySeed);
+        }
+    }
+
     /// <summary>
     /// Custom implementation so that we can ensure we don't apply duplicate customisations.
     /// </summary>
@@ -121,12 +153,8 @@ internal class SeedNavigationPropertyConfiguration<TEntity, TNavigation>(
     /// <returns>Whether this object equals the <paramref name="obj"/>.</returns>
     public override bool Equals(object? obj)
     {
-        if (obj is SeedNavigationPropertyConfiguration<TEntity, TNavigation> navigationCustomisation)
-        {
-            return Getter.GetPropertyInfo() == navigationCustomisation.Getter.GetPropertyInfo();
-        }
-
-        return false;
+        return obj is SeedNavigationPropertyConfiguration<TEntity, TNavigation> navigationCustomisation
+            && Getter.GetPropertyInfo() == navigationCustomisation.Getter.GetPropertyInfo();
     }
 
     /// <summary>

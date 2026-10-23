@@ -3,12 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Audacia.Seed.Tests.ExampleProject.EntityFrameworkCore;
 
-public class TestDatabaseContext : DbContext
+public class TestDatabaseContext(DbContextOptions<TestDatabaseContext> options) : DbContext(options)
 {
-    public TestDatabaseContext(DbContextOptions<TestDatabaseContext> options) : base(options)
-    {
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetAssembly(typeof(TestDatabaseContext))!);

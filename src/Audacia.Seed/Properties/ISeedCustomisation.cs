@@ -56,13 +56,16 @@ public interface ISeedCustomisation<TEntity> : ISeedCustomisation
     /// <param name="repository">For looking up existing information persisted in the repository, if necessary.</param>
     /// <param name="index">The index of this specific entity being created. Use this to vary how properties are set based on how many entities are already seeded.</param>
     /// <param name="previous">The previous entity that was created - does not exist in the database. Use this to vary how properties are set based what the previous entity looks like.</param>
-    public void Apply(TEntity entity, ISeedableRepository repository, int index, TEntity? previous);
+    void Apply(TEntity entity, ISeedableRepository repository, int index, TEntity? previous);
 
     /// <summary>
     /// Return a predicate that would match a <typeparamref name="TEntity"/> to the customisation this represents.
     /// </summary>
     /// <returns>A predicate to match to.</returns>
-    Expression<Func<TEntity, bool>> ToPredicate() => _ => true;
+    Expression<Func<TEntity, bool>> ToPredicate()
+    {
+        return _ => true;
+    }
 
     /// <summary>
     /// Ensure the setup of the customisation is valid.

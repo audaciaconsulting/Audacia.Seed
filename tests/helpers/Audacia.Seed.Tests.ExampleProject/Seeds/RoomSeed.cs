@@ -4,10 +4,10 @@ namespace Audacia.Seed.Tests.ExampleProject.Seeds;
 
 public class RoomSeed : EntitySeed<Room>
 {
-    public override IEnumerable<ISeedPrerequisite> Prerequisites() =>
-    [
-        new SeedPrerequisite<Room, Region>(b => b.Region)
-    ];
+    public override IEnumerable<ISeedPrerequisite> Prerequisites()
+    {
+        return [new SeedPrerequisite<Room, Region>(b => b.Region)];
+    }
 
     protected override Room GetDefault(int index, Room? previous)
     {

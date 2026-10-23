@@ -15,7 +15,7 @@ public interface IEntityModelInformation
     /// <summary>
     /// Gets the property info(s) that make up the primary key.
     /// </summary>
-    public List<PropertyInfo>? PrimaryKey { get; }
+    List<PropertyInfo>? PrimaryKey { get; }
 
     /// <summary>
     /// Gets or sets the list of required navigation properties for the entity.
