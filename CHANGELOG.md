@@ -17,6 +17,7 @@
 - Bug Fix: Entities could be added to the in-memory repository multiple times, when using `Build` methods (#214683).
 - Bug Fix: `.With()` on a property of a navigation supplied via `.WithNew()` seeded an extra, orphaned prerequisite (#214683).
 - Bug Fix: `.WithDifferent()` on a nested navigation changed the seed's options, so it no longer reused entities in other navigations or later builds (#214683).
+- Bug Fix: A seed supplied via `.WithNew()` didn't populate its own prerequisites when built later, if `.With()` had set a property of that navigation (#214683).
 
 ## 3.0.3 - 2026-10-07
 

@@ -441,6 +441,41 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
+    public void With_DerivedSeedBuiltAfterParentSetsItsNavigation_PrerequisiteIsStillPopulated()
+    {
+        var builder = new EntityBuilder();
+        var employee = builder.Build(new EmployeeSeed());
+        var assetSeed = new EntitySeed<EmployeeAsset>();
+        var companyAsset = builder.Build(new EntitySeed<CompanyAsset>()
+            .WithNew(ca => ca.Asset, assetSeed)
+            .With(ca => ((EmployeeAsset)ca.Asset).Employee, employee));
+
+        var asset = builder.Build(assetSeed);
+
+        asset.ShouldSatisfyAllConditions(
+            _ => ((EmployeeAsset)companyAsset.Asset).Employee.ShouldBe(employee),
+            a => a.ShouldNotBeSameAs(companyAsset.Asset),
+            a => a.Employee.ShouldNotBeNull("the seed should populate its own prerequisite when built independently"));
+    }
+
+    [Fact]
+    public void With_SeedBuiltAfterParentSetsItsNavigation_PrerequisiteIsStillPopulated()
+    {
+        var builder = new EntityBuilder();
+        var employee = builder.Build(new EmployeeSeed());
+        var facilitySeed = new FacilitySeed();
+        var booking = builder.Build(new BookingSeed()
+            .WithNew(b => b.Facility, facilitySeed)
+            .With(b => b.Facility.Owner, employee));
+
+        var facility = builder.Build(facilitySeed);
+
+        facility.ShouldSatisfyAllConditions(
+            _ => booking.Facility.Owner.ShouldBe(employee),
+            f => f.Owner.ShouldNotBeNull("the seed should populate its own prerequisite when built independently"));
+    }
+
+    [Fact]
     public void With_ExplicitlyCastingToCorrectTypeForPropertyOnCastNavigation_DoesNotSeedOrphanedPrerequisite()
     {
         var employee = _context.Seed(new EmployeeSeed());
@@ -1418,6 +1453,24 @@ public sealed class EntitySeedExtensionTests : IDisposable
                 .ShouldBe(1, "we should have seeded a facility with a single booking"),
             f => f.Count(facility => facility.Bookings.Count == 2)
                 .ShouldBe(1, "we should have seeded a facility with two bookings"));
+    }
+
+    [Fact]
+    public async Task DistinctFacilitySeedsWithSharedNestedValue_SeedsDifferentFacilities()
+    {
+        const string name = "Shared name";
+        var seed = new BookingSeed()
+            .WithNew(b => b.Facility, new FacilitySeed(), new FacilitySeed())
+            .With(b => b.Facility.Name, name);
+
+        const int bookingsToSeed = 2;
+        _context.SeedMany(bookingsToSeed, seed);
+
+        var bookings = await _context.Set<Booking>().Include(b => b.Facility).ToListAsync(TestContext.Current.CancellationToken);
+        bookings.ShouldSatisfyAllConditions(
+            b => b.Select(booking => booking.FacilityId).Distinct().Count()
+                .ShouldBe(bookingsToSeed, "each distinct facility seed should create its own facility"),
+            b => b.ShouldAllBe(booking => booking.Facility.Name == name));
     }
 
     [Fact]

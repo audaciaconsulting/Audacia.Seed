@@ -16,7 +16,7 @@ namespace Audacia.Seed;
 /// Base class for seeding a specific entity to the database, with utility methods to facilitate customisability.
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity being seeded.</typeparam>
-public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
+public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed, IScopedCustomisationSeed
     where TEntity : class
 {
     /// <inheritdoc />
@@ -283,6 +283,12 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
     }
 
     /// <inheritdoc />
+    void IScopedCustomisationSeed.RemoveCustomisation(ISeedCustomisation customisation)
+    {
+        Customisations.RemoveAll(c => ReferenceEquals(c, customisation));
+    }
+
+    /// <inheritdoc />
     object IIndexedEntitySeed.GetOrCreateEntity(int index)
     {
         return GetOrCreateEntity(index, null);
@@ -360,14 +366,33 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
 
         var entity = GetDefault(index, previous);
 
-        PopulatePrerequisites(entity);
+        // Void customisations added to other seeds only apply while building this entity,
+        // so a caller-supplied seed still populates its own prerequisites when it's built independently.
+        var voidCustomisations = new List<(IEntitySeed Seed, ISeedCustomisation Customisation)>();
 
-        // The entity is considered valid at this point, so we can add it to the repository.
-        Repository.Add(entity);
+        try
+        {
+            PopulatePrerequisites(entity, voidCustomisations);
 
-        PopulateCustomisations(index, previous, entity);
+            // The entity is considered valid at this point, so we can add it to the repository.
+            Repository.Add(entity);
+
+            PopulateCustomisations(index, previous, entity);
+        }
+        finally
+        {
+            RemoveVoidCustomisations(voidCustomisations);
+        }
 
         return entity;
+    }
+
+    private static void RemoveVoidCustomisations(List<(IEntitySeed Seed, ISeedCustomisation Customisation)> voidCustomisations)
+    {
+        foreach (var (seed, customisation) in voidCustomisations)
+        {
+            (seed as IScopedCustomisationSeed)?.RemoveCustomisation(customisation);
+        }
     }
 
     private void PopulateCustomisations(int index, TEntity? previous, TEntity entity)
@@ -379,7 +404,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
         }
     }
 
-    private void PopulatePrerequisites(TEntity entity)
+    private void PopulatePrerequisites(TEntity entity, List<(IEntitySeed Seed, ISeedCustomisation Customisation)> voidCustomisations)
     {
         foreach (var prerequisite in Prerequisites().ToList())
         {
@@ -389,7 +414,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
 
             foreach (var customisation in Customisations)
             {
-                var shouldStillPopulatePrerequisite = MatchToCustomisation(prerequisite, customisation, seed);
+                var shouldStillPopulatePrerequisite = MatchToCustomisation(prerequisite, customisation, seed, voidCustomisations);
 
                 shouldPopulatePrerequisite &= shouldStillPopulatePrerequisite;
             }
@@ -401,7 +426,11 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
         }
     }
 
-    private bool MatchToCustomisation(ISeedPrerequisite prerequisite, ISeedCustomisation<TEntity> customisation, IEntitySeed seed)
+    private bool MatchToCustomisation(
+        ISeedPrerequisite prerequisite,
+        ISeedCustomisation<TEntity> customisation,
+        IEntitySeed seed,
+        List<(IEntitySeed Seed, ISeedCustomisation Customisation)> voidCustomisations)
     {
         var match = customisation.MatchToPrerequisite(prerequisite);
         var shouldStillPopulatePrerequisite = true;
@@ -412,7 +441,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
         }
         else if (match == LambdaExpressionMatch.Partial && customisation.GetterLambda != null)
         {
-            AddVoidCustomisation(customisation, seed, prerequisite);
+            AddVoidCustomisation(customisation, seed, prerequisite, voidCustomisations);
         }
 
         return shouldStillPopulatePrerequisite;
@@ -440,15 +469,21 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed
     /// <summary>
     /// Stop the prerequisite's seed, and every seed supplied for the same navigation, from also populating the property
     /// set by the <paramref name="customisation"/>, which would otherwise seed an orphaned prerequisite.
+    /// Each void customisation added is recorded in <paramref name="voidCustomisations"/>, so it can be removed after the build.
     /// </summary>
-    private void AddVoidCustomisation(ISeedCustomisation<TEntity> customisation, IEntitySeed seed, ISeedPrerequisite prerequisite)
+    private void AddVoidCustomisation(
+        ISeedCustomisation<TEntity> customisation,
+        IEntitySeed seed,
+        ISeedPrerequisite prerequisite,
+        List<(IEntitySeed Seed, ISeedCustomisation Customisation)> voidCustomisations)
     {
         var (_, right) = customisation.GetterLambda!.SplitFirstMemberAccessLayer();
-        seed.AddCustomisation(CreateVoidCustomisation(seed, right));
 
-        foreach (var fullMatchSeed in GetFullMatchSeeds(prerequisite))
+        foreach (var seedToVoid in GetFullMatchSeeds(prerequisite).Prepend(seed))
         {
-            fullMatchSeed.AddCustomisation(CreateVoidCustomisation(fullMatchSeed, right));
+            var voidCustomisation = CreateVoidCustomisation(seedToVoid, right);
+            seedToVoid.AddCustomisation(voidCustomisation);
+            voidCustomisations.Add((seedToVoid, voidCustomisation));
         }
     }
 

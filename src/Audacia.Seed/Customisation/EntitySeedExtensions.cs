@@ -541,9 +541,12 @@ public static class EntitySeedExtensions
 
         var predicate = seed.Predicate(index);
 
-        return !seed.HasCustomisations
+        // Void markers only suppress prerequisites, so they shouldn't constrain the lookup
+        var customisations = seed.Customisations.Where(c => c is not SeedVoidConfiguration<TEntity>).ToList();
+
+        return customisations.Count == 0
             ? predicate
-            : predicate.And(seed.Customisations.Select(c => c.ToPredicate()).Aggregate((first, second) => first.And(second)));
+            : predicate.And(customisations.Select(c => c.ToPredicate()).Aggregate((first, second) => first.And(second)));
     }
 
     /// <summary>
