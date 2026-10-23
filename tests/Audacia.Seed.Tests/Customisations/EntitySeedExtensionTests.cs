@@ -1474,6 +1474,28 @@ public sealed class EntitySeedExtensionTests : IDisposable
     }
 
     [Fact]
+    public async Task WithDifferent_NestedAfterWithNewWithMultipleValues_PreservesSuppliedSeedBatchSize()
+    {
+        const int bookingsToSeed = 3;
+        var facilitySeed = new FacilitySeed();
+        facilitySeed.Options.AmountToCreate = bookingsToSeed;
+        facilitySeed.With(f => f.Name, "A", "B", "C");
+        var seed = new BookingSeed()
+            .WithNew(b => b.Facility, facilitySeed, facilitySeed, facilitySeed)
+            .WithDifferent(b => b.Facility.Owner);
+
+        _context.SeedMany(bookingsToSeed, seed);
+
+        var bookings = await _context.Set<Booking>().Include(b => b.Facility).ToListAsync(TestContext.Current.CancellationToken);
+        bookings.ShouldSatisfyAllConditions(
+            b => b.ConvertAll(booking => booking.Facility.Name)
+                .ShouldBe(["A", "B", "C"], ignoreOrder: true, customMessage: "the supplied seed's values should be used for each facility"),
+            b => b.Select(booking => booking.Facility.OwnerId).Distinct().Count()
+                .ShouldBe(bookingsToSeed, "each facility should have a different owner"),
+            _ => facilitySeed.Options.AmountToCreate.ShouldBe(bookingsToSeed, "the supplied seed's batch size should not be changed"));
+    }
+
+    [Fact]
     public void MemberHasConflictingBookingsInDifferentRooms_DataSeededCorrectly()
     {
         var start = DateTime.Now;

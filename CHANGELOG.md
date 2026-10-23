@@ -18,6 +18,7 @@
 - Bug Fix: A seed supplied via `.WithNew()` didn't populate its own prerequisites when built later, if `.With()` had set a property of that navigation (#215442).
 - Bug Fix: Entities could be added to the in-memory repository multiple times, when using `Build` methods (#215443).
 - Bug Fix: `.WithDifferent()` on a nested navigation changed the seed's options, so it no longer reused entities in other navigations or later builds (#215444).
+- Bug Fix: `.WithDifferent()` on a nested navigation overwrote the batch size of seeds supplied via `.WithNew()`, so multiple values set on those seeds failed validation (#215445).
 
 ## 3.0.3 - 2026-10-07
 

@@ -629,7 +629,7 @@ public static class EntitySeedExtensions
 
         if (existing != null)
         {
-            return UseExistingSeedsForDifferent(existing, amountToCreate);
+            return UseExistingSeedsForDifferent(existing);
         }
 
         var seed = entitySeed.Customisations.Select(c => c.FindSeedForGetter(left)).FirstOrDefault(s => s != null)
@@ -644,14 +644,9 @@ public static class EntitySeedExtensions
     /// <summary>
     /// Make an existing navigation customisation create different entities, keeping all of its supplied seeds.
     /// </summary>
-    private static IReadOnlyList<IEntitySeed> UseExistingSeedsForDifferent(INavigationSeedConfiguration existing, int amountToCreate)
+    private static IReadOnlyList<IEntitySeed> UseExistingSeedsForDifferent(INavigationSeedConfiguration existing)
     {
         existing.UseDifferentSeeds();
-
-        foreach (var navigationSeed in existing.NavigationSeeds)
-        {
-            navigationSeed.Options.AmountToCreate = amountToCreate;
-        }
 
         return existing.NavigationSeeds;
     }
