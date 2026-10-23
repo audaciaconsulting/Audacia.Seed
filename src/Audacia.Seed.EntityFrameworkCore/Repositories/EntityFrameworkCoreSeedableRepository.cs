@@ -63,7 +63,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
         if (primaryKey.Count == 0)
         {
             throw new DataSeedingException(
-                $"Cannot explicitly set the primary key for {nameof(TEntity)} as it is not configured");
+                $"Cannot explicitly set the primary key for {typeof(TEntity).Name} as it is not configured");
         }
 
         if (primaryKey.Count > 1)
@@ -71,7 +71,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
             string compositeKeys = string.Join(", ", primaryKey.Select(p => p.Name));
 
             throw new DataSeedingException(
-                $"Explicitly setting the primary key for composite keys is not supported. Entity: {nameof(TEntity)}. Composite keys: {compositeKeys}");
+                $"Explicitly setting the primary key for composite keys is not supported. Entity: {typeof(TEntity).Name}. Composite keys: {compositeKeys}");
         }
 
         SetPropertyValue(entity, primaryKeyValue, primaryKey);
