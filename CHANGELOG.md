@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.4 - 2026-10-30
+
+### Changed
+
+- Updated Microsoft.EntityFrameworkCore to version 10.0.13
+- Updated Microsoft.EntityFrameworkCore.Relational to version 10.0.13
+- Updated Microsoft.EntityFrameworkCore.SqlServer to version 10.0.13
+- Pinned transient dependency System.Security.Cryptography.Pkcs at version 10.0.14
+
 ## 3.0.3 - 2026-10-07
 
 ### Fixed
