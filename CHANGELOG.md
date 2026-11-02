@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.0.4 - 2026-10-23
+## 3.0.5 - 2026-11-02
 
 ### Changed
 
@@ -19,6 +19,15 @@
 - Bug Fix: Entities could be added to the in-memory repository multiple times, when using `Build` methods (#215443).
 - Bug Fix: `.WithDifferent()` on a nested navigation changed the seed's options, so it no longer reused entities in other navigations or later builds (#215444).
 - Bug Fix: `.WithDifferent()` on a nested navigation overwrote the batch size of seeds supplied via `.WithNew()`, so multiple values set on those seeds failed validation (#215445).
+
+## 3.0.4 - 2026-10-30
+
+### Changed
+
+- Updated Microsoft.EntityFrameworkCore to version 10.0.13
+- Updated Microsoft.EntityFrameworkCore.Relational to version 10.0.13
+- Updated Microsoft.EntityFrameworkCore.SqlServer to version 10.0.13
+- Pinned transient dependency System.Security.Cryptography.Pkcs at version 10.0.14
 
 ## 3.0.3 - 2026-10-07
 
