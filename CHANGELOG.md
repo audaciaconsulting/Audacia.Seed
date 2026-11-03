@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.5 - 2026-11-02
+
+### Changed
+
+- Updated Microsoft.EntityFrameworkCore dependency to version 10.0.14.
+- Updated Microsoft.EntityFrameworkCore.Relational dependency to version 10.0.14.
+- Updated Microsoft.EntityFrameworkCore.SqlServer dependency to version 10.0.14.
+- Updated Microsoft.NET.Test.Sdk dependency to version 18.11.0.
+
 ## 3.0.4 - 2026-10-30
 
 ### Changed
