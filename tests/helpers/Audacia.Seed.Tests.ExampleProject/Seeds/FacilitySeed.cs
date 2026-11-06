@@ -5,12 +5,15 @@ namespace Audacia.Seed.Tests.ExampleProject.Seeds;
 
 public class FacilitySeed : EntitySeed<Facility>
 {
-    public override IEnumerable<ISeedPrerequisite> Prerequisites() =>
-    [
-        new SeedPrerequisite<Facility, Employee>(f => f.Owner),
-        new SeedPrerequisite<Facility, Employee>(f => f.Manager),
-        new SeedPrerequisite<Facility, FacilityTypeEntity>(f => f.TypeEntity)
-    ];
+    public override IEnumerable<ISeedPrerequisite> Prerequisites()
+    {
+        return
+        [
+            new SeedPrerequisite<Facility, Employee>(f => f.Owner),
+            new SeedPrerequisite<Facility, Employee>(f => f.Manager),
+            new SeedPrerequisite<Facility, FacilityTypeEntity>(f => f.TypeEntity)
+        ];
+    }
 
     protected override Facility GetDefault(int index, Facility? previous)
     {

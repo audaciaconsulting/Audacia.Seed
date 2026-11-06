@@ -11,18 +11,13 @@ namespace Audacia.Seed.EntityFramework.Repositories;
 /// <summary>
 /// A seedable repository for a Entity Framework database context.
 /// </summary>
-public class EntityFrameworkSeedableRepository : ISeedableRepository
+/// <remarks>
+/// <para>Initializes a new instance of the <see cref="EntityFrameworkSeedableRepository"/> class.</para>
+/// </remarks>
+/// <param name="context">The Entity Framework context to use as a data store.</param>
+public class EntityFrameworkSeedableRepository(DbContext context) : ISeedableRepository
 {
-    private readonly DbContext _context;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="EntityFrameworkSeedableRepository"/> class.
-    /// </summary>
-    /// <param name="context">The Entity Framework context to use as a data store.</param>
-    public EntityFrameworkSeedableRepository(DbContext context)
-    {
-        _context = context;
-    }
+    private readonly DbContext _context = context;
 
     /// <inheritdoc />
     public IQueryable<TEntity> DbSet<TEntity>() where TEntity : class

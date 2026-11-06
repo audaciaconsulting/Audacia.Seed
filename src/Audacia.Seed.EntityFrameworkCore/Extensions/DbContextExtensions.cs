@@ -309,9 +309,7 @@ public static class DbContextExtensions
         ArgumentNullException.ThrowIfNull(seed);
 
         var repository = new EntityFrameworkCoreSeedableRepository(context);
-        var entity = repository.PerformSeeding(seed);
-
-        return entity;
+        return repository.PerformSeeding(seed);
     }
 
     /// <summary>

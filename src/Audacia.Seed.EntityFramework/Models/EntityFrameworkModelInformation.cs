@@ -1,5 +1,4 @@
 using System.Reflection;
-using Audacia.Seed.Exceptions;
 using Audacia.Seed.Models;
 
 namespace Audacia.Seed.EntityFramework.Models;

@@ -2,17 +2,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Audacia.Seed.Tests.ExampleProject.Entities;
 
-public class Asset
+[method: SetsRequiredMembers]
+public class Asset(string name)
 {
-    [SetsRequiredMembers]
-    public Asset(string name)
-    {
-        Name = name;
-    }
-
     public int Id { get; set; }
 
-    public required string Name { get; set; }
+    public required string Name { get; set; } = name;
 
     public int AssetTypeId { get; set; }
 

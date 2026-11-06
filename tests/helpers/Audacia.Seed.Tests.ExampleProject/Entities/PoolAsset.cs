@@ -2,13 +2,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Audacia.Seed.Tests.ExampleProject.Entities;
 
-public class PoolAsset : Asset
+[method: SetsRequiredMembers]
+public class PoolAsset(string name) : Asset(name)
 {
-    [SetsRequiredMembers]
-    public PoolAsset(string name) : base(name)
-    {
-    }
-
     public int PoolId { get; set; }
 
     public Pool Pool { get; set; } = null!;

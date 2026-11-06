@@ -8,7 +8,7 @@ namespace Audacia.Seed.Tests.ExampleProject.Seeds;
 
 public class FacilityTypeEntitySeed : EntitySeed<FacilityTypeEntity>
 {
-    private readonly List<FacilityType> _facilityTypes = Enum.GetValues<FacilityType>().ToList();
+    private readonly List<FacilityType> _facilityTypes = [.. Enum.GetValues<FacilityType>()];
 
     public FacilityTypeEntitySeed()
     {

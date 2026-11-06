@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Reflection;
 using Audacia.Seed.Contracts;
 using Audacia.Seed.EntityFrameworkCore.Models;
 using Audacia.Seed.Exceptions;
@@ -30,7 +31,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
         _afterSaveJobs =
         [
             // This removes all entity information that is currently in memory and would therefore be eagerly loaded by EF Core.
-            () => _context.ChangeTracker.Clear()
+            _context.ChangeTracker.Clear
         ];
     }
 
@@ -57,21 +58,30 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
         ArgumentNullException.ThrowIfNull(primaryKeyValue);
 
         var modelInformation = GetEntityModelInformation<TEntity>();
-
         var primaryKey = modelInformation.PrimaryKey ?? [];
+
         if (primaryKey.Count == 0)
         {
             throw new DataSeedingException(
-                $"Cannot explicitly set the primary key for {nameof(TEntity)} as it is not configured");
+                $"Cannot explicitly set the primary key for {typeof(TEntity).Name} as it is not configured");
         }
 
         if (primaryKey.Count > 1)
         {
+            string compositeKeys = string.Join(", ", primaryKey.Select(p => p.Name));
+
             throw new DataSeedingException(
-                $"Explicitly setting the primary key for composite keys is not supported. Entity: ${nameof(TEntity)}. Composite keys: ${string.Join(", ", primaryKey.Select(p => p.Name) ?? Array.Empty<string>())}");
+                $"Explicitly setting the primary key for composite keys is not supported. Entity: {typeof(TEntity).Name}. Composite keys: {compositeKeys}");
         }
 
+        SetPropertyValue(entity, primaryKeyValue, primaryKey);
+    }
+
+    private static void SetPropertyValue<TEntity, TKey>(TEntity entity, TKey primaryKeyValue, List<PropertyInfo> primaryKey) where TEntity : class
+    {
+        ArgumentNullException.ThrowIfNull(primaryKeyValue);
         var property = primaryKey.First();
+
         try
         {
             property.SetValue(entity, primaryKeyValue, null);
@@ -556,7 +566,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
     {
         seed.PrepareToSeed(this);
 
-        var entities = seed.BuildMany(amountToCreate).ToList();
+        var entities = seed.BuildMany(amountToCreate);
 
         if (seed.Customisations.Any(c => c.GetType().GetGenericTypeDefinition() == typeof(SeedPrimaryKeyConfiguration<,>)))
         {
@@ -602,7 +612,7 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
         // This is the lowest-level base type
         var baseType = entityType.GetAllBaseTypes().FirstOrDefault(bt => bt.BaseType == null) ?? entityType;
 
-        var requiredNavigations = entityType.GetNavigations()
+        return [.. entityType.GetNavigations()
             .Where(n =>
             {
                 var typeTheNavigationBelongsTo = n.ForeignKey.DeclaringEntityType;
@@ -616,8 +626,6 @@ public class EntityFrameworkCoreSeedableRepository : ISeedableRepository
                 var matchedForeignKey =
                     foreignKeys.FirstOrDefault(fk => n.ForeignKey.Properties[0] == fk)?.PropertyInfo;
                 return new NavigationPropertyConfiguration(n.PropertyInfo!, matchedForeignKey);
-            })
-            .ToList();
-        return requiredNavigations;
+            })];
     }
 }

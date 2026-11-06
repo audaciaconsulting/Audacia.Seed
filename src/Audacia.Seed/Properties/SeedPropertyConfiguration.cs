@@ -70,8 +70,7 @@ internal class SeedPropertyConfiguration<TEntity, TProperty>(Expression<Func<TEn
     public Expression<Func<TEntity, bool>> ToPredicate()
     {
         var comparison = Expression.Equal(Getter.Body, Expression.Constant(Value, typeof(TProperty)));
-        var lambda = Expression.Lambda<Func<TEntity, bool>>(comparison, Getter.Parameters);
-        return lambda;
+        return Expression.Lambda<Func<TEntity, bool>>(comparison, Getter.Parameters);
     }
 
     /// <inheritdoc />

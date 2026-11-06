@@ -648,7 +648,7 @@ public class EntityBuilder
         ArgumentNullException.ThrowIfNull(seed);
 
         seed.Repository = _repo;
-        var entities = seed.BuildMany(amountToCreate).ToList();
+        var entities = seed.BuildMany(amountToCreate);
 
         foreach (var entity in entities)
         {

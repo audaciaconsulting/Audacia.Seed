@@ -2,17 +2,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Audacia.Seed.Tests.ExampleProject.Entities;
 
-public class Coupon
+[method: SetsRequiredMembers]
+public class Coupon(string name)
 {
-    [SetsRequiredMembers]
-    public Coupon(string name)
-    {
-        Name = name;
-    }
-
     public int Id { get; set; }
 
-    public required string Name { get; set; }
+    public required string Name { get; set; } = name;
 
     public decimal Discount { get; set; }
 

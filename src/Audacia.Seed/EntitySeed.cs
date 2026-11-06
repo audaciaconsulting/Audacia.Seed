@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -17,7 +16,7 @@ namespace Audacia.Seed;
 /// Base class for seeding a specific entity to the database, with utility methods to facilitate customisability.
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity being seeded.</typeparam>
-public class EntitySeed<TEntity> : IEntitySeed<TEntity>
+public class EntitySeed<TEntity> : IEntitySeed<TEntity>, IIndexedEntitySeed, IScopedCustomisationSeed
     where TEntity : class
 {
     /// <inheritdoc />
@@ -48,14 +47,10 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     public virtual IEnumerable<ISeedPrerequisite> Prerequisites()
     {
         var modelInformation = Repository!.GetEntityModelInformation<TEntity>();
-        if (!modelInformation.RequiredNavigationProperties.Any())
-        {
-            return [];
-        }
 
-        var prerequisites = GetSeedPrerequisites(modelInformation);
-
-        return prerequisites;
+        return !modelInformation.RequiredNavigationProperties.Any()
+            ? []
+            : (IEnumerable<ISeedPrerequisite>)GetSeedPrerequisites(modelInformation);
     }
 
     private static List<ISeedPrerequisite> GetSeedPrerequisites(IEntityModelInformation modelInformation)
@@ -87,6 +82,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
             typeof(SeedPrerequisite<,>).MakeGenericType(
                 typeof(TEntity),
                 requiredNavigationProperty.NavigationProperty.PropertyType);
+
         var seedPrerequisite = (ISeedPrerequisite)Activator.CreateInstance(
             prerequisiteSeedType,
             lambda,
@@ -123,11 +119,11 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
 
         if (Options.AmountToCreate > 1)
         {
-            _ = BuildMany(Options.AmountToCreate).ToList();
+            BuildMany(Options.AmountToCreate);
         }
         else
         {
-            _ = Build();
+            Build();
         }
     }
 
@@ -149,9 +145,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
             .Select(p => p.ParameterType.ExampleValue())
             .ToArray();
 
-        var instance = (TEntity)simplestConstructor.Invoke(valuesForConstructor);
-
-        return instance;
+        return (TEntity)simplestConstructor.Invoke(valuesForConstructor);
     }
 
     /// <summary>
@@ -194,6 +188,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         var matchedEntities = query
             .Where(predicate)
             .ToList();
+
         if (!matchedEntities.Any())
         {
             var sb = new StringBuilder($"You must set up at least one {typeof(TNavigation)} ");
@@ -213,10 +208,11 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     /// Build the entities that are to be added to the database.
     /// </summary>
     /// <param name="amountToCreate">The amount of entities to create.</param>
-    /// <returns>An enumerable with count <paramref name="amountToCreate"/> of valid entities to seed.</returns>
-    internal IEnumerable<TEntity> BuildMany(int amountToCreate)
+    /// <returns>A list with count <paramref name="amountToCreate"/> of valid entities to seed.</returns>
+    internal List<TEntity> BuildMany(int amountToCreate)
     {
         Options.AmountToCreate = amountToCreate;
+
         if (Options.InsertionBehavior != SeedingInsertionBehaviour.TryFindExisting)
         {
             Options.InsertionBehavior = amountToCreate > 1
@@ -224,14 +220,16 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
                 : SeedingInsertionBehaviour.TryFindNew;
         }
 
+        var entities = new List<TEntity>(Options.AmountToCreate);
         TEntity? previous = null;
+
         for (var index = 0; index < Options.AmountToCreate; index++)
         {
-            var entity = GetOrCreateEntity(index, previous);
-
-            previous = entity;
-            yield return entity;
+            previous = GetOrCreateEntity(index, previous);
+            entities.Add(previous);
         }
+
+        return entities;
     }
 
     /// <summary>
@@ -240,8 +238,7 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
     /// <returns>A valid entity to seed.</returns>
     public TEntity Build()
     {
-        var entity = GetOrCreateEntity(0, null);
-        return entity;
+        return GetOrCreateEntity(0, null);
     }
 
     /// <summary>
@@ -285,6 +282,18 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         }
     }
 
+    /// <inheritdoc />
+    void IScopedCustomisationSeed.RemoveCustomisation(ISeedCustomisation customisation)
+    {
+        Customisations.RemoveAll(c => ReferenceEquals(c, customisation));
+    }
+
+    /// <inheritdoc />
+    object IIndexedEntitySeed.GetOrCreateEntity(int index)
+    {
+        return GetOrCreateEntity(index, null);
+    }
+
     /// <summary>
     /// Get a <typeparamref name="TEntity"/> from the repository, or create a new one if it doesn't exist.
     /// </summary>
@@ -300,51 +309,112 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         }
 
         var predicate = this.ToPredicate(index);
+
         var entity = Options.InsertionBehavior switch
         {
             SeedingInsertionBehaviour.TryFindExisting => Repository.FindLocal(predicate)
                                                          ?? Repository.DbSet<TEntity>().FirstOrDefault(predicate),
             SeedingInsertionBehaviour.TryFindNew => Repository.FindLocal(predicate),
+            SeedingInsertionBehaviour.AddNew => null,
             _ => null
         };
 
         // If we didn't find an existing entity, we need to create a new one.
-        if (entity == null)
-        {
-            entity = GetDefault(index, previous);
+        return entity ?? CreateEntity(index, previous);
+    }
 
-            PopulatePrerequisites(entity);
+    /// <summary>
+    /// Create a new entity for a <c>WithDifferent</c> navigation, flagging it so that nested <c>WithDifferent</c>
+    /// validation treats it as part of the outer batch, without changing this (possibly shared) seed's options.
+    /// </summary>
+    /// <param name="index">The index of the entity being created.</param>
+    /// <returns>The seeded entity.</returns>
+    object IIndexedEntitySeed.CreateEntity(int index)
+    {
+        var wasCreatingDifferentEntity = IsCreatingDifferentEntity;
+
+        try
+        {
+            IsCreatingDifferentEntity = true;
+            return CreateEntity(index, null);
+        }
+        finally
+        {
+            IsCreatingDifferentEntity = wasCreatingDifferentEntity;
+        }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the current navigation explicitly requires a new entity.
+    /// This creation context does not change the options of a potentially shared seed.
+    /// </summary>
+    internal bool IsCreatingDifferentEntity { get; private set; }
+
+    /// <summary>
+    /// Create a new <typeparamref name="TEntity"/>, regardless of the <see cref="EntitySeedOptions.InsertionBehavior"/>.
+    /// </summary>
+    /// <param name="index">The current index. This will be greater than zero if creating many.</param>
+    /// <param name="previous">The entity seeded previously. This will not be null if creating many.</param>
+    /// <returns>A new entity.</returns>
+    /// <exception cref="DataSeedingException">If we don't have a <see cref="Repository"/> set.</exception>
+    internal TEntity CreateEntity(int index, TEntity? previous)
+    {
+        if (Repository == null)
+        {
+            throw new DataSeedingException("Cannot build entities as there is no repository set.");
+        }
+
+        var entity = GetDefault(index, previous);
+
+        // Void customisations added to other seeds only apply while building this entity,
+        // so a caller-supplied seed still populates its own prerequisites when it's built independently.
+        var voidCustomisations = new List<(IEntitySeed Seed, ISeedCustomisation Customisation)>();
+
+        try
+        {
+            PopulatePrerequisites(entity, voidCustomisations);
 
             // The entity is considered valid at this point, so we can add it to the repository.
             Repository.Add(entity);
 
             PopulateCustomisations(index, previous, entity);
         }
+        finally
+        {
+            RemoveVoidCustomisations(voidCustomisations);
+        }
 
         return entity;
     }
 
+    private static void RemoveVoidCustomisations(List<(IEntitySeed Seed, ISeedCustomisation Customisation)> voidCustomisations)
+    {
+        foreach (var (seed, customisation) in voidCustomisations)
+        {
+            (seed as IScopedCustomisationSeed)?.RemoveCustomisation(customisation);
+        }
+    }
+
     private void PopulateCustomisations(int index, TEntity? previous, TEntity entity)
     {
-        var uniqueCustomisations = Customisations.OrderBy(c => c.Order).Distinct().ToList();
-        foreach (var customisation in uniqueCustomisations)
+        foreach (var customisation in Customisations.OrderBy(c => c.Order).Distinct().ToList())
         {
             customisation.Validate(this);
             customisation.Apply(entity, Repository!, index, previous);
         }
     }
 
-    private void PopulatePrerequisites(TEntity entity)
+    private void PopulatePrerequisites(TEntity entity, List<(IEntitySeed Seed, ISeedCustomisation Customisation)> voidCustomisations)
     {
-        var prerequisites = Prerequisites().ToList();
-        foreach (var prerequisite in prerequisites)
+        foreach (var prerequisite in Prerequisites().ToList())
         {
             // We only want set up a pre-requisite if we haven't overridden it by a customisation
             var shouldPopulatePrerequisite = true;
             var seed = prerequisite.Seed;
+
             foreach (var customisation in Customisations)
             {
-                var shouldStillPopulatePrerequisite = MatchToCustomisation(prerequisite, customisation, seed);
+                var shouldStillPopulatePrerequisite = MatchToCustomisation(prerequisite, customisation, seed, voidCustomisations);
 
                 shouldPopulatePrerequisite &= shouldStillPopulatePrerequisite;
             }
@@ -356,17 +426,22 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
         }
     }
 
-    private bool MatchToCustomisation(ISeedPrerequisite prerequisite, ISeedCustomisation<TEntity> customisation, IEntitySeed seed)
+    private bool MatchToCustomisation(
+        ISeedPrerequisite prerequisite,
+        ISeedCustomisation<TEntity> customisation,
+        IEntitySeed seed,
+        List<(IEntitySeed Seed, ISeedCustomisation Customisation)> voidCustomisations)
     {
         var match = customisation.MatchToPrerequisite(prerequisite);
         var shouldStillPopulatePrerequisite = true;
+
         if (match == LambdaExpressionMatch.Full)
         {
             shouldStillPopulatePrerequisite = false;
         }
         else if (match == LambdaExpressionMatch.Partial && customisation.GetterLambda != null)
         {
-            AddVoidCustomisation(customisation, seed, prerequisite);
+            AddVoidCustomisation(customisation, seed, prerequisite, voidCustomisations);
         }
 
         return shouldStillPopulatePrerequisite;
@@ -386,21 +461,54 @@ public class EntitySeed<TEntity> : IEntitySeed<TEntity>
                 .GetType()
                 .GetMethod(nameof(Repository.Add))!
                 .MakeGenericMethod(navigationProperty.GetType());
+
             addMethod.Invoke(Repository, [navigationProperty]);
         }
     }
 
-    private void AddVoidCustomisation(ISeedCustomisation<TEntity> customisation, IEntitySeed seed, ISeedPrerequisite prerequisite)
+    /// <summary>
+    /// Stop the prerequisite's seed, and every seed supplied for the same navigation, from also populating the property
+    /// set by the <paramref name="customisation"/>, which would otherwise seed an orphaned prerequisite.
+    /// Each void customisation added is recorded in <paramref name="voidCustomisations"/>, so it can be removed after the build.
+    /// </summary>
+    private void AddVoidCustomisation(
+        ISeedCustomisation<TEntity> customisation,
+        IEntitySeed seed,
+        ISeedPrerequisite prerequisite,
+        List<(IEntitySeed Seed, ISeedCustomisation Customisation)> voidCustomisations)
     {
         var (_, right) = customisation.GetterLambda!.SplitFirstMemberAccessLayer();
-        var genericType = typeof(SeedVoidConfiguration<>).MakeGenericType(seed.EntityType);
-        var customisationToAdd = (ISeedCustomisation)Activator.CreateInstance(genericType, right)!;
-        seed.AddCustomisation(customisationToAdd);
-        var fullMatches = Customisations
-            .Where(c => c.MatchToPrerequisite(prerequisite) == LambdaExpressionMatch.Full).ToList();
-        foreach (var fullMatch in fullMatches)
+
+        foreach (var seedToVoid in GetFullMatchSeeds(prerequisite).Prepend(seed))
         {
-            fullMatch.Seed?.AddCustomisation(customisationToAdd);
+            var voidCustomisation = CreateVoidCustomisation(seedToVoid, right);
+            seedToVoid.AddCustomisation(voidCustomisation);
+            voidCustomisations.Add((seedToVoid, voidCustomisation));
         }
+    }
+
+    /// <summary>
+    /// Get every distinct seed supplied for the <paramref name="prerequisite"/>'s navigation,
+    /// including each seed of e.g. <c>WithNew(x => x.Asset, firstSeed, secondSeed)</c>, not just the first.
+    /// </summary>
+    private IEnumerable<IEntitySeed> GetFullMatchSeeds(ISeedPrerequisite prerequisite)
+    {
+        return Customisations
+            .Where(c => c.MatchToPrerequisite(prerequisite) == LambdaExpressionMatch.Full)
+            .SelectMany(c => c is INavigationSeedConfiguration navigation
+                ? navigation.NavigationSeeds
+                : c.Seed is { } seed ? [seed] : [])
+            .Distinct(ReferenceEqualityComparer.Instance)
+            .Cast<IEntitySeed>();
+    }
+
+    /// <summary>
+    /// Create the void customisation for the <paramref name="seed"/>'s own type, which may be derived from the navigation's type,
+    /// e.g. <c>WithNew(x => x.Asset, new EntitySeed&lt;EmployeeAsset&gt;())</c>; a customisation for the base type would be ignored.
+    /// </summary>
+    private static ISeedCustomisation CreateVoidCustomisation(IEntitySeed seed, LambdaExpression getter)
+    {
+        var genericType = typeof(SeedVoidConfiguration<>).MakeGenericType(seed.EntityType);
+        return (ISeedCustomisation)Activator.CreateInstance(genericType, getter)!;
     }
 }
