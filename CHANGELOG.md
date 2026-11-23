@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.7 - 2026-11-23
+
+### Changed
+
+- Updated Microsoft.EntityFrameworkCore dependency to version 10.0.15.
+- Updated Microsoft.EntityFrameworkCore.Relational dependency to version 10.0.15.
+
 ## 3.0.6 - 2026-11-02
 
 ### Changed
